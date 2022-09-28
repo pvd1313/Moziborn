@@ -22,7 +22,6 @@ namespace ProjectTolerance
             var overlapVolume = GetOverlapVolume(_collider.bounds, _buildingController.RoomBounds);
             var playerInside = overlapVolume / playerVolume;
             
-            gameObject.layer = playerInside == 0 ? LayerNames.Default : LayerNames.Interior;
             _materialProperty.SetFloat(ShaderPropertyId.InteriorExterior, 1 - playerInside);
             _renderer.SetPropertyBlock(_materialProperty);
         }

@@ -74,7 +74,22 @@ namespace ProjectTolerance
             
             foreach (var transition in _transitions)
             {
-                transition.targetAlpha = visibleParts.HasFlag(transition.location) ? 1 : 0;
+                if (transition.type != EBuildingPartType.Door)
+                {
+                    transition.targetAlpha = visibleParts.HasFlag(transition.location) ? 1 : 0;
+                }
+            }
+        }
+
+        public void SetExteriorDoorsInteriorExterior(float value)
+        {
+            foreach (var part in _transitions)
+            {
+                if (part.type == EBuildingPartType.Door && part.isExterior)
+                {
+                    part.propertyBlock.SetFloat(ShaderPropertyId.InteriorExterior, value);
+                    part.renderer.SetPropertyBlock(part.propertyBlock);
+                }
             }
         }
         

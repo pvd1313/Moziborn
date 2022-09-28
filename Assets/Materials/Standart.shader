@@ -18,7 +18,7 @@ Shader "ProjectTolerance/Standart"
 
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Custom fullforwardshadows addshadow
+        #pragma surface surf Custom fullforwardshadows
 
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
@@ -54,7 +54,7 @@ Shader "ProjectTolerance/Standart"
 
         inline half4 LightingCustom_Deferred(SurfaceOutputStandard s, UnityGI gi, out half4 outDiffuseOcclusion, out half4 outSpecSmoothness, out half4 outNormal)
         {
-            gi.indirect.diffuse *= _InteriorExterior;
+            gi.indirect.diffuse *= _InteriorExterior * _InteriorExterior;
             
             return LightingStandard_Deferred(s, 0, gi, outDiffuseOcclusion, outSpecSmoothness, outNormal);
         }

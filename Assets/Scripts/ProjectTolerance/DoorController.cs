@@ -12,20 +12,11 @@ namespace ProjectTolerance
         [SerializeField] private Collider[] _proximityTriggers;
         [SerializeField] private Animator _doorAnimator;
         [SerializeField] private PlayerController _playerController;
-        [SerializeField] private MeshRenderer[] _renderers;
         
         private float _progress;
         private float _targetValue;
 
-        public void SetDoorsLayer(int layer)
-        {
-            foreach (var meshRenderer in _renderers)
-            {
-                meshRenderer.gameObject.layer = layer;
-            }
-        }
-        
-        private void Update()
+          private void Update()
         {
             _targetValue = 0;
             

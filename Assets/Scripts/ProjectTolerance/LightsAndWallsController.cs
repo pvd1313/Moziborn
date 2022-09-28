@@ -45,8 +45,8 @@ namespace ProjectTolerance
             
             if (_buildingController.RoomBounds.Contains(playerPosition))
             {
-                _buildingController.SwitchVisibleParts(EBuildingPartLocation.North| EBuildingPartLocation.East, _wallCutDuration);
-                _doorController.SetDoorsLayer(LayerNames.Interior);
+                _buildingController.SwitchVisibleParts(EBuildingPartLocation.North | EBuildingPartLocation.East, _wallCutDuration);
+                _buildingController.SetExteriorDoorsInteriorExterior(0);
                 return;
             }
             
@@ -63,12 +63,12 @@ namespace ProjectTolerance
             if (_buildingController.BuildingBounds.IntersectRay(ray))
             {
                 _buildingController.SwitchVisibleParts(EBuildingPartLocation.None, _wallCutDuration);
-                _doorController.SetDoorsLayer(LayerNames.Door);
+                _buildingController.SetExteriorDoorsInteriorExterior(1);
                 return;
             }
             
             _buildingController.SwitchVisibleParts(EBuildingPartLocation.All, _wallCutDuration);
-            _doorController.SetDoorsLayer(LayerNames.Door);
+            _buildingController.SetExteriorDoorsInteriorExterior(1);
         }
     }
 }
