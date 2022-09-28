@@ -28,6 +28,7 @@ namespace ProjectTolerance
         [SerializeField] private BoxCollider _buildingBoundsCollider;
         [SerializeField] private BoxCollider _roomBoundsCollider;
         [SerializeField] private BuildingParts[] _parts;
+        [SerializeField] private GameObject[] _interiorParts;
 
         private BuildingPartsTransition[] _transitions;
         private float _transitionDuration;
@@ -71,6 +72,14 @@ namespace ProjectTolerance
             foreach (var transition in _transitions)
             {
                 transition.targetAlpha = visibleParts.HasFlag(transition.partType) ? 1 : 0;
+            }
+        }
+        
+        public void SetInteriorPartsVisible(bool visible)
+        {
+            foreach (var interiorPart in _interiorParts)
+            {
+                interiorPart.gameObject.SetActive(visible);
             }
         }
     }
