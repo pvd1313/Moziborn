@@ -7,19 +7,23 @@ namespace ProjectTolerance
     public class BuildingController : MonoBehaviour
     {
         [Serializable]
-        public struct BuildingParts
+        public struct BuildingPart
         {
-            public Renderer[] renderers;
-            public EBuildingPartType partType;
+            public Renderer renderer;
+            public EBuildingPartLocation location;
+            public EBuildingPartType type;
+            public bool isExterior;
         }
 
-        private class BuildingPartsTransition
+        private class BuildingPartTransition
         {
-            public Renderer[] renderers;
+            public Renderer renderer;
             public MaterialPropertyBlock propertyBlock;
-            public EBuildingPartType partType;
+            public EBuildingPartLocation location;
+            public EBuildingPartType type;
             public float alpha;
             public float targetAlpha;
+            public bool isExterior;
         }
 
         public Bounds BuildingBounds => _buildingBoundsCollider.bounds;
@@ -27,20 +31,21 @@ namespace ProjectTolerance
         
         [SerializeField] private BoxCollider _buildingBoundsCollider;
         [SerializeField] private BoxCollider _roomBoundsCollider;
-        [SerializeField] private BuildingParts[] _parts;
-        [SerializeField] private GameObject[] _interiorParts;
+        [SerializeField] private BuildingPart[] _parts;
 
-        private BuildingPartsTransition[] _transitions;
+        private BuildingPartTransition[] _transitions;
         private float _transitionDuration;
 
         private void Awake()
         {
-            _transitions = _parts.Select(p => new BuildingPartsTransition
+            _transitions = _parts.Select(p => new BuildingPartTransition
             {
-                renderers = p.renderers,
-                partType = p.partType,
+                renderer = p.renderer,
+                location = p.location,
+                type = p.type,
                 alpha = 1,
                 targetAlpha = 1,
+                isExterior = p.isExterior,
                 propertyBlock = new MaterialPropertyBlock()
             }).ToArray();
         }
@@ -55,31 +60,32 @@ namespace ProjectTolerance
                         transition.targetAlpha,
                         Time.deltaTime / _transitionDuration);
                     
-                    transition.propertyBlock.SetFloat("_WallCutAlpha", transition.alpha);
+                    transition.propertyBlock.SetFloat(ShaderPropertyId.WallCutAlpha, transition.alpha);
+                    transition.propertyBlock.SetFloat(ShaderPropertyId.InteriorExterior, transition.isExterior ? 1 : 0);
                     
-                    foreach (var transitionRenderer in transition.renderers)
-                    {
-                        transitionRenderer.SetPropertyBlock(transition.propertyBlock);
-                    }
+                    transition.renderer.SetPropertyBlock(transition.propertyBlock);
                 }
             }
         }
 
-        public void SwitchVisibleParts(EBuildingPartType visibleParts, float transitionDuration)
+        public void SwitchVisibleParts(EBuildingPartLocation visibleParts, float transitionDuration)
         {
             _transitionDuration = transitionDuration;
             
             foreach (var transition in _transitions)
             {
-                transition.targetAlpha = visibleParts.HasFlag(transition.partType) ? 1 : 0;
+                transition.targetAlpha = visibleParts.HasFlag(transition.location) ? 1 : 0;
             }
         }
         
-        public void SetInteriorPartsVisible(bool visible)
+        public void SetInteriorBulbsVisible(bool visible)
         {
-            foreach (var interiorPart in _interiorParts)
+            foreach (var part in _parts)
             {
-                interiorPart.gameObject.SetActive(visible);
+                if (!part.isExterior && part.type == EBuildingPartType.Bulb)
+                {
+                    part.renderer.gameObject.SetActive(visible);
+                }
             }
         }
     }
