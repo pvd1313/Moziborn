@@ -45,15 +45,6 @@ namespace ProjectTolerance
                 _doorController.SetDoorsLayer(LayerNames.Interior);
                 return;
             }
-            
-            if (_doorController.IsClosed())
-            {
-                _buildingController.SetInteriorPartsVisible(false);
-            }
-            else
-            {
-                _buildingController.SetInteriorPartsVisible(true);
-            }
 
             var ray = new Ray( _cameraTransform.position, _playerTransform.position - _cameraTransform.position);
             if (_buildingController.BuildingBounds.IntersectRay(ray))
