@@ -12,6 +12,8 @@ namespace ProjectTolerance
         [SerializeField] private Collider[] _proximityTriggers;
         [SerializeField] private Animator _doorAnimator;
         [SerializeField] private PlayerController _playerController;
+        [SerializeField] private AmbientLightMapController _ambientLightMapController;
+        [SerializeField] private Vector2Int[] _occupiedPixels;
         
         private float _progress;
         private float _targetValue;
@@ -42,15 +44,14 @@ namespace ProjectTolerance
             {
                 _progress = Mathf.MoveTowards(_progress, _targetValue, Time.deltaTime / _switchDuration);
                 _doorAnimator.SetFloat(IsOpenId, _progress);
+                foreach (var occupiedPixel in _occupiedPixels)
+                {
+                    _ambientLightMapController.ModifyPixel(occupiedPixel.x, occupiedPixel.y, 0.75f * _progress);    
+                }
             }
         }
 
-        public bool IsClosed()
-        {
-            return _targetValue == 0 && _progress == 0;
-        }
-        
-        public bool IsClosingOrClosed()
+          public bool IsClosingOrClosed()
         {
             return _targetValue == 0;
         }

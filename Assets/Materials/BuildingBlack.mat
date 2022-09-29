@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: TrueBlack
+  m_Name: BuildingBlack
   m_Shader: {fileID: 4800000, guid: 7767f4ee55ab49848ae53b4328ff2942, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -64,6 +64,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 1
     - _GlossyReflections: 1
+    - _InteriorExterior: 1
     - _Metallic: 1
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -72,6 +73,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
+    - _VerticalCutAlpha: 1
     - _WallCutAlpha: 1
     - _WallCutPower: 0
     - _ZWrite: 1
@@ -79,5 +81,6 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _VerticalCutRange: {r: 1, g: 3.2, b: 0, a: 0}
     - _WallCutRange: {r: 1, g: 2.2, b: 0, a: 0}
   m_BuildTextureStacks: []

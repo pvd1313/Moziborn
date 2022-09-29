@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/Standart"
+Shader "ProjectTolerance/BuildingStructure"
 {
     Properties
     {
@@ -6,10 +6,9 @@ Shader "ProjectTolerance/Standart"
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        _WallCutAlpha("WallCutAlpha", Range(0, 1)) = 0
-        _WallCutRange("WallCutRange", Vector) = (0, 0, 0, 0)
+        _VerticalCutAlpha("VerticalCutAlpha", Range(0, 1)) = 1
+        _VerticalCutRange("VerticalCutRange", Vector) = (0, 0, 0, 0)
         _Emission ("Emission", Color) = (0, 0, 0, 0)
-        _InteriorExterior("InteriorExterior", Range(0, 1)) = 1
     }
     SubShader
     {
@@ -30,15 +29,21 @@ Shader "ProjectTolerance/Standart"
         {
             float2 uv_MainTex;
             float3 worldPos;
+            float3 worldNormal;
         };
 
-        half _Glossiness;
-        half _Metallic;
-        fixed4 _Color;
-        fixed4 _Emission;
-        half _WallCutAlpha;
-        half4 _WallCutRange;
-        half _InteriorExterior;
+        // local
+        float _Glossiness;
+        float _Metallic;
+        float4 _Color;
+        float4 _Emission;
+        float _VerticalCutAlpha;
+        float4 _VerticalCutRange;
+
+        // global
+        float3 _AmbientLightMapOffset;
+        sampler2D _AmbientLightMapTexture;
+        float2 _AmbientLightMapSize;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -54,23 +59,24 @@ Shader "ProjectTolerance/Standart"
 
         inline half4 LightingCustom_Deferred(SurfaceOutputStandard s, UnityGI gi, out half4 outDiffuseOcclusion, out half4 outSpecSmoothness, out half4 outNormal)
         {
-            gi.indirect.diffuse *= _InteriorExterior * _InteriorExterior;
+            gi.indirect.diffuse *= s.Alpha;
             
             return LightingStandard_Deferred(s, 0, gi, outDiffuseOcclusion, outSpecSmoothness, outNormal);
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            // Albedo comes from a texture tinted by color
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
-            // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
             o.Emission = _Emission;
 
-            clip(-IN.worldPos.y + _WallCutRange.x + _WallCutRange.y * _WallCutAlpha + 0.00001);
+            float2 ambientUV = (IN.worldPos + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
+            o.Alpha = tex2D(_AmbientLightMapTexture, ambientUV);
+
+            float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
+            clip(-IN.worldPos.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
         }
         ENDCG
     }

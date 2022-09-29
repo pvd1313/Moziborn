@@ -73,12 +73,14 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _WallCutAlpha: 0.441
+    - _VerticalCutAlpha: 1
+    - _WallCutAlpha: 0.745
     - _WallCutPower: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.32062122, g: 0.34216464, b: 0.5188679, a: 1}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _VerticalCutRange: {r: 1, g: 3.3, b: 0, a: 0}
     - _WallCutRange: {r: 1, g: 2.2, b: 0, a: 0}
   m_BuildTextureStacks: []

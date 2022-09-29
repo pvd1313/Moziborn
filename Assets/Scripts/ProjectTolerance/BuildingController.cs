@@ -60,9 +60,7 @@ namespace ProjectTolerance
                         transition.targetAlpha,
                         Time.deltaTime / _transitionDuration);
                     
-                    transition.propertyBlock.SetFloat(ShaderPropertyId.WallCutAlpha, transition.alpha);
-                    transition.propertyBlock.SetFloat(ShaderPropertyId.InteriorExterior, transition.isExterior ? 1 : 0);
-                    
+                    transition.propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, transition.alpha);
                     transition.renderer.SetPropertyBlock(transition.propertyBlock);
                 }
             }
@@ -77,29 +75,6 @@ namespace ProjectTolerance
                 if (transition.type != EBuildingPartType.Door)
                 {
                     transition.targetAlpha = visibleParts.HasFlag(transition.location) ? 1 : 0;
-                }
-            }
-        }
-
-        public void SetExteriorDoorsInteriorExterior(float value)
-        {
-            foreach (var part in _transitions)
-            {
-                if (part.type == EBuildingPartType.Door && part.isExterior)
-                {
-                    part.propertyBlock.SetFloat(ShaderPropertyId.InteriorExterior, value);
-                    part.renderer.SetPropertyBlock(part.propertyBlock);
-                }
-            }
-        }
-        
-        public void SetInteriorBulbsVisible(bool visible)
-        {
-            foreach (var part in _parts)
-            {
-                if (!part.isExterior && part.type == EBuildingPartType.Bulb)
-                {
-                    part.renderer.gameObject.SetActive(visible);
                 }
             }
         }

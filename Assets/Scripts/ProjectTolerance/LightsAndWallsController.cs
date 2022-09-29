@@ -46,29 +46,17 @@ namespace ProjectTolerance
             if (_buildingController.RoomBounds.Contains(playerPosition))
             {
                 _buildingController.SwitchVisibleParts(EBuildingPartLocation.North | EBuildingPartLocation.East, _wallCutDuration);
-                _buildingController.SetExteriorDoorsInteriorExterior(0);
                 return;
-            }
-            
-            if (_doorController.IsClosed())
-            {
-                _buildingController.SetInteriorBulbsVisible(false);
-            }
-            else
-            {
-                _buildingController.SetInteriorBulbsVisible(true);
             }
 
             var ray = new Ray( _cameraTransform.position, _playerTransform.position - _cameraTransform.position);
             if (_buildingController.BuildingBounds.IntersectRay(ray))
             {
                 _buildingController.SwitchVisibleParts(EBuildingPartLocation.None, _wallCutDuration);
-                _buildingController.SetExteriorDoorsInteriorExterior(1);
                 return;
             }
             
             _buildingController.SwitchVisibleParts(EBuildingPartLocation.All, _wallCutDuration);
-            _buildingController.SetExteriorDoorsInteriorExterior(1);
         }
     }
 }
