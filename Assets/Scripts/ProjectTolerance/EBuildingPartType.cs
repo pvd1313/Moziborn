@@ -7,6 +7,7 @@ namespace ProjectTolerance
         Floor = 2,
         Bulb = 3,
         Roof = 4,
-        Door = 5
+        Door = 5,
+        DoorFrame = 6
     }
 }

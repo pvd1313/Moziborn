@@ -73,6 +73,15 @@ namespace ProjectTolerance
             var cameraPos = _cameraTransform.position;
             var playerBounds = _playerCollider.bounds;
             var playerBottomRay = new Ray(cameraPos, playerBounds.min - cameraPos);
+            
+            var playerTop0 = playerBounds.max;
+            var playerTop1 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
+            var playerTop2 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.max.z);
+            var playerTop3 = new Vector3(playerBounds.max.x, playerBounds.max.y, playerBounds.min.z);
+            var playerTopRay0 = new Ray(cameraPos, playerTop0 - cameraPos);
+            var playerTopRay1 = new Ray(cameraPos, playerTop1 - cameraPos);
+            var playerTopRay2 = new Ray(cameraPos, playerTop2 - cameraPos);
+            var playerTopRay3 = new Ray(cameraPos, playerTop3 - cameraPos);
 
             for (var i = 0; i < _buildings.Count; i++)
             {
@@ -80,6 +89,18 @@ namespace ProjectTolerance
                 foreach (var room in _buildings[i].rooms)
                 {
                     if (room.IntersectRay(playerBottomRay))
+                    {
+                        blocksView = true;
+                        break;
+                    }
+                }
+
+                foreach (var doorFrame in _buildings[i].doorFrames)
+                {
+                    if (doorFrame.IntersectRay(playerTopRay0) || 
+                        doorFrame.IntersectRay(playerTopRay1) ||
+                        doorFrame.IntersectRay(playerTopRay2) ||
+                        doorFrame.IntersectRay(playerTopRay3))
                     {
                         blocksView = true;
                         break;
@@ -113,13 +134,18 @@ namespace ProjectTolerance
                 return;
             }
 
-            Gizmos.color = Color.yellow;
-            
             foreach (var building in _buildings)
             {
+                Gizmos.color = Color.yellow;
                 foreach (var room in building.rooms)
                 {
                     Gizmos.DrawWireCube(room.center, room.size);
+                }
+
+                Gizmos.color = Color.cyan;
+                foreach (var doorFrame in building.doorFrames)
+                {
+                    Gizmos.DrawWireCube(doorFrame.center, doorFrame.size);
                 }
             }
         }

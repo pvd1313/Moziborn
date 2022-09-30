@@ -17,10 +17,12 @@ namespace ProjectTolerance
             var adjustedCells = new HashSet<Vector2Int>();
             var renderers = new List<MeshRenderer>();
             var rooms = new List<BoundsInt>();
+            var doorFrames = new List<Vector2Int>();
 
             while (occupiedCells.Count > 0)
             {
                 VisitAdjustedCells(occupiedCells.First(), occupiedCells, adjustedCells);
+                GetBuildingParts(floor0, adjustedCells, EBuildingPartType.DoorFrame, doorFrames);
                 GetRoomBounds(adjustedCells, rooms);
 
                 renderers.Clear();
@@ -46,7 +48,9 @@ namespace ProjectTolerance
                 {
                     rooms = rooms.Select(r => new Bounds(new Vector3(r.center.x, 1.65f, r.center.y), 
                         new Vector3(r.size.x, 3.3f, r.size.y))).ToArray(),
-                    viewBlockingParts = renderers.ToArray()
+                    viewBlockingParts = renderers.ToArray(),
+                    doorFrames = doorFrames.Select(r => new Bounds(new Vector3(r.x + 0.5f, 1.5f, r.y + 0.5f), 
+                        new Vector3(1, 3, 1))).ToArray()
                 });
             }
 
@@ -57,19 +61,42 @@ namespace ProjectTolerance
                 var gameObject = tilemap.GetInstantiatedObject(new Vector3Int(x, y, 0));
                 if (gameObject == null)
                 {
-                    //Debug.Assert(!tilemap.HasTile(new Vector3Int(x, y, 0)), "Tilemap has tile, but gameObject is not spawned yet");
-                    
                     return false;
                 }
 
                 var partData = gameObject.GetComponentInChildren<BuildingPartData>();
-                if (partData.PartType == EBuildingPartType.Roof || partData.PartType == EBuildingPartType.Wall)
+                if (partData.PartType == EBuildingPartType.Roof || 
+                    partData.PartType == EBuildingPartType.Wall ||
+                    partData.PartType == EBuildingPartType.DoorFrame)
                 {
                     meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
                     return true;
                 }
 
                 return false;
+            }
+        }
+
+        private static void GetBuildingParts(Tilemap tilemap, 
+                                             HashSet<Vector2Int> cells, 
+                                             EBuildingPartType partType,
+                                             List<Vector2Int> resultParts)
+        {
+            resultParts.Clear();
+
+            foreach (var cell in cells)
+            {
+                var gameObject = tilemap.GetInstantiatedObject(new Vector3Int(cell.x, cell.y, 0));
+                if (gameObject == null)
+                {
+                    continue;
+                }
+                
+                var partData = gameObject.GetComponentInChildren<BuildingPartData>();
+                if (partData.PartType == partType)
+                {
+                    resultParts.Add(cell);
+                }
             }
         }
 

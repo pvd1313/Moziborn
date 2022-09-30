@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7428504945016534193}
   - component: {fileID: 5366022354550571227}
   m_Layer: 0
-  m_Name: Wall_Frame_E
+  m_Name: Wall_Frame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -125,4 +125,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeb6aed2a595421499ca3412213221ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _partType: 1
+  _partType: 6
