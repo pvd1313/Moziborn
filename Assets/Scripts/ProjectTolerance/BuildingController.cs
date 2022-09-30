@@ -1,80 +1,127 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEditorInternal;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace ProjectTolerance
 {
     public class BuildingController : MonoBehaviour
     {
-        [Serializable]
-        public struct BuildingPart
+        private class BuildingTransition
         {
-            public Renderer renderer;
-            public EBuildingPartLocation location;
-            public EBuildingPartType type;
-            public bool isExterior;
-        }
-
-        private class BuildingPartTransition
-        {
-            public Renderer renderer;
-            public MaterialPropertyBlock propertyBlock;
-            public EBuildingPartLocation location;
-            public EBuildingPartType type;
-            public float alpha;
             public float targetAlpha;
-            public bool isExterior;
+            public float alpha;
+            public MaterialPropertyBlock materialProperty;
         }
-
-        public Bounds BuildingBounds => _buildingBoundsCollider.bounds;
-        public Bounds RoomBounds => _roomBoundsCollider.bounds;
         
-        [SerializeField] private BoxCollider _buildingBoundsCollider;
-        [SerializeField] private BoxCollider _roomBoundsCollider;
-        [SerializeField] private BuildingPart[] _parts;
+        [SerializeField] private Tilemap _level0Tilemap;
+        [SerializeField] private Tilemap _level1Tilemap;
+        [SerializeField] private float _transitionDuration;
+        [SerializeField] private Collider _playerCollider;
+        [SerializeField] private Transform _cameraTransform;
 
-        private BuildingPartTransition[] _transitions;
-        private float _transitionDuration;
+        private List<BuildingData> _buildings;
+        private BuildingTransition[] _transitions;
+        private bool _intialized;
 
-        private void Awake()
+        private IEnumerator Start()
         {
-            _transitions = _parts.Select(p => new BuildingPartTransition
+            // Wait for tilemap GameObjects be spawned.
+            yield return null;
+            
+            Initialize();
+        }
+        
+        private void Initialize()
+        {
+            _buildings = new List<BuildingData>();
+            BuildingUtil.DetectBuildings(_level0Tilemap, _level1Tilemap, _buildings);
+
+            _transitions = new BuildingTransition[_buildings.Count];
+            for (var i = 0; i < _transitions.Length; i++)
             {
-                renderer = p.renderer,
-                location = p.location,
-                type = p.type,
-                alpha = 1,
-                targetAlpha = 1,
-                isExterior = p.isExterior,
-                propertyBlock = new MaterialPropertyBlock()
-            }).ToArray();
+                var propertyBlock = new MaterialPropertyBlock();
+                
+                propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, 1);
+                
+                _transitions[i] = new BuildingTransition
+                {
+                    targetAlpha = 1,
+                    alpha = 1,
+                    materialProperty = propertyBlock
+                };
+
+                foreach (var renderer in _buildings[i].viewBlockingParts)
+                {
+                    renderer.SetPropertyBlock(propertyBlock);
+                }
+            }
+
+            _intialized = true;
         }
 
         private void Update()
         {
-            foreach (var transition in _transitions)
+            if (!_intialized)
             {
-                if (transition.targetAlpha > transition.alpha || transition.targetAlpha < transition.alpha)
+                return;
+            }
+
+            var cameraPos = _cameraTransform.position;
+            var playerBounds = _playerCollider.bounds;
+            var playerBottomRay = new Ray(cameraPos, playerBounds.min - cameraPos);
+
+            for (var i = 0; i < _buildings.Count; i++)
+            {
+                var blocksView = false;
+                foreach (var room in _buildings[i].rooms)
+                {
+                    if (room.IntersectRay(playerBottomRay))
+                    {
+                        blocksView = true;
+                        break;
+                    }
+                }
+                
+                var transition = _transitions[i];
+
+                transition.targetAlpha = blocksView ? 0 : 1;
+                
+                if (transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)
                 {
                     transition.alpha = Mathf.MoveTowards(transition.alpha,
                         transition.targetAlpha,
                         Time.deltaTime / _transitionDuration);
                     
-                    transition.propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, transition.alpha);
-                    transition.renderer.SetPropertyBlock(transition.propertyBlock);
+                    transition.materialProperty.SetFloat(ShaderPropertyId.VerticalCutAlpha, transition.alpha);
+
+                    foreach (var part in _buildings[i].viewBlockingParts)
+                    {
+                        part.SetPropertyBlock(transition.materialProperty);
+                    }
                 }
             }
         }
 
-        public void SwitchVisibleParts(EBuildingPartLocation visibleParts, float transitionDuration)
+        private void OnDrawGizmos()
         {
-            _transitionDuration = transitionDuration;
+            return;
             
-            foreach (var transition in _transitions)
+            if (_buildings == null)
             {
-                if (transition.type != EBuildingPartType.Door)
+                return;
+            }
+
+            Gizmos.color = Color.yellow;
+            
+            foreach (var building in _buildings)
+            {
+                foreach (var room in building.rooms)
                 {
-                    transition.targetAlpha = visibleParts.HasFlag(transition.location) ? 1 : 0;
+                    Gizmos.DrawWireCube(room.center, room.size);
                 }
             }
         }
