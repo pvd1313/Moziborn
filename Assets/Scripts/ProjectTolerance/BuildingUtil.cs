@@ -57,15 +57,15 @@ namespace ProjectTolerance
                 var gameObject = tilemap.GetInstantiatedObject(new Vector3Int(x, y, 0));
                 if (gameObject == null)
                 {
-                    Debug.Assert(!tilemap.HasTile(new Vector3Int(x, y, 0)), "Tilemap has tile, but gameObject is not spawned yet");
+                    //Debug.Assert(!tilemap.HasTile(new Vector3Int(x, y, 0)), "Tilemap has tile, but gameObject is not spawned yet");
                     
                     return false;
                 }
 
-                var partData = gameObject.GetComponent<BuildingPartData>();
+                var partData = gameObject.GetComponentInChildren<BuildingPartData>();
                 if (partData.PartType == EBuildingPartType.Roof || partData.PartType == EBuildingPartType.Wall)
                 {
-                    meshRenderer = gameObject.GetComponent<MeshRenderer>();
+                    meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
                     return true;
                 }
 

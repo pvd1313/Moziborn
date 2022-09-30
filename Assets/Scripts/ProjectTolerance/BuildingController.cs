@@ -108,8 +108,6 @@ namespace ProjectTolerance
 
         private void OnDrawGizmos()
         {
-            return;
-            
             if (_buildings == null)
             {
                 return;
