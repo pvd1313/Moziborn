@@ -72,15 +72,7 @@ namespace ProjectTolerance
 
             var cameraPos = _cameraTransform.position;
             var playerBounds = _playerCollider.bounds;
-            
-            var playerBottom0 = playerBounds.min;
-            var playerBottom1 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.min.z);
-            var playerBottom2 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
-            var playerBottom3 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
-            var playerBottomRay0 = new Ray(cameraPos, playerBottom0 - cameraPos);
-            var playerBottomRay1 = new Ray(cameraPos, playerBottom1 - cameraPos);
-            var playerBottomRay2 = new Ray(cameraPos, playerBottom2 - cameraPos);
-            var playerBottomRay3 = new Ray(cameraPos, playerBottom3 - cameraPos);
+            var playerBottomRay = new Ray(cameraPos, playerBounds.min - cameraPos);
             
             var playerTop0 = playerBounds.max;
             var playerTop1 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
@@ -96,10 +88,7 @@ namespace ProjectTolerance
                 var blocksView = false;
                 foreach (var room in _buildings[i].rooms)
                 {
-                    if (room.IntersectRay(playerBottomRay0) ||
-                        room.IntersectRay(playerBottomRay1) || 
-                        room.IntersectRay(playerBottomRay2) ||
-                        room.IntersectRay(playerBottomRay3))
+                    if (room.IntersectRay(playerBottomRay))
                     {
                         blocksView = true;
                         break;
