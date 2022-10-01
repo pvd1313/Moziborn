@@ -4,8 +4,6 @@ Shader "ProjectTolerance/BuildingStructure"
     {
         _Color ("Color", Color) = (1,1,1,1)
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
         _VerticalCutAlpha("VerticalCutAlpha", Range(0, 1)) = 1
         _VerticalCutRange("VerticalCutRange", Vector) = (0, 0, 0, 0)
         _Emission ("Emission", Color) = (0, 0, 0, 0)
@@ -33,8 +31,6 @@ Shader "ProjectTolerance/BuildingStructure"
         };
 
         // local
-        float _Glossiness;
-        float _Metallic;
         float4 _Color;
         float4 _Emission;
         float _VerticalCutAlpha;
@@ -68,8 +64,6 @@ Shader "ProjectTolerance/BuildingStructure"
         {
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
             o.Emission = _Emission;
 
             float2 ambientUV = (IN.worldPos + _AmbientLightMapOffset).xz / _AmbientLightMapSize;

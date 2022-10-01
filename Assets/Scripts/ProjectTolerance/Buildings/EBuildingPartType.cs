@@ -1,4 +1,4 @@
-namespace ProjectTolerance
+namespace ProjectTolerance.Buildings
 {
     public enum EBuildingPartType
     {

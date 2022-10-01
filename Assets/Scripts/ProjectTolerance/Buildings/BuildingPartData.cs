@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ProjectTolerance
+namespace ProjectTolerance.Buildings
 {
     public class BuildingPartData : MonoBehaviour
     {

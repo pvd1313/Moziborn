@@ -1,12 +1,9 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace ProjectTolerance
+namespace ProjectTolerance.Buildings
 {
     public class BuildingController : MonoBehaviour
     {
@@ -16,29 +13,27 @@ namespace ProjectTolerance
             public float alpha;
             public MaterialPropertyBlock materialProperty;
         }
-        
-        [SerializeField] private Tilemap _level0Tilemap;
-        [SerializeField] private Tilemap _level1Tilemap;
+
+        public IReadOnlyList<BuildingData> Buildings => _buildings;
+
+        [SerializeField] private Tilemap _level0Frame;
+        [SerializeField] private Tilemap _level1Interactive;
+        [SerializeField] private Tilemap _level1Frame;
         [SerializeField] private float _transitionDuration;
         [SerializeField] private Collider _playerCollider;
         [SerializeField] private Transform _cameraTransform;
 
         private List<BuildingData> _buildings;
         private BuildingTransition[] _transitions;
-        private bool _intialized;
-
-        private IEnumerator Start()
+        private bool _initialized;
+        
+        public IEnumerator Initialize()
         {
             // Wait for tilemap GameObjects be spawned.
             yield return null;
             
-            Initialize();
-        }
-        
-        private void Initialize()
-        {
             _buildings = new List<BuildingData>();
-            BuildingUtil.DetectBuildings(_level0Tilemap, _level1Tilemap, _buildings);
+            BuildingUtil.DetectBuildings(_level0Frame, _level1Interactive, _level1Frame, _buildings);
 
             _transitions = new BuildingTransition[_buildings.Count];
             for (var i = 0; i < _transitions.Length; i++)
@@ -60,12 +55,12 @@ namespace ProjectTolerance
                 }
             }
 
-            _intialized = true;
+            _initialized = true;
         }
 
         private void Update()
         {
-            if (!_intialized)
+            if (!_initialized)
             {
                 return;
             }
@@ -88,7 +83,7 @@ namespace ProjectTolerance
                 var blocksView = false;
                 foreach (var room in _buildings[i].rooms)
                 {
-                    if (room.IntersectRay(playerBottomRay))
+                    if (RoomBoundsToFloat(room).IntersectRay(playerBottomRay))
                     {
                         blocksView = true;
                         break;
@@ -97,10 +92,12 @@ namespace ProjectTolerance
 
                 foreach (var doorFrame in _buildings[i].doorFrames)
                 {
-                    if (doorFrame.IntersectRay(playerTopRay0) || 
-                        doorFrame.IntersectRay(playerTopRay1) ||
-                        doorFrame.IntersectRay(playerTopRay2) ||
-                        doorFrame.IntersectRay(playerTopRay3))
+                    var doorBounds = DoorFrameToBoundsFloat(doorFrame);
+                    
+                    if (doorBounds.IntersectRay(playerTopRay0) || 
+                        doorBounds.IntersectRay(playerTopRay1) ||
+                        doorBounds.IntersectRay(playerTopRay2) ||
+                        doorBounds.IntersectRay(playerTopRay3))
                     {
                         blocksView = true;
                         break;
@@ -127,6 +124,20 @@ namespace ProjectTolerance
             }
         }
 
+        private Bounds RoomBoundsToFloat(BoundsInt bounds)
+        {
+            var center = new Vector3(bounds.center.x, 1.65f, bounds.center.y);
+            var size = new Vector3(bounds.size.x, 3.3f, bounds.size.y);
+            return new Bounds(center, size);
+        }
+
+        private Bounds DoorFrameToBoundsFloat(Vector2Int pos)
+        {
+            var center = new Vector3(pos.x + 0.5f, 1.5f, pos.y + 0.5f);
+            var size = new Vector3(1, 3, 1);
+            return new Bounds(center, size);
+        }
+
         private void OnDrawGizmos()
         {
             if (_buildings == null)
@@ -139,13 +150,15 @@ namespace ProjectTolerance
                 Gizmos.color = Color.yellow;
                 foreach (var room in building.rooms)
                 {
-                    Gizmos.DrawWireCube(room.center, room.size);
+                    var bounds = RoomBoundsToFloat(room);
+                    Gizmos.DrawWireCube(bounds.center, bounds.size);
                 }
 
                 Gizmos.color = Color.cyan;
                 foreach (var doorFrame in building.doorFrames)
                 {
-                    Gizmos.DrawWireCube(doorFrame.center, doorFrame.size);
+                    var bounds = DoorFrameToBoundsFloat(doorFrame);
+                    Gizmos.DrawWireCube(bounds.center, bounds.size);
                 }
             }
         }

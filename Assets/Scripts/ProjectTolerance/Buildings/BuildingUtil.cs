@@ -1,28 +1,36 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace ProjectTolerance
+namespace ProjectTolerance.Buildings
 {
     public static class BuildingUtil
     {
-        public static void DetectBuildings(Tilemap floor0, Tilemap floor1, List<BuildingData> resultBuildings)
+        public static void DetectBuildings(Tilemap floor0Frame, 
+                                           Tilemap floor0Interactive, 
+                                           Tilemap floor1Frame, 
+                                           List<BuildingData> resultBuildings)
         {
             resultBuildings.Clear();
             
             var occupiedCells = new HashSet<Vector2Int>();
-            GetTilemapOccupiedCells(floor1, occupiedCells);
+            GetTilemapOccupiedCells(floor1Frame, occupiedCells);
 
             var adjustedCells = new HashSet<Vector2Int>();
             var renderers = new List<MeshRenderer>();
             var rooms = new List<BoundsInt>();
             var doorFrames = new List<Vector2Int>();
+            var walls = new List<Vector2Int>();
+            var doors = new List<Vector2Int>();
 
             while (occupiedCells.Count > 0)
             {
                 VisitAdjustedCells(occupiedCells.First(), occupiedCells, adjustedCells);
-                GetBuildingParts(floor0, adjustedCells, EBuildingPartType.DoorFrame, doorFrames);
+                GetBuildingParts(floor0Frame, adjustedCells, EBuildingPartType.DoorFrame, doorFrames);
+                GetBuildingParts(floor0Frame, adjustedCells, EBuildingPartType.Wall, walls);
+                GetBuildingParts(floor0Interactive, adjustedCells, EBuildingPartType.Door, doors);
                 GetRoomBounds(adjustedCells, rooms);
 
                 renderers.Clear();
@@ -32,12 +40,12 @@ namespace ProjectTolerance
                     for (var x = room.min.x; x <= room.max.x; x++)
                     for (var y = room.min.y; y <= room.max.y; y++)
                     {
-                        if (TryGetRendererAtPosition(floor0, x, y, out var meshRenderer))
+                        if (TryGetRendererAtPosition(floor0Frame, x, y, out var meshRenderer))
                         {
                             renderers.Add(meshRenderer);
                         }
                         
-                        if (TryGetRendererAtPosition(floor1, x, y, out meshRenderer))
+                        if (TryGetRendererAtPosition(floor1Frame, x, y, out meshRenderer))
                         {
                             renderers.Add(meshRenderer);
                         }
@@ -46,11 +54,16 @@ namespace ProjectTolerance
 
                 resultBuildings.Add(new BuildingData
                 {
-                    rooms = rooms.Select(r => new Bounds(new Vector3(r.center.x, 1.65f, r.center.y), 
-                        new Vector3(r.size.x, 3.3f, r.size.y))).ToArray(),
+                    rooms = rooms.ToArray(),
                     viewBlockingParts = renderers.ToArray(),
-                    doorFrames = doorFrames.Select(r => new Bounds(new Vector3(r.x + 0.5f, 1.5f, r.y + 0.5f), 
-                        new Vector3(1, 3, 1))).ToArray()
+                    doorFrames = doorFrames.ToArray(),
+                    walls = walls.ToArray(),
+                    doors = doors.Select(pos => new DoorData
+                    {
+                        position = pos,
+                        controller = floor0Interactive.GetInstantiatedObject(new Vector3Int(pos.x, pos.y, 0))
+                            .GetComponentInChildren<DoorController>()
+                    }).ToArray()
                 });
             }
 
@@ -127,14 +140,12 @@ namespace ProjectTolerance
                 boundsMin.y = boundsMin.y - offset + 1;
                 
                 for (var x = boundsMin.x; x <= boundsMax.x; x++)
-                for (var y = boundsMin.y; y <= boundsMax.y; y++)
-                {
-                    cells.Remove(new Vector2Int(x, y));
-                }
+                    for (var y = boundsMin.y; y <= boundsMax.y; y++)
+                        cells.Remove(new Vector2Int(x, y));
 
                 var boundsDelta = boundsMax - boundsMin + Vector2Int.one;
                 
-                resultBounds.Add(new BoundsInt(boundsMin.x, boundsMin.y, 0, boundsDelta.x, boundsDelta.y, 0));
+                resultBounds.Add(new BoundsInt(boundsMin.x, boundsMin.y, 0, boundsDelta.x, boundsDelta.y, 1));
             }
 
             bool TestRow(int xMin, int xMax, int y)
