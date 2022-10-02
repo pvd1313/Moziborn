@@ -1,78 +1,210 @@
-Shader "ProjectTolerance/BuildingStructure"
+Shader "ProjectTolerance/BuildingStructure_URP"
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _VerticalCutAlpha("VerticalCutAlpha", Range(0, 1)) = 1
         _VerticalCutRange("VerticalCutRange", Vector) = (0, 0, 0, 0)
-        _Emission ("Emission", Color) = (0, 0, 0, 0)
+        
+        // Specular vs Metallic workflow
+        [HideInInspector] _WorkflowMode("WorkflowMode", Float) = 1.0
+
+        [MainTexture] _BaseMap("Albedo", 2D) = "white" {}
+        [MainColor] _BaseColor("Color", Color) = (1,1,1,1)
+
+        _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+
+        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+        _GlossMapScale("Smoothness Scale", Range(0.0, 1.0)) = 1.0
+        _SmoothnessTextureChannel("Smoothness texture channel", Float) = 0
+
+        _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
+        _MetallicGlossMap("Metallic", 2D) = "white" {}
+
+        _SpecColor("Specular", Color) = (0.2, 0.2, 0.2)
+        _SpecGlossMap("Specular", 2D) = "white" {}
+
+        [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
+        [ToggleOff] _EnvironmentReflections("Environment Reflections", Float) = 1.0
+
+        _BumpScale("Scale", Float) = 1.0
+        _BumpMap("Normal Map", 2D) = "bump" {}
+
+        _Parallax("Scale", Range(0.005, 0.08)) = 0.005
+        _ParallaxMap("Height Map", 2D) = "black" {}
+
+        _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
+        _OcclusionMap("Occlusion", 2D) = "white" {}
+
+        [HDR] _EmissionColor("Color", Color) = (0,0,0)
+        _EmissionMap("Emission", 2D) = "white" {}
+
+        _DetailMask("Detail Mask", 2D) = "white" {}
+        _DetailAlbedoMapScale("Scale", Range(0.0, 2.0)) = 1.0
+        _DetailAlbedoMap("Detail Albedo x2", 2D) = "linearGrey" {}
+        _DetailNormalMapScale("Scale", Range(0.0, 2.0)) = 1.0
+        [Normal] _DetailNormalMap("Normal Map", 2D) = "bump" {}
+
+        // SRP batching compatibility for Clear Coat (Not used in Lit)
+        [HideInInspector] _ClearCoatMask("_ClearCoatMask", Float) = 0.0
+        [HideInInspector] _ClearCoatSmoothness("_ClearCoatSmoothness", Float) = 0.0
+
+        // Blending state
+        [HideInInspector] _Surface("__surface", Float) = 0.0
+        [HideInInspector] _Blend("__blend", Float) = 0.0
+        [HideInInspector] _AlphaClip("__clip", Float) = 0.0
+        [HideInInspector] _SrcBlend("__src", Float) = 1.0
+        [HideInInspector] _DstBlend("__dst", Float) = 0.0
+        [HideInInspector] _ZWrite("__zw", Float) = 1.0
+        [HideInInspector] _Cull("__cull", Float) = 2.0
+
+        _ReceiveShadows("Receive Shadows", Float) = 1.0
+        // Editmode props
+        [HideInInspector] _QueueOffset("Queue offset", Float) = 0.0
+
+        // ObsoleteProperties
+        [HideInInspector] _MainTex("BaseMap", 2D) = "white" {}
+        [HideInInspector] _Color("Base Color", Color) = (1, 1, 1, 1)
+        [HideInInspector] _GlossMapScale("Smoothness", Float) = 0.0
+        [HideInInspector] _Glossiness("Smoothness", Float) = 0.0
+        [HideInInspector] _GlossyReflections("EnvironmentReflections", Float) = 0.0
+
+        [HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
+        [HideInInspector][NoScaleOffset]unity_ShadowMasks("unity_ShadowMasks", 2DArray) = "" {}
     }
+    
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 200
-
-        CGPROGRAM
-        // Physically based Standard lighting model, and enable shadows on all light types
-        #pragma surface surf Custom fullforwardshadows
-
-        // Use shader model 3.0 target, to get nicer looking lighting
-        #pragma target 3.0
-        #include "UnityPBSLighting.cginc"
-
-        sampler2D _MainTex;
-
-        struct Input
-        {
-            float2 uv_MainTex;
-            float3 worldPos;
-            float3 worldNormal;
-        };
-
-        // local
-        float4 _Color;
-        float4 _Emission;
-        float _VerticalCutAlpha;
-        float4 _VerticalCutRange;
-
-        // global
-        float3 _AmbientLightMapOffset;
-        sampler2D _AmbientLightMapTexture;
-        float2 _AmbientLightMapSize;
-
-        // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
-        // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
-        // #pragma instancing_options assumeuniformscaling
-        UNITY_INSTANCING_BUFFER_START(Props)
-            // put more per-instance properties here
-        UNITY_INSTANCING_BUFFER_END(Props)
+       // Universal Pipeline tag is required. If Universal render pipeline is not set in the graphics settings
+        // this Subshader will fail. One can add a subshader below or fallback to Standard built-in to make this
+        // material work with both Universal Render Pipeline and Builtin Unity Pipeline
+        Tags{"RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" "UniversalMaterialType" = "Lit" "IgnoreProjector" = "True" "ShaderModel"="4.5"}
+        LOD 300
         
-        inline void LightingCustom_GI(SurfaceOutputStandard s, UnityGIInput data, inout UnityGI gi)
+        Pass
         {
-            LightingStandard_GI(s, data, gi);
-        }
+            Name "ShadowCaster"
+            Tags{"LightMode" = "ShadowCaster"}
 
-        inline half4 LightingCustom_Deferred(SurfaceOutputStandard s, UnityGI gi, out half4 outDiffuseOcclusion, out half4 outSpecSmoothness, out half4 outNormal)
+            ZWrite On
+            ZTest LEqual
+            ColorMask 0
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma exclude_renderers gles gles3 glcore
+            #pragma target 4.5
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            #pragma vertex ShadowPassVertex
+            #pragma fragment ShadowPassFragment
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+            ENDHLSL
+        }
+        
+        Pass
         {
-            gi.indirect.diffuse *= s.Alpha;
-            
-            return LightingStandard_Deferred(s, 0, gi, outDiffuseOcclusion, outSpecSmoothness, outNormal);
-        }
+            // Lightmode matches the ShaderPassName set in UniversalRenderPipeline.cs. SRPDefaultUnlit and passes with
+            // no LightMode tag are also rendered by Universal Render Pipeline
+            Name "GBuffer"
+            Tags{"LightMode" = "UniversalGBuffer"}
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+            ZWrite[_ZWrite]
+            ZTest LEqual
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma exclude_renderers gles gles3 glcore
+            #pragma target 4.5
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local _NORMALMAP
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            //#pragma shader_feature_local_fragment _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature_local_fragment _EMISSION
+            #pragma shader_feature_local_fragment _METALLICSPECGLOSSMAP
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+            #pragma shader_feature_local_fragment _OCCLUSIONMAP
+            #pragma shader_feature_local _PARALLAXMAP
+            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
+
+            #pragma shader_feature_local_fragment _SPECULARHIGHLIGHTS_OFF
+            #pragma shader_feature_local_fragment _ENVIRONMENTREFLECTIONS_OFF
+            #pragma shader_feature_local_fragment _SPECULAR_SETUP
+            #pragma shader_feature_local _RECEIVE_SHADOWS_OFF
+
+            // -------------------------------------
+            // Universal Pipeline keywords
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
+            //#pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            //#pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile _ _SHADOWS_SOFT
+            #pragma multi_compile _ _MIXED_LIGHTING_SUBTRACTIVE
+
+            // -------------------------------------
+            // Unity defined keywords
+            #pragma multi_compile _ DIRLIGHTMAP_COMBINED
+            #pragma multi_compile _ LIGHTMAP_ON
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            #pragma vertex LitGBufferPassVertex
+            #pragma fragment LitGBufferPassFragment
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "BuildingStructure_GBufferPass.hlsl"
+            ENDHLSL
+        }
+        
+        Pass
         {
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb;
-            o.Emission = _Emission;
+            Name "DepthOnly"
+            Tags{"LightMode" = "DepthOnly"}
 
-            float2 ambientUV = (IN.worldPos + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
-            o.Alpha = tex2D(_AmbientLightMapTexture, ambientUV);
+            ZWrite On
+            ColorMask 0
+            Cull[_Cull]
 
-            float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
-            clip(-IN.worldPos.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
+            HLSLPROGRAM
+            #pragma exclude_renderers gles gles3 glcore
+            #pragma target 4.5
+
+            #pragma vertex DepthOnlyVertex
+            #pragma fragment DepthOnlyFragment
+
+            // -------------------------------------
+            // Material Keywords
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            //--------------------------------------
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
+            ENDHLSL
         }
-        ENDCG
     }
-    FallBack "Diffuse"
+    
+    FallBack "Hidden/Universal Render Pipeline/FallbackError"
+    //CustomEditor "UnityEditor.Rendering.Universal.ShaderGUI.LitShader"
 }
