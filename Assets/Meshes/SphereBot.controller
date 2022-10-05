@@ -21,7 +21,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: MotionSpeed
+  - m_Name: MotionProgress
     m_Type: 1
     m_DefaultFloat: 1
     m_DefaultInt: 0
@@ -95,7 +95,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Blend Tree
-  m_Speed: 1
+  m_Speed: 0
   m_CycleOffset: 0
   m_Transitions: []
   m_StateMachineBehaviours: []
@@ -103,16 +103,16 @@ AnimatorState:
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
   m_Mirror: 0
-  m_SpeedParameterActive: 1
+  m_SpeedParameterActive: 0
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
-  m_TimeParameterActive: 0
+  m_TimeParameterActive: 1
   m_Motion: {fileID: 4878104207810510973}
   m_Tag: 
-  m_SpeedParameter: MotionSpeed
+  m_SpeedParameter: MotionProgress
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
-  m_TimeParameter: MotionSpeed
+  m_TimeParameter: MotionProgress
 --- !u!1107 &9072082667548654197
 AnimatorStateMachine:
   serializedVersion: 6

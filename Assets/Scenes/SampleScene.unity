@@ -5071,12 +5071,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9dbd43c8a694c8399f8a23a3b73b5e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _camera: {fileID: 963194228}
-  _rigidbody: {fileID: 1167296161}
-  _animationSpeed: 0.3
+  _animationBakedSpeed: 0.3
   _animator: {fileID: 788527701}
-  _acceleration: 0.13
-  _maxSpeed: 0.3
+  _rigidbody: {fileID: 1167296161}
+  _speedMultiplierMin: 1
+  _speedMultiplierMax: 3
+  _speedIncreasePerCycle: 1
 --- !u!1 &1771883390
 GameObject:
   m_ObjectHideFlags: 0
