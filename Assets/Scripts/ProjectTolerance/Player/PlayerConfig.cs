@@ -6,6 +6,8 @@ namespace ProjectTolerance.Player
     public struct PlayerConfig
     {
         public PlayerView playerViewPrefab;
-        public float movementSpeed;
+        public AimSquareView aimSquareViewPrefab;
+        public float playerSpeed;
+        public float aimSpeed;
     }
 }

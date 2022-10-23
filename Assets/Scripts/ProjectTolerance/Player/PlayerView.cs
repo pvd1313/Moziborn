@@ -6,12 +6,12 @@ namespace ProjectTolerance.Player
     {
         public Bounds ColliderBounds => _collider.bounds;
 
-        [SerializeField] private Collider _collider;
-        [SerializeField] private Rigidbody _rigidbody;
-
-        public void Translate(Vector3 motion)
+        public Vector3 Position
         {
-            _rigidbody.MovePosition(_rigidbody.position + motion);
+            get => transform.position;
+            set => transform.position = value;
         }
+
+        [SerializeField] private Collider _collider;
     }
 }

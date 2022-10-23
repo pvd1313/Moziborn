@@ -107,7 +107,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3873407669168990991}
   - component: {fileID: 3873407669168990978}
-  - component: {fileID: 3873407669168990979}
   - component: {fileID: 6194257065066083958}
   m_Layer: 0
   m_Name: PlayerView
@@ -144,24 +143,10 @@ Rigidbody:
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!136 &3873407669168990979
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3873407669168990990}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.3
-  m_Height: 1.5
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.75, z: 0}
 --- !u!114 &6194257065066083958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,5 +159,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44c98cfc7d484ed492e98022557eaa30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _collider: {fileID: 3873407669168990979}
-  _rigidbody: {fileID: 3873407669168990978}
+  _collider: {fileID: 3873407669100746209}
