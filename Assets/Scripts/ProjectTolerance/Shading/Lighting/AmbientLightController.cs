@@ -1,14 +1,14 @@
 using System.Collections;
 using ProjectTolerance.Buildings;
+using ProjectTolerance.GameCycle;
 using UnityEngine;
-using UnityEngine.UI;
 
-namespace ProjectTolerance
+namespace ProjectTolerance.Shading.Lighting
 {
-    public class AmbientLightController : MonoBehaviour
+    public class AmbientLightController : IUnorderedLateUpdatable
     {
-        [SerializeField] private BuildingController _buildingController;
-        [SerializeField] private Shader _ambientLightShader;
+        private readonly AmbientLightConfig _config;
+        private BuildingController _buildingController;
         
         private Texture2D _sunLightTexture;
         private Texture2D _wallsTexture;
@@ -16,7 +16,11 @@ namespace ProjectTolerance
         private Material _ambientLightMaterial;
         private RenderTexture _stateTexture;
 
-        private bool _initialized;
+        public AmbientLightController(AmbientLightConfig config, BuildingController buildingController)
+        {
+            _config = config;
+            _buildingController = buildingController;
+        }
 
         public IEnumerator Initialize()
         {
@@ -51,7 +55,7 @@ namespace ProjectTolerance
             };
             _textureBounds = bounds;
             
-            _ambientLightMaterial = new Material(_ambientLightShader);
+            _ambientLightMaterial = new Material(_config.ambientLightShader);
             _ambientLightMaterial.SetTexture("_WallsTexture", _wallsTexture);
             _ambientLightMaterial.SetTexture("_SunLightTexture", _sunLightTexture);
             _ambientLightMaterial.SetTexture("_StateTexture", _stateTexture);
@@ -87,18 +91,11 @@ namespace ProjectTolerance
             _wallsTexture.Apply();
             _sunLightTexture.Apply();
 
-            _initialized = true;
-
             yield break;
         }
         
-        private void LateUpdate()
+        public void LateUpdate()
         {
-            if (!_initialized)
-            {
-                return;
-            }
-
             foreach (var building in _buildingController.Buildings)
                 foreach (var door in building.doors)
                 {
@@ -106,13 +103,13 @@ namespace ProjectTolerance
                     _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.controller.DoorState);
                 }
             _wallsTexture.Apply();
-
+        
             var tempTexture = RenderTexture.GetTemporary(
                 _textureBounds.size.x, 
                 _textureBounds.size.y, 
                 0, 
                 RenderTextureFormat.R8);
-
+        
             Graphics.Blit(_stateTexture, tempTexture, _ambientLightMaterial);
             
             Graphics.Blit(tempTexture, _stateTexture);

@@ -1,12 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using ProjectTolerance.Cinematics;
+using ProjectTolerance.Debugging;
+using ProjectTolerance.GameCycle;
+using ProjectTolerance.Player;
+using ProjectTolerance.Shading;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace ProjectTolerance.Buildings
 {
-    public class BuildingController : MonoBehaviour
+    public class BuildingController : IUnorderedUpdatable, IGizmosDrawer
     {
+        private readonly BuildingConfig _config;
+
         private class BuildingTransition
         {
             public float targetAlpha;
@@ -16,24 +23,36 @@ namespace ProjectTolerance.Buildings
 
         public IReadOnlyList<BuildingData> Buildings => _buildings;
 
-        [SerializeField] private Tilemap _level0Frame;
-        [SerializeField] private Tilemap _level1Interactive;
-        [SerializeField] private Tilemap _level1Frame;
-        [SerializeField] private float _transitionDuration;
-        [SerializeField] private Collider _playerCollider;
-        [SerializeField] private Transform _cameraTransform;
+        private readonly CameraController _cameraController;
+        private readonly PlayerController _playerController;
 
+        private Tilemap _floor0Frame;
+        private Tilemap _floor0Interactive;
+        private Tilemap _floor1Frame;
         private List<BuildingData> _buildings;
         private BuildingTransition[] _transitions;
-        private bool _initialized;
+
+        public BuildingController (BuildingConfig config, 
+                                   CameraController cameraController, 
+                                   PlayerController playerController)
+        {
+            _config = config;
+            _cameraController = cameraController;
+            _playerController = playerController;
+        }
         
         public IEnumerator Initialize()
         {
+            var levelPrefab = GameObject.Instantiate(_config.levelViewPrefab);
+            _floor0Frame = levelPrefab.Floor0Frame;
+            _floor0Interactive = levelPrefab.Floor0Interactive;
+            _floor1Frame = levelPrefab.Floor1Frame;
+
             // Wait for tilemap GameObjects be spawned.
             yield return null;
             
             _buildings = new List<BuildingData>();
-            BuildingUtil.DetectBuildings(_level0Frame, _level1Interactive, _level1Frame, _buildings);
+            BuildingUtil.DetectBuildings(_floor0Frame, _floor0Interactive, _floor1Frame, _buildings);
 
             _transitions = new BuildingTransition[_buildings.Count];
             for (var i = 0; i < _transitions.Length; i++)
@@ -54,19 +73,12 @@ namespace ProjectTolerance.Buildings
                     renderer.SetPropertyBlock(propertyBlock);
                 }
             }
-
-            _initialized = true;
         }
 
-        private void Update()
+        public void Update()
         {
-            if (!_initialized)
-            {
-                return;
-            }
-
-            var cameraPos = _cameraTransform.position;
-            var playerBounds = _playerCollider.bounds;
+            var cameraPos = _cameraController.CameraPosition;
+            var playerBounds = _playerController.ViewBounds;
             var playerBottomRay = new Ray(cameraPos, playerBounds.min - cameraPos);
             
             var playerTop0 = playerBounds.max;
@@ -77,7 +89,7 @@ namespace ProjectTolerance.Buildings
             var playerTopRay1 = new Ray(cameraPos, playerTop1 - cameraPos);
             var playerTopRay2 = new Ray(cameraPos, playerTop2 - cameraPos);
             var playerTopRay3 = new Ray(cameraPos, playerTop3 - cameraPos);
-
+        
             for (var i = 0; i < _buildings.Count; i++)
             {
                 var blocksView = false;
@@ -89,7 +101,7 @@ namespace ProjectTolerance.Buildings
                         break;
                     }
                 }
-
+        
                 foreach (var doorFrame in _buildings[i].doorFrames)
                 {
                     var doorBounds = DoorFrameToBoundsFloat(doorFrame);
@@ -105,17 +117,17 @@ namespace ProjectTolerance.Buildings
                 }
                 
                 var transition = _transitions[i];
-
+        
                 transition.targetAlpha = blocksView ? 0 : 1;
                 
                 if (transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)
                 {
                     transition.alpha = Mathf.MoveTowards(transition.alpha,
                         transition.targetAlpha,
-                        Time.deltaTime / _transitionDuration);
+                        Time.deltaTime / _config.transitionDuration);
                     
                     transition.materialProperty.SetFloat(ShaderPropertyId.VerticalCutAlpha, transition.alpha);
-
+        
                     foreach (var part in _buildings[i].viewBlockingParts)
                     {
                         part.SetPropertyBlock(transition.materialProperty);
@@ -138,13 +150,11 @@ namespace ProjectTolerance.Buildings
             return new Bounds(center, size);
         }
 
-        private void OnDrawGizmos()
+#pragma warning disable CS0162
+        public void OnDrawGizmos()
         {
-            if (_buildings == null)
-            {
-                return;
-            }
-
+            return;
+            
             foreach (var building in _buildings)
             {
                 Gizmos.color = Color.yellow;
@@ -162,5 +172,7 @@ namespace ProjectTolerance.Buildings
                 }
             }
         }
+#pragma warning restore CS0162
+        
     }
 }
