@@ -4,7 +4,7 @@ namespace ProjectTolerance.Cinematics
 {
     public class CameraView : MonoBehaviour
     {
-        public Vector3 CameraPosition => _camera.transform.position;
+        public Vector3 CameraDirection => _camera.transform.forward;
 
         public Vector3 OriginPosition
         {

@@ -7,7 +7,15 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController : IUnorderedUpdatable
     {
-        public Bounds ViewBounds => _playerView.ColliderBounds;
+        public Bounds ViewBounds
+        {
+            get
+            {
+                var bounds = _playerView.ColliderBounds;
+                bounds.center += CellToWorldPosition(_playerPosition) - _playerView.Position;
+                return bounds;
+            }
+        }
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;

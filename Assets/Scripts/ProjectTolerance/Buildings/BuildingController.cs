@@ -77,25 +77,39 @@ namespace ProjectTolerance.Buildings
 
         public void Update()
         {
-            var cameraPos = _cameraController.CameraPosition;
+            var cameraDir = _cameraController.CameraDirection;
             var playerBounds = _playerController.ViewBounds;
-            var playerBottomRay = new Ray(cameraPos, playerBounds.min - cameraPos);
+
+            var playerBottom0 = playerBounds.min;
+            var playerBottom1 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
+            var playerBottom2 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
+            var playerBottom3 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.max.z);
+            
+            var playerBottomRay0 = new Ray(playerBottom0, -cameraDir);
+            var playerBottomRay1 = new Ray(playerBottom1, -cameraDir);
+            var playerBottomRay2 = new Ray(playerBottom2, -cameraDir);
+            var playerBottomRay3 = new Ray(playerBottom3, -cameraDir);
             
             var playerTop0 = playerBounds.max;
             var playerTop1 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
             var playerTop2 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.max.z);
             var playerTop3 = new Vector3(playerBounds.max.x, playerBounds.max.y, playerBounds.min.z);
-            var playerTopRay0 = new Ray(cameraPos, playerTop0 - cameraPos);
-            var playerTopRay1 = new Ray(cameraPos, playerTop1 - cameraPos);
-            var playerTopRay2 = new Ray(cameraPos, playerTop2 - cameraPos);
-            var playerTopRay3 = new Ray(cameraPos, playerTop3 - cameraPos);
+            var playerTopRay0 = new Ray(playerTop0, cameraDir);
+            var playerTopRay1 = new Ray(playerTop1, cameraDir);
+            var playerTopRay2 = new Ray(playerTop2, cameraDir);
+            var playerTopRay3 = new Ray(playerTop3, cameraDir);
         
             for (var i = 0; i < _buildings.Count; i++)
             {
                 var blocksView = false;
                 foreach (var room in _buildings[i].rooms)
                 {
-                    if (RoomBoundsToFloat(room).IntersectRay(playerBottomRay))
+                    var roomBounds = RoomBoundsToFloat(room);
+                    
+                    if (roomBounds.IntersectRay(playerBottomRay0) ||
+                        roomBounds.IntersectRay(playerBottomRay1) ||
+                        roomBounds.IntersectRay(playerBottomRay2) ||
+                        roomBounds.IntersectRay(playerBottomRay3))
                     {
                         blocksView = true;
                         break;

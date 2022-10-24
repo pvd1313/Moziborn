@@ -6,7 +6,7 @@ namespace ProjectTolerance.Cinematics
 {
     public class CameraController : IUnorderedUpdatable
     {
-        public Vector3 CameraPosition => _cameraView.CameraPosition;
+        public Vector3 CameraDirection => _cameraView.CameraDirection;
         
         private readonly CameraConfig _config;
         
