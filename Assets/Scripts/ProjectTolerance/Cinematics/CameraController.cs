@@ -1,14 +1,18 @@
 using System.Collections;
+using ProjectTolerance.GameCycle;
 using UnityEngine;
 
 namespace ProjectTolerance.Cinematics
 {
-    public class CameraController
+    public class CameraController : IUnorderedUpdatable
     {
-        private readonly CameraConfig _config;
-        private CameraView _cameraView;
-
         public Vector3 CameraPosition => _cameraView.CameraPosition;
+        
+        private readonly CameraConfig _config;
+        
+        private CameraView _cameraView;
+        private Vector3 _targetPosition; 
+
         
         public CameraController (CameraConfig config)
         {
@@ -20,6 +24,16 @@ namespace ProjectTolerance.Cinematics
             _cameraView = GameObject.Instantiate(_config.cameraViewPrefab);
             
             yield break;
+        }
+
+        public void SetTargetPosition(Vector3 position)
+        {
+            _targetPosition = position;
+        }
+
+        public void Update()
+        {
+            _cameraView.OriginPosition = Vector3.Lerp(_cameraView.OriginPosition, _targetPosition, 4 * Time.deltaTime);
         }
     }
 }

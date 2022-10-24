@@ -1,4 +1,5 @@
 using System.Collections;
+using ProjectTolerance.Cinematics;
 using ProjectTolerance.GameCycle;
 using UnityEngine;
 
@@ -10,16 +11,18 @@ namespace ProjectTolerance.Player
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
+        private readonly CameraController _camera;
 
         private PlayerView _playerView;
         private AimSquareView _aimView;
         private Vector2Int _playerPosition;
         private Vector3 _targetAimPosition;
 
-        public PlayerController (PlayerConfig config, PlayerInputController input)
+        public PlayerController (PlayerConfig config, PlayerInputController input, CameraController camera)
         {
             _config = config;
             _input = input;
+            _camera = camera;
         }
 
         public IEnumerator Initialize()
@@ -55,6 +58,8 @@ namespace ProjectTolerance.Player
 
             _playerView.Position = Vector3.MoveTowards(_playerView.Position, CellToWorldPosition(_playerPosition), Time.deltaTime * _config.playerSpeed);
             _aimView.Position = Vector3.MoveTowards(_aimView.Position, _targetAimPosition, Time.deltaTime * _config.aimSpeed);
+            
+            _camera.SetTargetPosition(_playerView.Position);
         }
 
         private Vector2Int AimDirectionToCellDelta(Vector2 aimDirection)
