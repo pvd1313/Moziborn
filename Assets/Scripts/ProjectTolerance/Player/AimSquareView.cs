@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ProjectTolerance.Player
 {
@@ -8,6 +9,13 @@ namespace ProjectTolerance.Player
         {
             get => transform.position;
             set => transform.position = value;
+        }
+
+        [SerializeField] private MeshRenderer _renderer;
+        
+        private void Start()
+        {
+            // _renderer.sharedMaterial.renderQueue = (int) RenderQueue.Transparent + 1;
         }
     }
 }
