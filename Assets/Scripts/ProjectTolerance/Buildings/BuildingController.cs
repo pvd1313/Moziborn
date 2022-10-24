@@ -24,7 +24,6 @@ namespace ProjectTolerance.Buildings
         public IReadOnlyList<BuildingData> Buildings => _buildings;
 
         private readonly CameraController _cameraController;
-        private readonly PlayerController _playerController;
 
         private Tilemap _floor0Frame;
         private Tilemap _floor0Interactive;
@@ -32,13 +31,10 @@ namespace ProjectTolerance.Buildings
         private List<BuildingData> _buildings;
         private BuildingTransition[] _transitions;
 
-        public BuildingController (BuildingConfig config, 
-                                   CameraController cameraController, 
-                                   PlayerController playerController)
+        public BuildingController (BuildingConfig config, CameraController cameraController)
         {
             _config = config;
             _cameraController = cameraController;
-            _playerController = playerController;
         }
         
         public IEnumerator Initialize()
@@ -75,11 +71,21 @@ namespace ProjectTolerance.Buildings
             }
         }
 
-        public void Update()
+        public bool HasWallAtCell(Vector3Int cell)
+        {
+            var gameObject = _floor0Frame.GetInstantiatedObject(cell);
+            if (gameObject == null)
+            {
+                return false;
+            }
+
+            var structure = gameObject.GetComponentInChildren<BuildingPartView>();
+            return structure.PartType == EBuildingPartType.Wall;
+        }
+
+        public void OnPlayerBoundsUpdate(Bounds playerBounds)
         {
             var cameraDir = _cameraController.CameraDirection;
-            var playerBounds = _playerController.ViewBounds;
-
             var playerBottom0 = playerBounds.min;
             var playerBottom1 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
             var playerBottom2 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
@@ -98,7 +104,7 @@ namespace ProjectTolerance.Buildings
             var playerTopRay1 = new Ray(playerTop1, cameraDir);
             var playerTopRay2 = new Ray(playerTop2, cameraDir);
             var playerTopRay3 = new Ray(playerTop3, cameraDir);
-        
+            
             for (var i = 0; i < _buildings.Count; i++)
             {
                 var blocksView = false;
@@ -133,7 +139,15 @@ namespace ProjectTolerance.Buildings
                 var transition = _transitions[i];
         
                 transition.targetAlpha = blocksView ? 0 : 1;
-                
+            }
+        }
+
+        public void Update()
+        {
+            for (var i = 0; i < _buildings.Count; i++)
+            {
+                var transition = _transitions[i];
+
                 if (transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)
                 {
                     transition.alpha = Mathf.MoveTowards(transition.alpha,

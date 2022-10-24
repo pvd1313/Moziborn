@@ -77,7 +77,7 @@ namespace ProjectTolerance.Buildings
                     return false;
                 }
 
-                var partData = gameObject.GetComponentInChildren<BuildingPartData>();
+                var partData = gameObject.GetComponentInChildren<BuildingPartView>();
                 if (partData.PartType == EBuildingPartType.Roof || 
                     partData.PartType == EBuildingPartType.Wall ||
                     partData.PartType == EBuildingPartType.DoorFrame)
@@ -105,7 +105,7 @@ namespace ProjectTolerance.Buildings
                     continue;
                 }
                 
-                var partData = gameObject.GetComponentInChildren<BuildingPartData>();
+                var partData = gameObject.GetComponentInChildren<BuildingPartView>();
                 if (partData.PartType == partType)
                 {
                     resultParts.Add(cell);

@@ -1,4 +1,5 @@
 using System.Collections;
+using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.GameCycle;
 using UnityEngine;
@@ -7,30 +8,25 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController : IUnorderedUpdatable
     {
-        public Bounds ViewBounds
-        {
-            get
-            {
-                var bounds = _playerView.ColliderBounds;
-                bounds.center += CellToWorldPosition(_playerPosition) - _playerView.Position;
-                return bounds;
-            }
-        }
-        
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly CameraController _camera;
+        private readonly BuildingController _buildingController;
 
         private PlayerView _playerView;
         private AimSquareView _aimView;
         private Vector2Int _playerPosition;
         private Vector3 _targetAimPosition;
 
-        public PlayerController (PlayerConfig config, PlayerInputController input, CameraController camera)
+        public PlayerController (PlayerConfig config, 
+                                 PlayerInputController input, 
+                                 CameraController camera,
+                                 BuildingController buildingController)
         {
             _config = config;
             _input = input;
             _camera = camera;
+            _buildingController = buildingController;
         }
 
         public IEnumerator Initialize()
@@ -48,22 +44,29 @@ namespace ProjectTolerance.Player
             var targetWorldPosition = CellToWorldPosition(_playerPosition);
             var animationFinished = Vector3.Distance(_playerView.Position, targetWorldPosition) < 0.01f;
 
-            if (inputState.closeAim)
+            if (inputState.closeAim && animationFinished)
             {
                 var aimDelta = AimDirectionToCellDelta(inputState.closeAimDirection);
                 var targetPosition = _playerPosition + aimDelta;
+                var hasWallAtTarget = _buildingController.HasWallAtCell(new Vector3Int(targetPosition.x, targetPosition.y));
                 _targetAimPosition = CellToWorldPosition(targetPosition);
                 _aimView.SetVisible(true);
+                _aimView.SetBlock(hasWallAtTarget);
 
-                if (inputState.movement && animationFinished)
+                if (inputState.movement && !hasWallAtTarget)
                 {
                     _playerPosition = targetPosition;
+                    
+                    var bounds = _playerView.ColliderBounds;
+                    bounds.center += CellToWorldPosition(_playerPosition) - _playerView.Position;
+                    _buildingController.OnPlayerBoundsUpdate(bounds);
                 }
             }
             else
             {
                 _targetAimPosition = CellToWorldPosition(_playerPosition);
                 _aimView.SetVisible(false);
+                _aimView.SetBlock(false);
             }
 
             _playerView.Position = Vector3.MoveTowards(_playerView.Position, CellToWorldPosition(_playerPosition), Time.deltaTime * _config.playerSpeed);

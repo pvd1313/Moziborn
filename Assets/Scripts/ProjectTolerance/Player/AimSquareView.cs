@@ -14,16 +14,13 @@ namespace ProjectTolerance.Player
         }
 
         [SerializeField] private MeshRenderer _meshRenderer;
-        [SerializeField] private Color _color;
+        [SerializeField] private Color _normalColor;
+        [SerializeField] private Color _blockColor;
         
         private bool _isVisible;
         private float _alpha;
+        private bool _isBlock;
         private MaterialPropertyBlock _materialBlock;
-
-        public void SetVisible(bool isVisible)
-        {
-            _isVisible = isVisible;
-        }
 
         private void Start()
         {
@@ -34,10 +31,20 @@ namespace ProjectTolerance.Player
         {
             _alpha = Mathf.Clamp01(_alpha + Time.deltaTime / AnimationDuration * (_isVisible ? 1 : -1));
 
-            var color = _color;
-            _color.a = _alpha;
+            var color = _isBlock ? _blockColor : _normalColor;
+            _normalColor.a = _alpha;
             _materialBlock.SetColor(ShaderPropertyId.Color, color);
             _meshRenderer.SetPropertyBlock(_materialBlock);
+        }
+        
+        public void SetVisible(bool isVisible)
+        {
+            _isVisible = isVisible;
+        }
+
+        public void SetBlock(bool isBlock)
+        {
+            _isBlock = isBlock;
         }
     }
 }

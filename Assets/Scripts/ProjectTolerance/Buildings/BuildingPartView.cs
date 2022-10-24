@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ProjectTolerance.Buildings
 {
-    public class BuildingPartData : MonoBehaviour
+    public class BuildingPartView : MonoBehaviour
     {
         public EBuildingPartType PartType => _partType;
         
