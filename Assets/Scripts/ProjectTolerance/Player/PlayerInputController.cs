@@ -15,13 +15,13 @@ namespace ProjectTolerance.Player
             var side = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
             if (forward != 0 || side != 0)
             {
-                inputState.meleeAim = true;
-                inputState.meleeAimDirection = new Vector2(forward, side).normalized;
+                inputState.closeAim = true;
+                inputState.closeAimDirection = new Vector2(forward, side).normalized;
             }
 
             if (Input.GetMouseButton(1))
             {
-                inputState.meleeAttack = true;
+                inputState.movement = true;
             }
 
             State = inputState;

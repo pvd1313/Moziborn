@@ -48,13 +48,14 @@ namespace ProjectTolerance.Player
             var targetWorldPosition = CellToWorldPosition(_playerPosition);
             var animationFinished = Vector3.Distance(_playerView.Position, targetWorldPosition) < 0.01f;
 
-            if (inputState.meleeAim && animationFinished)
+            if (inputState.closeAim)
             {
-                var aimDelta = AimDirectionToCellDelta(inputState.meleeAimDirection);
+                var aimDelta = AimDirectionToCellDelta(inputState.closeAimDirection);
                 var targetPosition = _playerPosition + aimDelta;
                 _targetAimPosition = CellToWorldPosition(targetPosition);
+                _aimView.SetVisible(true);
 
-                if (inputState.meleeAttack)
+                if (inputState.movement && animationFinished)
                 {
                     _playerPosition = targetPosition;
                 }
@@ -62,6 +63,7 @@ namespace ProjectTolerance.Player
             else
             {
                 _targetAimPosition = CellToWorldPosition(_playerPosition);
+                _aimView.SetVisible(false);
             }
 
             _playerView.Position = Vector3.MoveTowards(_playerView.Position, CellToWorldPosition(_playerPosition), Time.deltaTime * _config.playerSpeed);

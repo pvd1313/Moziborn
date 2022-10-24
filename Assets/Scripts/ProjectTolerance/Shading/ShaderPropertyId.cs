@@ -8,5 +8,6 @@ namespace ProjectTolerance.Shading
         public static readonly int AmbientLightMapTexture = Shader.PropertyToID("_AmbientLightMapTexture");
         public static readonly int AmbientLightMapSize = Shader.PropertyToID("_AmbientLightMapSize");
         public static readonly int AmbientLightMapOffset = Shader.PropertyToID("_AmbientLightMapOffset");
+        public static readonly int Color = Shader.PropertyToID("_Color");
     }
 }

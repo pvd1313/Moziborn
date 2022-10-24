@@ -4,8 +4,8 @@ namespace ProjectTolerance.Player
 {
     public struct PlayerInputState
     {
-        public bool meleeAim;
-        public Vector2 meleeAimDirection;
-        public bool meleeAttack;
+        public bool closeAim;
+        public Vector2 closeAimDirection;
+        public bool movement;
     }
 }
