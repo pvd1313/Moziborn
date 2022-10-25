@@ -14204,8 +14204,6 @@ Tilemap:
     m_Data: {fileID: 4360637502055892345, guid: 63f262fe9a6d6be46af7db11f53d10f1, type: 3}
   - m_RefCount: 1
     m_Data: {fileID: 4360637502055892345, guid: d7460893285839f429e082a9bc039207, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -11, y: -14, z: 0}
@@ -18800,7 +18798,7 @@ Grid:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3144822497889059822}
   m_Enabled: 1
-  m_CellSize: {x: 1, y: 1, z: 0}
+  m_CellSize: {x: 1, y: 1.0641778, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 1

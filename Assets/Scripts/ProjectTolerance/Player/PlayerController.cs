@@ -8,6 +8,8 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController : IUnorderedUpdatable
     {
+        private static readonly Vector3 CellSize = new Vector3(1, 0, 1.064178f);
+        
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly CameraController _camera;
@@ -77,9 +79,9 @@ namespace ProjectTolerance.Player
 
         private Vector2Int AimDirectionToCellDelta(Vector2 aimDirection)
         {
-            const float QuaterPI = Mathf.PI * 0.25f;
+            const float HalfPI = Mathf.PI * 0.5f;
             
-            var angle = Mathf.Round(Mathf.Atan2(aimDirection.y, aimDirection.x) / QuaterPI) * QuaterPI + QuaterPI;
+            var angle = Mathf.Round(Mathf.Atan2(aimDirection.y, aimDirection.x) / HalfPI) * HalfPI;
             aimDirection = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
             
             return new Vector2Int((int) Mathf.Round(aimDirection.x), (int) Mathf.Round(aimDirection.y));
@@ -87,7 +89,7 @@ namespace ProjectTolerance.Player
 
         private Vector3 CellToWorldPosition(Vector2Int cellPosition)
         {
-            return new Vector3(cellPosition.x + 0.5f, 0, cellPosition.y + 0.5f);
+            return Vector3.Scale(new Vector3(cellPosition.x + 0.5f, 0, cellPosition.y + 0.5f), CellSize);
         }
     }
 }

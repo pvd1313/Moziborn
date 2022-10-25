@@ -19,7 +19,6 @@ Shader "ProjectTolerance/UnlitGroundOverlay"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
@@ -44,17 +43,22 @@ Shader "ProjectTolerance/UnlitGroundOverlay"
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
+
+                float4 objectCenter = mul(unity_ObjectToWorld, float4(0, 0, 0, 1.0));
+                float4 vertexPos = mul(unity_ObjectToWorld, v.vertex);
+                float4 delta = vertexPos - objectCenter;
+                delta.z *= 1.064178;
+                
+                o.vertex = mul(UNITY_MATRIX_VP, objectCenter + delta);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                UNITY_TRANSFER_FOG(o, o.vertex);
+                
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // sample the texture
                 fixed4 col = tex2D(_MainTex, i.uv) * _Color;
-                // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }

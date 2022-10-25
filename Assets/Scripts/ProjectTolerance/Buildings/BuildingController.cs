@@ -166,15 +166,15 @@ namespace ProjectTolerance.Buildings
 
         private Bounds RoomBoundsToFloat(BoundsInt bounds)
         {
-            var center = new Vector3(bounds.center.x, 1.65f, bounds.center.y);
-            var size = new Vector3(bounds.size.x, 3.3f, bounds.size.y);
+            var center = new Vector3(bounds.center.x, 1.65f, bounds.center.y * 1.064178f);
+            var size = new Vector3(bounds.size.x, 3.3f, bounds.size.y * 1.064178f);
             return new Bounds(center, size);
         }
 
         private Bounds DoorFrameToBoundsFloat(Vector2Int pos)
         {
-            var center = new Vector3(pos.x + 0.5f, 1.5f, pos.y + 0.5f);
-            var size = new Vector3(1, 3, 1);
+            var center = new Vector3(pos.x + 0.5f, 1.5f, (pos.y + 0.5f) * 1.064178f);
+            var size = new Vector3(1, 3, 1.064178f);
             return new Bounds(center, size);
         }
 
