@@ -11,7 +11,7 @@ namespace ProjectTolerance.Player
             get => transform.position;
             set => transform.position = value;
         }
-
+        
         [SerializeField] private Collider _collider;
     }
 }
