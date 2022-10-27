@@ -86,6 +86,10 @@ namespace ProjectTolerance.Buildings
         public void OnPlayerBoundsUpdate(Bounds playerBounds)
         {
             var cameraDir = _cameraController.CameraDirection;
+            
+            var playerBottomCenter = playerBounds.center;
+            playerBottomCenter.y = playerBounds.min.y;
+            
             var playerBottom0 = playerBounds.min;
             var playerBottom1 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
             var playerBottom2 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
@@ -104,7 +108,7 @@ namespace ProjectTolerance.Buildings
             var playerTopRay1 = new Ray(playerTop1, cameraDir);
             var playerTopRay2 = new Ray(playerTop2, cameraDir);
             var playerTopRay3 = new Ray(playerTop3, cameraDir);
-            
+
             for (var i = 0; i < _buildings.Count; i++)
             {
                 var blocksView = false;
@@ -120,22 +124,32 @@ namespace ProjectTolerance.Buildings
                         blocksView = true;
                         break;
                     }
-                }
-        
-                foreach (var doorFrame in _buildings[i].doorFrames)
-                {
-                    var doorBounds = DoorFrameToBoundsFloat(doorFrame);
-                    
-                    if (doorBounds.IntersectRay(playerTopRay0) || 
-                        doorBounds.IntersectRay(playerTopRay1) ||
-                        doorBounds.IntersectRay(playerTopRay2) ||
-                        doorBounds.IntersectRay(playerTopRay3))
+
+                    var extendedRoom = room;
+                    extendedRoom.position -= new Vector3Int(1, 1, 0);
+                    extendedRoom.size += new Vector3Int(2, 2, 0);
+                    roomBounds = RoomBoundsToFloat(extendedRoom);
+                    if (roomBounds.Contains(playerBottomCenter))
                     {
                         blocksView = true;
                         break;
                     }
+                    
+                    foreach (var doorFrame in _buildings[i].doorFrames)
+                    {
+                        var doorBounds = DoorFrameToBoundsFloat(doorFrame);
+                    
+                        if (doorBounds.IntersectRay(playerTopRay0) || 
+                            doorBounds.IntersectRay(playerTopRay1) ||
+                            doorBounds.IntersectRay(playerTopRay2) ||
+                            doorBounds.IntersectRay(playerTopRay3))
+                        {
+                            blocksView = true;
+                            break;
+                        }
+                    }
                 }
-                
+
                 var transition = _transitions[i];
         
                 transition.targetAlpha = blocksView ? 0 : 1;
