@@ -5,7 +5,7 @@ namespace ProjectTolerance.Player
 {
     public class AimSquareView : MonoBehaviour
     {
-        private const float AnimationDuration = 0.2f;
+        private const float AnimationDuration = 0.1f;
         
         public Vector3 Position
         {
