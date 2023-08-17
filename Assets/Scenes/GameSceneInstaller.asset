@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cc8919c86d14593b1fe86e14d4161a0, type: 3}
+  m_Name: GameSceneInstaller
+  m_EditorClassIdentifier: 
+  _buildingConfig:
+    levelViewPrefab: {fileID: 7652998681681001500, guid: b2b845a086910b842a69af898233d86f, type: 3}
+    transitionDuration: 0.3
+  _ambientLightConfig:
+    ambientLightShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
+  _playerConfig:
+    playerViewPrefab: {fileID: 6194257065066083958, guid: d897ea1f4fe894c47b457d95c8039308, type: 3}
+    aimSquareViewPrefab: {fileID: 839447573491209280, guid: f9089de126c0f244c967ede872c4818b, type: 3}
+    playerSpeed: 3
+    aimSpeed: 10
+  _cameraConfig:
+    cameraViewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
