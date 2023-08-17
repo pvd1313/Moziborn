@@ -15,7 +15,7 @@ namespace ProjectTolerance.Debugging
         
         public IEnumerator Initialize()
         {
-            var behaviour = new GameObject("GizmosController").AddComponent<GizmosBehaviour>();
+            GizmosBehaviour behaviour = new GameObject("GizmosController").AddComponent<GizmosBehaviour>();
             behaviour.onDrawGizmos += OnDrawGizmos;
             
             yield break;
@@ -23,7 +23,7 @@ namespace ProjectTolerance.Debugging
 
         private void OnDrawGizmos()
         {
-            foreach (var entity in _gizmosDrawers)
+            foreach (IGizmosDrawer entity in _gizmosDrawers)
             {
                 entity.OnDrawGizmos();
             }

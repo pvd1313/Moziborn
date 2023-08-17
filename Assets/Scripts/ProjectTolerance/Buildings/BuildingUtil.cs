@@ -15,15 +15,15 @@ namespace ProjectTolerance.Buildings
         {
             resultBuildings.Clear();
             
-            var occupiedCells = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
             GetTilemapOccupiedCells(floor1Frame, occupiedCells);
 
-            var adjustedCells = new HashSet<Vector2Int>();
-            var renderers = new List<MeshRenderer>();
-            var rooms = new List<BoundsInt>();
-            var doorFrames = new List<Vector2Int>();
-            var walls = new List<Vector2Int>();
-            var doors = new List<Vector2Int>();
+            HashSet<Vector2Int> adjustedCells = new HashSet<Vector2Int>();
+            List<MeshRenderer> renderers = new List<MeshRenderer>();
+            List<BoundsInt> rooms = new List<BoundsInt>();
+            List<Vector2Int> doorFrames = new List<Vector2Int>();
+            List<Vector2Int> walls = new List<Vector2Int>();
+            List<Vector2Int> doors = new List<Vector2Int>();
 
             while (occupiedCells.Count > 0)
             {
@@ -35,12 +35,12 @@ namespace ProjectTolerance.Buildings
 
                 renderers.Clear();
                 
-                foreach (var room in rooms)
+                foreach (BoundsInt room in rooms)
                 {
-                    for (var x = room.min.x; x <= room.max.x; x++)
-                    for (var y = room.min.y; y <= room.max.y; y++)
+                    for (int x = room.min.x; x <= room.max.x; x++)
+                    for (int y = room.min.y; y <= room.max.y; y++)
                     {
-                        if (TryGetRendererAtPosition(floor0Frame, x, y, out var meshRenderer))
+                        if (TryGetRendererAtPosition(floor0Frame, x, y, out MeshRenderer meshRenderer))
                         {
                             renderers.Add(meshRenderer);
                         }
@@ -71,13 +71,13 @@ namespace ProjectTolerance.Buildings
             {
                 meshRenderer = null;
 
-                var gameObject = tilemap.GetInstantiatedObject(new Vector3Int(x, y, 0));
+                GameObject gameObject = tilemap.GetInstantiatedObject(new Vector3Int(x, y, 0));
                 if (gameObject == null)
                 {
                     return false;
                 }
 
-                var partData = gameObject.GetComponentInChildren<BuildingPartView>();
+                BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
                 if (partData.PartType == EBuildingPartType.Roof || 
                     partData.PartType == EBuildingPartType.Wall ||
                     partData.PartType == EBuildingPartType.DoorFrame)
@@ -97,15 +97,15 @@ namespace ProjectTolerance.Buildings
         {
             resultParts.Clear();
 
-            foreach (var cell in cells)
+            foreach (Vector2Int cell in cells)
             {
-                var gameObject = tilemap.GetInstantiatedObject(new Vector3Int(cell.x, cell.y, 0));
+                GameObject gameObject = tilemap.GetInstantiatedObject(new Vector3Int(cell.x, cell.y, 0));
                 if (gameObject == null)
                 {
                     continue;
                 }
                 
-                var partData = gameObject.GetComponentInChildren<BuildingPartView>();
+                BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
                 if (partData.PartType == partType)
                 {
                     resultParts.Add(cell);
@@ -119,11 +119,11 @@ namespace ProjectTolerance.Buildings
             
             while (cells.Count > 0)
             {
-                var point = cells.First();
-                var boundsMin = point;
-                var boundsMax = point;
+                Vector2Int point = cells.First();
+                Vector2Int boundsMin = point;
+                Vector2Int boundsMax = point;
 
-                var offset = 1;
+                int offset = 1;
                 for (; cells.Contains(boundsMax + new Vector2Int(offset, 0)); offset++) ;
                 boundsMax.x = boundsMax.x + offset - 1;
 
@@ -139,18 +139,18 @@ namespace ProjectTolerance.Buildings
                 for (; TestRow(boundsMin.x, boundsMax.x, boundsMin.y - offset); offset++) ;
                 boundsMin.y = boundsMin.y - offset + 1;
                 
-                for (var x = boundsMin.x; x <= boundsMax.x; x++)
-                    for (var y = boundsMin.y; y <= boundsMax.y; y++)
+                for (int x = boundsMin.x; x <= boundsMax.x; x++)
+                    for (int y = boundsMin.y; y <= boundsMax.y; y++)
                         cells.Remove(new Vector2Int(x, y));
 
-                var boundsDelta = boundsMax - boundsMin + Vector2Int.one;
+                Vector2Int boundsDelta = boundsMax - boundsMin + Vector2Int.one;
                 
                 resultBounds.Add(new BoundsInt(boundsMin.x, boundsMin.y, 0, boundsDelta.x, boundsDelta.y, 1));
             }
 
             bool TestRow(int xMin, int xMax, int y)
             {
-                for (var x = xMin; x <= xMax; x++)
+                for (int x = xMin; x <= xMax; x++)
                 {
                     if (!cells.Contains(new Vector2Int(x, y)))
                     {
@@ -164,10 +164,10 @@ namespace ProjectTolerance.Buildings
 
         private static void GetTilemapOccupiedCells(Tilemap tilemap, HashSet<Vector2Int> resultCells)
         {
-            var cellBounds = tilemap.cellBounds;
+            BoundsInt cellBounds = tilemap.cellBounds;
             
-            for (var x = cellBounds.min.x; x <= cellBounds.max.x; x++)
-            for (var y = cellBounds.min.y; y <= cellBounds.max.y; y++)
+            for (int x = cellBounds.min.x; x <= cellBounds.max.x; x++)
+            for (int y = cellBounds.min.y; y <= cellBounds.max.y; y++)
             {
                 if (tilemap.HasTile(new Vector3Int(x, y, 0)))
                 {
@@ -181,7 +181,7 @@ namespace ProjectTolerance.Buildings
                                                HashSet<Vector2Int> resultVisitedPoints)
         {
             resultVisitedPoints.Clear();
-            var pointsStack = new Stack<Vector2Int>();
+            Stack<Vector2Int> pointsStack = new Stack<Vector2Int>();
             
             pointsStack.Push(startPoint);
 

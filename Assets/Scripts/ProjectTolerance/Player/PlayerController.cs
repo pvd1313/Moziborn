@@ -41,16 +41,16 @@ namespace ProjectTolerance.Player
 
         public void Update()
         {
-            var inputState = _input.State;
+            PlayerInputState inputState = _input.State;
 
-            var targetWorldPosition = CellToWorldPosition(_playerPosition);
-            var animationFinished = Vector3.Distance(_playerView.Position, targetWorldPosition) < 0.01f;
+            Vector3 targetWorldPosition = CellToWorldPosition(_playerPosition);
+            bool animationFinished = Vector3.Distance(_playerView.Position, targetWorldPosition) < 0.01f;
 
             if (inputState.closeAim && animationFinished)
             {
-                var aimDelta = AimDirectionToCellDelta(inputState.closeAimDirection);
-                var targetPosition = _playerPosition + aimDelta;
-                var hasWallAtTarget = _buildingController.HasWallAtCell(new Vector3Int(targetPosition.x, targetPosition.y));
+                Vector2Int aimDelta = AimDirectionToCellDelta(inputState.closeAimDirection);
+                Vector2Int targetPosition = _playerPosition + aimDelta;
+                bool hasWallAtTarget = _buildingController.HasWallAtCell(new Vector3Int(targetPosition.x, targetPosition.y));
                 _targetAimPosition = CellToWorldPosition(targetPosition);
                 _aimView.SetVisible(true);
                 _aimView.SetBlock(hasWallAtTarget);
@@ -59,7 +59,7 @@ namespace ProjectTolerance.Player
                 {
                     _playerPosition = targetPosition;
                     
-                    var bounds = _playerView.ColliderBounds;
+                    Bounds bounds = _playerView.ColliderBounds;
                     bounds.center += CellToWorldPosition(_playerPosition) - _playerView.Position;
                     _buildingController.OnPlayerBoundsUpdate(bounds);
                 }
@@ -81,7 +81,7 @@ namespace ProjectTolerance.Player
         {
             const float HalfPI = Mathf.PI * 0.5f;
             
-            var angle = Mathf.Round(Mathf.Atan2(aimDirection.y, aimDirection.x) / HalfPI) * HalfPI;
+            float angle = Mathf.Round(Mathf.Atan2(aimDirection.y, aimDirection.x) / HalfPI) * HalfPI;
             aimDirection = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
             
             return new Vector2Int((int) Mathf.Round(aimDirection.x), (int) Mathf.Round(aimDirection.y));

@@ -24,14 +24,14 @@ namespace ProjectTolerance.Shading.Lighting
 
         public IEnumerator Initialize()
         {
-            var bounds = new BoundsInt(Vector3Int.zero, Vector3Int.zero);
+            BoundsInt bounds = new BoundsInt(Vector3Int.zero, Vector3Int.zero);
             
             if (_buildingController.Buildings.Count > 0)
             {
                 bounds = _buildingController.Buildings[0].rooms[0];
                 
-                foreach (var building in _buildingController.Buildings)
-                    foreach (var room in building.rooms)
+                foreach (BuildingData building in _buildingController.Buildings)
+                    foreach (BoundsInt room in building.rooms)
                         bounds = JoinBounds(room, bounds);
             }
 
@@ -69,22 +69,22 @@ namespace ProjectTolerance.Shading.Lighting
             
             Shader.SetGlobalTexture(ShaderPropertyId.AmbientLightMapTexture, _stateTexture);
             
-            foreach (var building in _buildingController.Buildings)
-                foreach (var room in building.rooms)
-                    foreach (var pos in room.allPositionsWithin)
+            foreach (BuildingData building in _buildingController.Buildings)
+                foreach (BoundsInt room in building.rooms)
+                    foreach (Vector3Int pos in room.allPositionsWithin)
                     {
-                        var localPoint = pos - bounds.position;
+                        Vector3Int localPoint = pos - bounds.position;
                         _sunLightTexture.SetPixel(localPoint.x, localPoint.y, Color.black);
                     }
 
-            for (var x = 0; x < _textureBounds.size.x; x++)
-                for (var y = 0; y < _textureBounds.size.y; y++)
+            for (int x = 0; x < _textureBounds.size.x; x++)
+                for (int y = 0; y < _textureBounds.size.y; y++)
                     _wallsTexture.SetPixel(x, y, Color.black);
             
-            foreach (var building in _buildingController.Buildings)
-                foreach (var wallPos in building.walls)
+            foreach (BuildingData building in _buildingController.Buildings)
+                foreach (Vector2Int wallPos in building.walls)
                 {
-                    var localPoint = wallPos - new Vector2Int(bounds.position.x, bounds.position.y);
+                    Vector2Int localPoint = wallPos - new Vector2Int(bounds.position.x, bounds.position.y);
                     _wallsTexture.SetPixel(localPoint.x, localPoint.y, Color.white);
                 }
             
@@ -96,15 +96,15 @@ namespace ProjectTolerance.Shading.Lighting
         
         public void LateUpdate()
         {
-            foreach (var building in _buildingController.Buildings)
-                foreach (var door in building.doors)
+            foreach (BuildingData building in _buildingController.Buildings)
+                foreach (DoorData door in building.doors)
                 {
-                    var pos = door.position - new Vector2Int(_textureBounds.position.x, _textureBounds.position.y);
+                    Vector2Int pos = door.position - new Vector2Int(_textureBounds.position.x, _textureBounds.position.y);
                     _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.controller.DoorState);
                 }
             _wallsTexture.Apply();
         
-            var tempTexture = RenderTexture.GetTemporary(
+            RenderTexture tempTexture = RenderTexture.GetTemporary(
                 _textureBounds.size.x, 
                 _textureBounds.size.y, 
                 0, 
@@ -119,26 +119,26 @@ namespace ProjectTolerance.Shading.Lighting
 
         private BoundsInt JoinBounds(BoundsInt a, BoundsInt b)
         {
-            var xMin = Mathf.Min(a.min.x, b.min.x);
-            var yMin = Mathf.Min(a.min.y, b.min.y);
-            var zMin = Mathf.Min(a.min.z, b.min.z);
-            var xMax = Mathf.Max(a.max.x, b.max.x);
-            var yMax = Mathf.Max(a.max.y, b.max.y);
-            var zMax = Mathf.Max(a.max.z, b.max.z);
+            int xMin = Mathf.Min(a.min.x, b.min.x);
+            int yMin = Mathf.Min(a.min.y, b.min.y);
+            int zMin = Mathf.Min(a.min.z, b.min.z);
+            int xMax = Mathf.Max(a.max.x, b.max.x);
+            int yMax = Mathf.Max(a.max.y, b.max.y);
+            int zMax = Mathf.Max(a.max.z, b.max.z);
             return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - yMin);
         }
 
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-            var bounds = TileToWorldBounds(_textureBounds);
+            Bounds bounds = TileToWorldBounds(_textureBounds);
             Gizmos.DrawWireCube(bounds.center, bounds.size);
         }
 
         private Bounds TileToWorldBounds(BoundsInt bounds)
         {
-            var center = new Vector3(bounds.center.x, 0, bounds.center.y);
-            var size = new Vector3(bounds.size.x, 0, bounds.size.y);
+            Vector3 center = new Vector3(bounds.center.x, 0, bounds.center.y);
+            Vector3 size = new Vector3(bounds.size.x, 0, bounds.size.y);
             return new Bounds(center, size);
         }
     }

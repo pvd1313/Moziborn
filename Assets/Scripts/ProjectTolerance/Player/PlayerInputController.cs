@@ -9,10 +9,10 @@ namespace ProjectTolerance.Player
         
         public void Update()
         {
-            var inputState = new PlayerInputState();
+            PlayerInputState inputState = new PlayerInputState();
 
-            var forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
-            var side = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
+            int forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
+            int side = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
             if (forward != 0 || side != 0)
             {
                 inputState.closeAim = true;

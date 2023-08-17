@@ -21,7 +21,7 @@ namespace ProjectTolerance.GameCycle
         
         public IEnumerator Initialize()
         {
-            var behaviour = new GameObject("UpdatingController").AddComponent<UpdatingBehaviour>();
+            UpdatingBehaviour behaviour = new GameObject("UpdatingController").AddComponent<UpdatingBehaviour>();
 
             behaviour.onUpdate += Update;
             behaviour.onLateUpdate += LateUpdate;
@@ -32,7 +32,7 @@ namespace ProjectTolerance.GameCycle
 
         private void Update()
         {
-            foreach (var entity in _updatables)
+            foreach (IUnorderedUpdatable entity in _updatables)
             {
                 entity.Update();
             }
@@ -40,7 +40,7 @@ namespace ProjectTolerance.GameCycle
 
         private void LateUpdate()
         {
-            foreach (var entity in _lateUpdatables)
+            foreach (IUnorderedLateUpdatable entity in _lateUpdatables)
             {
                 entity.LateUpdate();
             }
@@ -48,7 +48,7 @@ namespace ProjectTolerance.GameCycle
 
         private void FixedUpdate()
         {
-            foreach (var entity in _fixedUpdatables)
+            foreach (IUnorderedFixedUpdatable entity in _fixedUpdatables)
             {
                 entity.FixedUpdate();
             }

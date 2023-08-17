@@ -31,7 +31,7 @@ namespace ProjectTolerance.Player
         {
             _alpha = Mathf.Clamp01(_alpha + Time.deltaTime / AnimationDuration * (_isVisible ? 1 : -1));
 
-            var color = _isBlock ? _blockColor : _normalColor;
+            Color color = _isBlock ? _blockColor : _normalColor;
             _normalColor.a = _alpha;
             _materialBlock.SetColor(ShaderPropertyId.Color, color);
             _meshRenderer.SetPropertyBlock(_materialBlock);
