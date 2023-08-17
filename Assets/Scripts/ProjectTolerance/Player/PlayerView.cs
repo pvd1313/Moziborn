@@ -4,14 +4,12 @@ namespace ProjectTolerance.Player
 {
     public class PlayerView : MonoBehaviour
     {
-        public Bounds colliderBounds => _collider.bounds;
+        public Collider viewBlockCollider => _viewBlockCollider;
+        public Rigidbody rigidbody => _rigidbody;
+        public Transform meshTransform => _meshTransform;
 
-        public Vector3 position
-        {
-            get => transform.position;
-            set => transform.position = value;
-        }
-        
-        [SerializeField] private Collider _collider;
+        [SerializeField] private Collider _viewBlockCollider;
+        [SerializeField] private Rigidbody _rigidbody;
+        [SerializeField] private Transform _meshTransform;
     }
 }

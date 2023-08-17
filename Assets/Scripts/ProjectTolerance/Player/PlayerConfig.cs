@@ -3,11 +3,10 @@ using System;
 namespace ProjectTolerance.Player
 {
     [Serializable]
-    public struct PlayerConfig
+    public class PlayerConfig
     {
+        public float meshSmoothTime;
         public PlayerView playerViewPrefab;
-        public AimSquareView aimSquareViewPrefab;
         public float playerSpeed;
-        public float aimSpeed;
     }
 }

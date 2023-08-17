@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ProjectTolerance.Player
 {
-    public class PlayerController : IUnorderedFixedUpdatable
+    public class PlayerController : IUnorderedFixedUpdatable, IUnorderedUpdatable
     {
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
@@ -14,6 +14,8 @@ namespace ProjectTolerance.Player
         private readonly BuildingController _buildingController;
 
         private PlayerView _playerView;
+        private Vector3 _playerMeshPosition;
+        private Vector3 _playerMeshVelocity;
 
         public PlayerController (PlayerConfig config, 
                                  PlayerInputController input, 
@@ -42,13 +44,25 @@ namespace ProjectTolerance.Player
                 Vector3 cameraForward = Vector3.ProjectOnPlane(_camera.forward, Vector3.up).normalized;
                 Vector3 cameraRight = Vector3.ProjectOnPlane(_camera.right, Vector3.up).normalized;
                 Vector3 movement = cameraForward * input.forward + cameraRight * input.right;
-                
-                _playerView.position += movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
 
-                _buildingController.OnPlayerBoundsUpdate(_playerView.colliderBounds);
+                Vector3 targetPosition = _playerView.rigidbody.position + movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
+                _playerView.rigidbody.MovePosition(targetPosition);
             }
 
-            _camera.SetTargetPosition(_playerView.position);
+            _camera.SetDesiredPosition(_playerView.rigidbody.position);
+        }
+
+        public void Update()
+        {
+            _playerMeshPosition = Vector3.SmoothDamp(
+                _playerMeshPosition, 
+                _playerView.rigidbody.position, 
+                ref _playerMeshVelocity, 
+                _config.meshSmoothTime);
+            
+            _playerView.meshTransform.position = _playerMeshPosition;
+            
+            _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds);
         }
     }
 }

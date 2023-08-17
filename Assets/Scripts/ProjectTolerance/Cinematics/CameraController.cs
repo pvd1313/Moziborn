@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ProjectTolerance.Cinematics
 {
-    public class CameraController : IUnorderedUpdatable
+    public class CameraController : IUnorderedLateUpdatable
     {
         public Vector3 forward => _cameraView.forward;
         public Vector3 right => _cameraView.right;
@@ -12,9 +12,9 @@ namespace ProjectTolerance.Cinematics
         private readonly CameraConfig _config;
         
         private CameraView _cameraView;
-        private Vector3 _targetPosition; 
+        private Vector3 _desiredPosition;
+        private Vector3 _velocity;
 
-        
         public CameraController (CameraConfig config)
         {
             _config = config;
@@ -22,19 +22,19 @@ namespace ProjectTolerance.Cinematics
 
         public IEnumerator Initialize()
         {
-            _cameraView = Object.Instantiate(_config.cameraViewPrefab);
+            _cameraView = Object.Instantiate(_config.viewPrefab);
             
             yield break;
         }
 
-        public void SetTargetPosition(Vector3 position)
+        public void SetDesiredPosition(Vector3 position)
         {
-            _targetPosition = position;
+            _desiredPosition = position;
         }
-
-        public void Update()
+        
+        public void LateUpdate()
         {
-            _cameraView.originPosition = Vector3.Lerp(_cameraView.originPosition, _targetPosition, 4 * Time.deltaTime);
+            _cameraView.position = Vector3.SmoothDamp(_cameraView.position, _desiredPosition, ref _velocity, _config.smoothTime);
         }
     }
 }

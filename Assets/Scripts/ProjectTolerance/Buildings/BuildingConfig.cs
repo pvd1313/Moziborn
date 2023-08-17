@@ -3,7 +3,7 @@ using System;
 namespace ProjectTolerance.Buildings
 {
     [Serializable]
-    public struct BuildingConfig
+    public class BuildingConfig
     {
         public LevelView levelViewPrefab;
         public float transitionDuration;

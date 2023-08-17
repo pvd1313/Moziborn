@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ProjectTolerance.Shading.Lighting
 {
     [Serializable]
-    public struct AmbientLightConfig
+    public class AmbientLightConfig
     {
         public Shader ambientLightShader;
     }

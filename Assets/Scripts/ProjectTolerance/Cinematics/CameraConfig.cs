@@ -3,8 +3,9 @@ using System;
 namespace ProjectTolerance.Cinematics
 {
     [Serializable]
-    public struct CameraConfig
+    public class CameraConfig
     {
-        public CameraView cameraViewPrefab;
+        public CameraView viewPrefab;
+        public float smoothTime;
     }
 }
