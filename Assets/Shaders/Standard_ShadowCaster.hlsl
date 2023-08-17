@@ -30,7 +30,6 @@ float4 GetShadowPositionHClip(Attributes input)
     float3 objectCenterWS = TransformObjectToWorld(float3(0, 0, 0));
     float3 vertexWS = TransformObjectToWorld(input.positionOS.xyz);
     float3 delta = vertexWS - objectCenterWS;
-    delta.z *= 1.064178;
     float3 resultOS = TransformWorldToObject(objectCenterWS + delta);
     input.positionOS = float4(resultOS.x, resultOS.y, resultOS.z, input.positionOS.w);
     

@@ -47,7 +47,6 @@ Shader "ProjectTolerance/UnlitGroundOverlay"
                 float4 objectCenter = mul(unity_ObjectToWorld, float4(0, 0, 0, 1.0));
                 float4 vertexPos = mul(unity_ObjectToWorld, v.vertex);
                 float4 delta = vertexPos - objectCenter;
-                delta.z *= 1.064178;
                 
                 o.vertex = mul(UNITY_MATRIX_VP, objectCenter + delta);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);

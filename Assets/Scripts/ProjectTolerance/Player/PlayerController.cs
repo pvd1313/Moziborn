@@ -8,7 +8,7 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController : IUnorderedUpdatable
     {
-        private static readonly Vector3 CellSize = new Vector3(1, 0, 1.064178f);
+        private static readonly Vector3 CellSize = new Vector3(1, 0, 1);
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;

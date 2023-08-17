@@ -120,7 +120,6 @@ Varyings LitGBufferPassVertex(Attributes input)
     float3 objectCenterWS = TransformObjectToWorld(float3(0, 0, 0));
     float3 vertexWS = TransformObjectToWorld(input.positionOS.xyz);
     float3 delta = vertexWS - objectCenterWS;
-    delta.z *= 1.064178;
     float3 resultOS = TransformWorldToObject(objectCenterWS + delta);
     input.positionOS = float4(resultOS.x, resultOS.y, resultOS.z, input.positionOS.w);
 
@@ -199,7 +198,6 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
 
     // Modify ambient color based on map
     float3 positionWS = input.positionWS;
-    positionWS.z *= 0.939693;
     float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
     color *= ambientMapColor;

@@ -35,7 +35,7 @@ namespace ProjectTolerance.Shading.Lighting
                         bounds = JoinBounds(room, bounds);
             }
 
-            bounds.min += new Vector3Int(-1, -1, 0);
+            bounds.min -= new Vector3Int(1, 1, 0);
             bounds.max += new Vector3Int(1, 1, 0);
 
             _sunLightTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R8, false, true)
