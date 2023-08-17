@@ -9,7 +9,7 @@ namespace ProjectTolerance.Buildings
         /// <summary>
         /// 1 = closed, 0 = open.
         /// </summary>
-        public float DoorState => _progress;
+        public float doorState => _progress;
         
         [SerializeField] private float _switchDuration;
         [SerializeField] private Animator _doorAnimator;

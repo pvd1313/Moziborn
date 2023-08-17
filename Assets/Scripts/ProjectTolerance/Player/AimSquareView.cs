@@ -7,7 +7,7 @@ namespace ProjectTolerance.Player
     {
         private const float AnimationDuration = 0.1f;
         
-        public Vector3 Position
+        public Vector3 position
         {
             get => transform.position;
             set => transform.position = value;

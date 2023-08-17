@@ -35,7 +35,7 @@ namespace ProjectTolerance.Player
 
         public void FixedUpdate()
         {
-            PlayerInputState input = _input.State;
+            PlayerInputState input = _input.state;
 
             if (input.isMoving)
             {
@@ -43,12 +43,12 @@ namespace ProjectTolerance.Player
                 Vector3 cameraRight = Vector3.ProjectOnPlane(_camera.right, Vector3.up).normalized;
                 Vector3 movement = cameraForward * input.forward + cameraRight * input.right;
                 
-                _playerView.Position += movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
+                _playerView.position += movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
 
-                _buildingController.OnPlayerBoundsUpdate(_playerView.ColliderBounds);
+                _buildingController.OnPlayerBoundsUpdate(_playerView.colliderBounds);
             }
 
-            _camera.SetTargetPosition(_playerView.Position);
+            _camera.SetTargetPosition(_playerView.position);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace ProjectTolerance.Cinematics
 
         public Vector3 right => _camera.transform.right;
 
-        public Vector3 OriginPosition
+        public Vector3 originPosition
         {
             get => transform.position;
             set => transform.position = value;

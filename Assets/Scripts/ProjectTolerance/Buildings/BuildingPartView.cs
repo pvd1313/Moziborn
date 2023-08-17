@@ -4,7 +4,7 @@ namespace ProjectTolerance.Buildings
 {
     public class BuildingPartView : MonoBehaviour
     {
-        public EBuildingPartType PartType => _partType;
+        public EBuildingPartType partType => _partType;
         
         [SerializeField] private EBuildingPartType _partType;
     }

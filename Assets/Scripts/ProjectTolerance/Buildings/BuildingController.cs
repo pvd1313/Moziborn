@@ -21,7 +21,7 @@ namespace ProjectTolerance.Buildings
             public MaterialPropertyBlock materialProperty;
         }
 
-        public IReadOnlyList<BuildingData> Buildings => _buildings;
+        public IReadOnlyList<BuildingData> buildings => _buildings;
 
         private readonly CameraController _cameraController;
 
@@ -40,9 +40,9 @@ namespace ProjectTolerance.Buildings
         public IEnumerator Initialize()
         {
             LevelView levelPrefab = GameObject.Instantiate(_config.levelViewPrefab);
-            _floor0Frame = levelPrefab.Floor0Frame;
-            _floor0Interactive = levelPrefab.Floor0Interactive;
-            _floor1Frame = levelPrefab.Floor1Frame;
+            _floor0Frame = levelPrefab.floor0Frame;
+            _floor0Interactive = levelPrefab.floor0Interactive;
+            _floor1Frame = levelPrefab.floor1Frame;
 
             // Wait for tilemap GameObjects be spawned.
             yield return null;
@@ -80,7 +80,7 @@ namespace ProjectTolerance.Buildings
             }
 
             BuildingPartView structure = gameObject.GetComponentInChildren<BuildingPartView>();
-            return structure.PartType == EBuildingPartType.Wall;
+            return structure.partType == EBuildingPartType.Wall;
         }
 
         public void OnPlayerBoundsUpdate(Bounds playerBounds)

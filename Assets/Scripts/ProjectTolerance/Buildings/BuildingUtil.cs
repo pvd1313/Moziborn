@@ -78,9 +78,9 @@ namespace ProjectTolerance.Buildings
                 }
 
                 BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
-                if (partData.PartType == EBuildingPartType.Roof || 
-                    partData.PartType == EBuildingPartType.Wall ||
-                    partData.PartType == EBuildingPartType.DoorFrame)
+                if (partData.partType == EBuildingPartType.Roof || 
+                    partData.partType == EBuildingPartType.Wall ||
+                    partData.partType == EBuildingPartType.DoorFrame)
                 {
                     meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
                     return true;
@@ -106,7 +106,7 @@ namespace ProjectTolerance.Buildings
                 }
                 
                 BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
-                if (partData.PartType == partType)
+                if (partData.partType == partType)
                 {
                     resultParts.Add(cell);
                 }

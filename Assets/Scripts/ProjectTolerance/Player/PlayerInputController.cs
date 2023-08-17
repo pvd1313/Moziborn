@@ -5,7 +5,7 @@ namespace ProjectTolerance.Player
 {
     public class PlayerInputController : IUnorderedUpdatable
     {
-        public PlayerInputState State { get; private set; }
+        public PlayerInputState state { get; private set; }
         
         public void Update()
         {
@@ -21,7 +21,7 @@ namespace ProjectTolerance.Player
                 inputState.right = right;
             }
 
-            State = inputState;
+            state = inputState;
         }
     }
 }

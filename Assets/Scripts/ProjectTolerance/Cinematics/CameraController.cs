@@ -34,7 +34,7 @@ namespace ProjectTolerance.Cinematics
 
         public void Update()
         {
-            _cameraView.OriginPosition = Vector3.Lerp(_cameraView.OriginPosition, _targetPosition, 4 * Time.deltaTime);
+            _cameraView.originPosition = Vector3.Lerp(_cameraView.originPosition, _targetPosition, 4 * Time.deltaTime);
         }
     }
 }

@@ -4,9 +4,9 @@ namespace ProjectTolerance.Player
 {
     public class PlayerView : MonoBehaviour
     {
-        public Bounds ColliderBounds => _collider.bounds;
+        public Bounds colliderBounds => _collider.bounds;
 
-        public Vector3 Position
+        public Vector3 position
         {
             get => transform.position;
             set => transform.position = value;

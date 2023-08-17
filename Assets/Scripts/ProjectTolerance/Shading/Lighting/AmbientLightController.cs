@@ -26,11 +26,11 @@ namespace ProjectTolerance.Shading.Lighting
         {
             BoundsInt bounds = new BoundsInt(Vector3Int.zero, Vector3Int.zero);
             
-            if (_buildingController.Buildings.Count > 0)
+            if (_buildingController.buildings.Count > 0)
             {
-                bounds = _buildingController.Buildings[0].rooms[0];
+                bounds = _buildingController.buildings[0].rooms[0];
                 
-                foreach (BuildingData building in _buildingController.Buildings)
+                foreach (BuildingData building in _buildingController.buildings)
                     foreach (BoundsInt room in building.rooms)
                         bounds = JoinBounds(room, bounds);
             }
@@ -69,7 +69,7 @@ namespace ProjectTolerance.Shading.Lighting
             
             Shader.SetGlobalTexture(ShaderPropertyId.AmbientLightMapTexture, _stateTexture);
             
-            foreach (BuildingData building in _buildingController.Buildings)
+            foreach (BuildingData building in _buildingController.buildings)
                 foreach (BoundsInt room in building.rooms)
                     foreach (Vector3Int pos in room.allPositionsWithin)
                     {
@@ -81,7 +81,7 @@ namespace ProjectTolerance.Shading.Lighting
                 for (int y = 0; y < _textureBounds.size.y; y++)
                     _wallsTexture.SetPixel(x, y, Color.black);
             
-            foreach (BuildingData building in _buildingController.Buildings)
+            foreach (BuildingData building in _buildingController.buildings)
                 foreach (Vector2Int wallPos in building.walls)
                 {
                     Vector2Int localPoint = wallPos - new Vector2Int(bounds.position.x, bounds.position.y);
@@ -96,11 +96,11 @@ namespace ProjectTolerance.Shading.Lighting
         
         public void LateUpdate()
         {
-            foreach (BuildingData building in _buildingController.Buildings)
+            foreach (BuildingData building in _buildingController.buildings)
                 foreach (DoorData door in building.doors)
                 {
                     Vector2Int pos = door.position - new Vector2Int(_textureBounds.position.x, _textureBounds.position.y);
-                    _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.controller.DoorState);
+                    _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.controller.doorState);
                 }
             _wallsTexture.Apply();
         
