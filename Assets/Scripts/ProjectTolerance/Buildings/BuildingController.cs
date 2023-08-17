@@ -85,7 +85,7 @@ namespace ProjectTolerance.Buildings
 
         public void OnPlayerBoundsUpdate(Bounds playerBounds)
         {
-            Vector3 cameraDir = _cameraController.CameraDirection;
+            Vector3 cameraDir = _cameraController.forward;
             
             Vector3 playerBottomCenter = playerBounds.center;
             playerBottomCenter.y = playerBounds.min.y;

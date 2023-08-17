@@ -6,7 +6,8 @@ namespace ProjectTolerance.Cinematics
 {
     public class CameraController : IUnorderedUpdatable
     {
-        public Vector3 CameraDirection => _cameraView.CameraDirection;
+        public Vector3 forward => _cameraView.forward;
+        public Vector3 right => _cameraView.right;
         
         private readonly CameraConfig _config;
         
@@ -21,7 +22,7 @@ namespace ProjectTolerance.Cinematics
 
         public IEnumerator Initialize()
         {
-            _cameraView = GameObject.Instantiate(_config.cameraViewPrefab);
+            _cameraView = Object.Instantiate(_config.cameraViewPrefab);
             
             yield break;
         }

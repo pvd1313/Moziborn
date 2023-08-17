@@ -6,19 +6,14 @@ using UnityEngine;
 
 namespace ProjectTolerance.Player
 {
-    public class PlayerController : IUnorderedUpdatable
+    public class PlayerController : IUnorderedFixedUpdatable
     {
-        private static readonly Vector3 CellSize = new Vector3(1, 0, 1);
-        
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly CameraController _camera;
         private readonly BuildingController _buildingController;
 
         private PlayerView _playerView;
-        private AimSquareView _aimView;
-        private Vector2Int _playerPosition;
-        private Vector3 _targetAimPosition;
 
         public PlayerController (PlayerConfig config, 
                                  PlayerInputController input, 
@@ -33,63 +28,27 @@ namespace ProjectTolerance.Player
 
         public IEnumerator Initialize()
         {
-            _playerView = GameObject.Instantiate(_config.playerViewPrefab);
-            _aimView = GameObject.Instantiate(_config.aimSquareViewPrefab);
+            _playerView = Object.Instantiate(_config.playerViewPrefab);
 
             yield break;
         }
 
-        public void Update()
+        public void FixedUpdate()
         {
-            PlayerInputState inputState = _input.State;
+            PlayerInputState input = _input.State;
 
-            Vector3 targetWorldPosition = CellToWorldPosition(_playerPosition);
-            bool animationFinished = Vector3.Distance(_playerView.Position, targetWorldPosition) < 0.01f;
-
-            if (inputState.closeAim && animationFinished)
+            if (input.isMoving)
             {
-                Vector2Int aimDelta = AimDirectionToCellDelta(inputState.closeAimDirection);
-                Vector2Int targetPosition = _playerPosition + aimDelta;
-                bool hasWallAtTarget = _buildingController.HasWallAtCell(new Vector3Int(targetPosition.x, targetPosition.y));
-                _targetAimPosition = CellToWorldPosition(targetPosition);
-                _aimView.SetVisible(true);
-                _aimView.SetBlock(hasWallAtTarget);
+                Vector3 cameraForward = Vector3.ProjectOnPlane(_camera.forward, Vector3.up).normalized;
+                Vector3 cameraRight = Vector3.ProjectOnPlane(_camera.right, Vector3.up).normalized;
+                Vector3 movement = cameraForward * input.forward + cameraRight * input.right;
+                
+                _playerView.Position += movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
 
-                if (inputState.movement && !hasWallAtTarget)
-                {
-                    _playerPosition = targetPosition;
-                    
-                    Bounds bounds = _playerView.ColliderBounds;
-                    bounds.center += CellToWorldPosition(_playerPosition) - _playerView.Position;
-                    _buildingController.OnPlayerBoundsUpdate(bounds);
-                }
-            }
-            else
-            {
-                _targetAimPosition = CellToWorldPosition(_playerPosition);
-                _aimView.SetVisible(false);
-                _aimView.SetBlock(false);
+                _buildingController.OnPlayerBoundsUpdate(_playerView.ColliderBounds);
             }
 
-            _playerView.Position = Vector3.MoveTowards(_playerView.Position, CellToWorldPosition(_playerPosition), Time.deltaTime * _config.playerSpeed);
-            _aimView.Position = Vector3.MoveTowards(_aimView.Position, _targetAimPosition, Time.deltaTime * _config.aimSpeed);
-            
             _camera.SetTargetPosition(_playerView.Position);
-        }
-
-        private Vector2Int AimDirectionToCellDelta(Vector2 aimDirection)
-        {
-            const float HalfPI = Mathf.PI * 0.5f;
-            
-            float angle = Mathf.Round(Mathf.Atan2(aimDirection.y, aimDirection.x) / HalfPI) * HalfPI;
-            aimDirection = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-            
-            return new Vector2Int((int) Mathf.Round(aimDirection.x), (int) Mathf.Round(aimDirection.y));
-        }
-
-        private Vector3 CellToWorldPosition(Vector2Int cellPosition)
-        {
-            return Vector3.Scale(new Vector3(cellPosition.x + 0.5f, 0, cellPosition.y + 0.5f), CellSize);
         }
     }
 }
