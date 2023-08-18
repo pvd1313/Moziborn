@@ -45,18 +45,18 @@ namespace ProjectTolerance.Player
                 Vector3 cameraRight = Vector3.ProjectOnPlane(_camera.right, Vector3.up).normalized;
                 Vector3 movement = cameraForward * input.forward + cameraRight * input.right;
 
-                Vector3 targetPosition = _playerView.rigidbody.position + movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
-                _playerView.rigidbody.MovePosition(targetPosition);
+                Vector3 targetPosition = _playerView.body.position + movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
+                _playerView.body.MovePosition(targetPosition);
             }
 
-            _camera.SetDesiredPosition(_playerView.rigidbody.position);
+            _camera.SetDesiredPosition(_playerView.body.position);
         }
 
         public void Update()
         {
             _playerMeshPosition = Vector3.SmoothDamp(
                 _playerMeshPosition, 
-                _playerView.rigidbody.position, 
+                _playerView.body.position, 
                 ref _playerMeshVelocity, 
                 _config.meshSmoothTime);
             

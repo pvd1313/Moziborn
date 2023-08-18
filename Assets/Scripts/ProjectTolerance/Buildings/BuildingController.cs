@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Debugging;
 using ProjectTolerance.GameCycle;
-using ProjectTolerance.Player;
 using ProjectTolerance.Shading;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -12,8 +11,6 @@ namespace ProjectTolerance.Buildings
 {
     public class BuildingController : IUnorderedUpdatable, IGizmosDrawer
     {
-        private readonly BuildingConfig _config;
-
         private class BuildingTransition
         {
             public float targetAlpha;
@@ -23,6 +20,7 @@ namespace ProjectTolerance.Buildings
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
 
+        private readonly BuildingConfig _config;
         private readonly CameraController _cameraController;
 
         private Tilemap _floor0Frame;
@@ -39,7 +37,7 @@ namespace ProjectTolerance.Buildings
         
         public IEnumerator Initialize()
         {
-            LevelView levelPrefab = GameObject.Instantiate(_config.levelViewPrefab);
+            LevelView levelPrefab = Object.Instantiate(_config.levelViewPrefab);
             _floor0Frame = levelPrefab.floor0Frame;
             _floor0Interactive = levelPrefab.floor0Interactive;
             _floor1Frame = levelPrefab.floor1Frame;

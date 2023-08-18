@@ -61,8 +61,7 @@ namespace ProjectTolerance.Buildings
                     doors = doors.Select(pos => new DoorData
                     {
                         position = pos,
-                        controller = floor0Interactive.GetInstantiatedObject(new Vector3Int(pos.x, pos.y, 0))
-                            .GetComponentInChildren<DoorController>()
+                        view = floor0Interactive.GetInstantiatedObject(new Vector3Int(pos.x, pos.y, 0)).GetComponentInChildren<DoorView>()
                     }).ToArray()
                 });
             }
@@ -78,9 +77,7 @@ namespace ProjectTolerance.Buildings
                 }
 
                 BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
-                if (partData.partType == EBuildingPartType.Roof || 
-                    partData.partType == EBuildingPartType.Wall ||
-                    partData.partType == EBuildingPartType.DoorFrame)
+                if (partData.partType is EBuildingPartType.Roof or EBuildingPartType.Wall or EBuildingPartType.DoorFrame)
                 {
                     meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
                     return true;

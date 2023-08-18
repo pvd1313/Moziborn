@@ -4,7 +4,7 @@ namespace ProjectTolerance.Buildings
 {
     public struct DoorData
     {
-        public DoorController controller;
+        public DoorView view;
         public Vector2Int position;
     }
 }

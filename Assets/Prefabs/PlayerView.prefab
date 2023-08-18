@@ -271,5 +271,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _viewBlockCollider: {fileID: 7206259452483865961}
-  _rigidbody: {fileID: 3873407669168990978}
+  _body: {fileID: 3873407669168990978}
   _meshTransform: {fileID: 3093190278972199757}

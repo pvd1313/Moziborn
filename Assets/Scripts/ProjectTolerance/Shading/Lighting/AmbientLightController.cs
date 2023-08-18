@@ -100,7 +100,7 @@ namespace ProjectTolerance.Shading.Lighting
                 foreach (DoorData door in building.doors)
                 {
                     Vector2Int pos = door.position - new Vector2Int(_textureBounds.position.x, _textureBounds.position.y);
-                    _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.controller.doorState);
+                    _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.view.doorState);
                 }
             _wallsTexture.Apply();
         
