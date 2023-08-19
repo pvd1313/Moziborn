@@ -3,14 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.GameCycle;
 using UnityEngine;
+
 using Object = UnityEngine.Object;
 
 namespace ProjectTolerance.Shading.Lighting
 {
     public class TorchLightController : IUnorderedUpdatable
     {
-        private const float SamplesPerRad = 1;
-        
         private readonly TorchLightConfig _config;
 
         private Transform _root;
@@ -35,7 +34,7 @@ namespace ProjectTolerance.Shading.Lighting
         public int CreateLight(float spreadAngleRad, float spreadRange)
         {
             TorchLightView lightView = Object.Instantiate(_config.torchLightViewPrefab, _root);
-            lightView.Initialize(spreadAngleRad, spreadRange,  Mathf.CeilToInt(spreadAngleRad * SamplesPerRad));
+            lightView.Initialize(spreadAngleRad, spreadRange);
             
             _lightViews[_nextId] = lightView;
 
@@ -68,6 +67,10 @@ namespace ProjectTolerance.Shading.Lighting
         {
             foreach ((int lightId, TorchLightView lightView) in _lightViews)
             {
+                lightView.DebugDrawRaycasts();
+                
+                lightView.RebuildMesh();
+                
                 lightView.DebugDrawRaycasts();
             }
         }

@@ -37,7 +37,7 @@ namespace ProjectTolerance.Player
         {
             _playerView = Object.Instantiate(_config.playerViewPrefab);
             
-            _torchLightId = _torchLightController.CreateLight(_config.torchLightAngle, _config.torchLightDistance);
+            _torchLightId = _torchLightController.CreateLight(_config.torchLightAngleDeg * Mathf.Deg2Rad, _config.torchLightDistance);
 
             yield break;
         }

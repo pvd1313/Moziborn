@@ -7,7 +7,7 @@ namespace ProjectTolerance.Player
     {
         public float meshSmoothTime;
         public PlayerView playerViewPrefab;
-        public float torchLightAngle;
+        public float torchLightAngleDeg;
         public float torchLightDistance;
         public float playerSpeed;
     }
