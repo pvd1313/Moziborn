@@ -122,7 +122,7 @@ Shader "ProjectTolerance/Standard"
 
             ZWrite[_ZWrite]
             ZTest LEqual
-            Cull[_Cull]
+            Cull off
 
             HLSLPROGRAM
             #pragma exclude_renderers gles gles3 glcore

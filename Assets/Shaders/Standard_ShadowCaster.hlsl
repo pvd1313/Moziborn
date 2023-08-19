@@ -26,13 +26,6 @@ struct Varyings
 
 float4 GetShadowPositionHClip(Attributes input)
 {
-    // Scale Z based on camera angle
-    float3 objectCenterWS = TransformObjectToWorld(float3(0, 0, 0));
-    float3 vertexWS = TransformObjectToWorld(input.positionOS.xyz);
-    float3 delta = vertexWS - objectCenterWS;
-    float3 resultOS = TransformWorldToObject(objectCenterWS + delta);
-    input.positionOS = float4(resultOS.x, resultOS.y, resultOS.z, input.positionOS.w);
-    
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
     float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
 
@@ -44,12 +37,15 @@ float4 GetShadowPositionHClip(Attributes input)
 
     float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
 
+    // * TOLERANCE START
 #if UNITY_REVERSED_Z
+    // * Add / remove small margin to fix weird light + shadow issues
     positionCS.z = min(positionCS.z - 0.0001, UNITY_NEAR_CLIP_VALUE);
 #else
     positionCS.z = max(positionCS.z + 0.0001, UNITY_NEAR_CLIP_VALUE);
 #endif
-
+    // * TOLERANCE END
+    
     return positionCS;
 }
 

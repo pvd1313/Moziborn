@@ -15,6 +15,7 @@ MonoBehaviour:
   _buildingConfig:
     levelViewPrefab: {fileID: 7652998681681001500, guid: b2b845a086910b842a69af898233d86f, type: 3}
     transitionDuration: 0.3
+    verticalCutRange: {x: 1, y: 3.3}
   _ambientLightConfig:
     ambientLightShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
   _playerConfig:

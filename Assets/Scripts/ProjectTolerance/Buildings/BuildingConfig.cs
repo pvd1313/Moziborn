@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace ProjectTolerance.Buildings
 {
@@ -7,5 +8,6 @@ namespace ProjectTolerance.Buildings
     {
         public LevelView levelViewPrefab;
         public float transitionDuration;
+        public Vector2 verticalCutRange;
     }
 }

@@ -195,15 +195,24 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
 
     half3 color = GlobalIllumination(brdfData, inputData.bakedGI, surfaceData.occlusion, inputData.normalWS, inputData.viewDirectionWS);
-
-    // Modify ambient color based on map
+    
+    // Modify ambient color based on ambient map
     float3 positionWS = input.positionWS;
     float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
     color *= ambientMapColor;
-    
+
+    // Cut walls
     float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
+
+    // Make backfaces black
+    float backface = dot(input.viewDirWS, input.normalWS);
+    if (backface < 0)
+    {
+        brdfData.albedo *= 0;
+        color *= 0;
+    }
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + color);
 }

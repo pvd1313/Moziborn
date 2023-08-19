@@ -54,6 +54,7 @@ namespace ProjectTolerance.Buildings
                 MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
                 
                 propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, 1);
+                propertyBlock.SetVector(ShaderPropertyId.VerticalCutRange, _config.verticalCutRange);
                 
                 _transitions[i] = new BuildingTransition
                 {
