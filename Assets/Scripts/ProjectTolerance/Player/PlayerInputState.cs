@@ -4,7 +4,7 @@ namespace ProjectTolerance.Player
     {
         public float motionForward;
         public float motionRight;
-        public float viewAngleRad;
+        public float aimDirectionAngleRad;
         
         public bool isMoving;
     }

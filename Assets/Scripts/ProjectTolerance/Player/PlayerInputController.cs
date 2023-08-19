@@ -39,7 +39,7 @@ namespace ProjectTolerance.Player
                 Vector3 cameraCenter = cameraCenterRay.origin + cameraCenterRay.direction * cameraCenterRayLength;
                 Vector3 mousePosition = mouseRay.origin + mouseRay.direction * mouseRayLength;
                 Vector3 viewDirection = (mousePosition - cameraCenter).normalized;
-                inputState.viewAngleRad = Mathf.Atan2(viewDirection.x, viewDirection.z);
+                inputState.aimDirectionAngleRad = Mathf.Atan2(viewDirection.x, viewDirection.z);
                 
                 Debug.DrawRay(mousePosition - Vector3.forward * 0.5f, Vector3.forward, Color.gray);
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);

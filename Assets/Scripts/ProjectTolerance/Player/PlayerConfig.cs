@@ -1,5 +1,4 @@
 using System;
-using ProjectTolerance.Shading.Lighting;
 
 namespace ProjectTolerance.Player
 {
@@ -8,7 +7,6 @@ namespace ProjectTolerance.Player
     {
         public float meshSmoothTime;
         public PlayerView playerViewPrefab;
-        public TorchLightView torchLightViewPrefab;
         public float torchLightAngle;
         public float torchLightDistance;
         public float playerSpeed;

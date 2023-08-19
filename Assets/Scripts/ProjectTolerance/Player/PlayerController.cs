@@ -13,30 +13,31 @@ namespace ProjectTolerance.Player
         private readonly PlayerInputController _input;
         private readonly CameraController _camera;
         private readonly BuildingController _buildingController;
+        private readonly TorchLightController _torchLightController;
 
         private PlayerView _playerView;
-        private TorchLightView _torchLightView;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
+        private int _torchLightId;
 
         public PlayerController (PlayerConfig config, 
                                  PlayerInputController input, 
                                  CameraController camera,
-                                 BuildingController buildingController)
+                                 BuildingController buildingController,
+                                 TorchLightController torchLightController)
         {
             _config = config;
             _input = input;
             _camera = camera;
             _buildingController = buildingController;
+            _torchLightController = torchLightController;
         }
 
         public IEnumerator Initialize()
         {
             _playerView = Object.Instantiate(_config.playerViewPrefab);
-            _torchLightView = Object.Instantiate(_config.torchLightViewPrefab, _playerView.transform);
-            _torchLightView.transform.localPosition = new Vector3(0, 1, 0);
-
-            _torchLightView.Initialize(_config.torchLightAngle, _config.torchLightDistance, 10);
+            
+            _torchLightId = _torchLightController.CreateLight(_config.torchLightAngle, _config.torchLightDistance);
 
             yield break;
         }
@@ -67,11 +68,10 @@ namespace ProjectTolerance.Player
                 _config.meshSmoothTime);
             
             _playerView.meshTransform.position = _playerMeshPosition;
-            _torchLightView.transform.position = _playerMeshPosition + new Vector3(0, 1, 0);
             
+            _torchLightController.UpdateLightData(_torchLightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
+
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds);
-            
-            _torchLightView.DebugDrawRaycasts(_input.state.viewAngleRad);
         }
     }
 }
