@@ -6,8 +6,8 @@ namespace ProjectTolerance.Cinematics
 {
     public class CameraController : IUnorderedLateUpdatable
     {
-        public Vector3 forward => _cameraView.forward;
-        public Vector3 right => _cameraView.right;
+        public Vector3 forward => _cameraView.unityCamera.transform.forward;
+        public Vector3 right => _cameraView.unityCamera.transform.right;
         
         private readonly CameraConfig _config;
         
@@ -30,11 +30,18 @@ namespace ProjectTolerance.Cinematics
         public void SetDesiredPosition(Vector3 position)
         {
             _desiredPosition = position;
+
+            _cameraView.unityCamera.ScreenPointToRay(Input.mousePosition);
+        }
+
+        public Ray ScreenPointToRay(Vector3 screenPosition)
+        {
+            return _cameraView.unityCamera.ScreenPointToRay(screenPosition);
         }
         
         public void LateUpdate()
         {
-            _cameraView.position = Vector3.SmoothDamp(_cameraView.position, _desiredPosition, ref _velocity, _config.smoothTime);
+            _cameraView.transform.position = Vector3.SmoothDamp(_cameraView.transform.position, _desiredPosition, ref _velocity, _config.smoothTime);
         }
     }
 }

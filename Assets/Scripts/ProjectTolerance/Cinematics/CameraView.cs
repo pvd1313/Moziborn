@@ -4,16 +4,8 @@ namespace ProjectTolerance.Cinematics
 {
     public class CameraView : MonoBehaviour
     {
-        public Vector3 forward => _camera.transform.forward;
+        public Camera unityCamera => _unityCamera;
 
-        public Vector3 right => _camera.transform.right;
-
-        public Vector3 position
-        {
-            get => transform.position;
-            set => transform.position = value;
-        }
-        
-        [SerializeField] private Camera _camera;
+        [SerializeField] private Camera _unityCamera;
     }
 }

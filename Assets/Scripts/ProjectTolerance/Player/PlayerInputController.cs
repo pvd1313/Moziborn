@@ -1,3 +1,4 @@
+using ProjectTolerance.Cinematics;
 using ProjectTolerance.GameCycle;
 using UnityEngine;
 
@@ -6,6 +7,13 @@ namespace ProjectTolerance.Player
     public class PlayerInputController : IUnorderedUpdatable
     {
         public PlayerInputState state { get; private set; }
+
+        private readonly CameraController _cameraController;
+        
+        public PlayerInputController (CameraController cameraController)
+        {
+            _cameraController = cameraController;
+        }
         
         public void Update()
         {
@@ -17,8 +25,24 @@ namespace ProjectTolerance.Player
             if (forward != 0 || right != 0)
             {
                 inputState.isMoving = true;
-                inputState.forward = forward;
-                inputState.right = right;
+                inputState.motionForward = forward;
+                inputState.motionRight = right;
+            }
+
+            Ray cameraCenterRay = _cameraController.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
+            Ray mouseRay = _cameraController.ScreenPointToRay(Input.mousePosition);
+            Plane worldPlane = new Plane(Vector3.up, 0);
+
+            if (worldPlane.Raycast(cameraCenterRay, out float cameraCenterRayLength) &&
+                worldPlane.Raycast(mouseRay, out float mouseRayLength))
+            {
+                Vector3 cameraCenter = cameraCenterRay.origin + cameraCenterRay.direction * cameraCenterRayLength;
+                Vector3 mousePosition = mouseRay.origin + mouseRay.direction * mouseRayLength;
+                Vector3 viewDirection = (mousePosition - cameraCenter).normalized;
+                inputState.viewAngleRad = Mathf.Atan2(viewDirection.x, viewDirection.z);
+                
+                Debug.DrawRay(mousePosition - Vector3.forward * 0.5f, Vector3.forward, Color.gray);
+                Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
             }
 
             state = inputState;

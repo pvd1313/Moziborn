@@ -2,8 +2,10 @@ namespace ProjectTolerance.Player
 {
     public struct PlayerInputState
     {
-        public float forward;
-        public float right;
+        public float motionForward;
+        public float motionRight;
+        public float viewAngleRad;
+        
         public bool isMoving;
     }
 }

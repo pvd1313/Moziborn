@@ -21,6 +21,9 @@ MonoBehaviour:
   _playerConfig:
     meshSmoothTime: 0.05
     playerViewPrefab: {fileID: 6194257065066083958, guid: d897ea1f4fe894c47b457d95c8039308, type: 3}
+    torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
+    torchLightAngle: 45
+    torchLightDistance: 5
     playerSpeed: 3
   _cameraConfig:
     viewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
