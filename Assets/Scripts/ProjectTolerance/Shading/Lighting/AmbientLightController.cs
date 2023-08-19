@@ -24,7 +24,7 @@ namespace ProjectTolerance.Shading.Lighting
 
         public IEnumerator Initialize()
         {
-            BoundsInt bounds = new BoundsInt(Vector3Int.zero, Vector3Int.zero);
+            BoundsInt bounds = new (Vector3Int.zero, Vector3Int.zero);
             
             if (_buildingController.buildings.Count > 0)
             {
@@ -137,8 +137,8 @@ namespace ProjectTolerance.Shading.Lighting
 
         private Bounds TileToWorldBounds(BoundsInt bounds)
         {
-            Vector3 center = new Vector3(bounds.center.x, 0, bounds.center.y);
-            Vector3 size = new Vector3(bounds.size.x, 0, bounds.size.y);
+            Vector3 center = new (bounds.center.x, 0, bounds.center.y);
+            Vector3 size = new (bounds.size.x, 0, bounds.size.y);
             return new Bounds(center, size);
         }
     }

@@ -51,7 +51,7 @@ namespace ProjectTolerance.Buildings
             _transitions = new BuildingTransition[_buildings.Count];
             for (int i = 0; i < _transitions.Length; i++)
             {
-                MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
+                MaterialPropertyBlock propertyBlock = new ();
                 
                 propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, 1);
                 propertyBlock.SetVector(ShaderPropertyId.VerticalCutRange, _config.verticalCutRange);
@@ -90,23 +90,23 @@ namespace ProjectTolerance.Buildings
             playerBottomCenter.y = playerBounds.min.y;
             
             Vector3 playerBottom0 = playerBounds.min;
-            Vector3 playerBottom1 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
-            Vector3 playerBottom2 = new Vector3(playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
-            Vector3 playerBottom3 = new Vector3(playerBounds.max.x, playerBounds.min.y, playerBounds.max.z);
+            Vector3 playerBottom1 = new (playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
+            Vector3 playerBottom2 = new (playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
+            Vector3 playerBottom3 = new (playerBounds.max.x, playerBounds.min.y, playerBounds.max.z);
             
-            Ray playerBottomRay0 = new Ray(playerBottom0, -cameraDir);
-            Ray playerBottomRay1 = new Ray(playerBottom1, -cameraDir);
-            Ray playerBottomRay2 = new Ray(playerBottom2, -cameraDir);
-            Ray playerBottomRay3 = new Ray(playerBottom3, -cameraDir);
+            Ray playerBottomRay0 = new (playerBottom0, -cameraDir);
+            Ray playerBottomRay1 = new (playerBottom1, -cameraDir);
+            Ray playerBottomRay2 = new (playerBottom2, -cameraDir);
+            Ray playerBottomRay3 = new (playerBottom3, -cameraDir);
             
             Vector3 playerTop0 = playerBounds.max;
-            Vector3 playerTop1 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
-            Vector3 playerTop2 = new Vector3(playerBounds.min.x, playerBounds.max.y, playerBounds.max.z);
-            Vector3 playerTop3 = new Vector3(playerBounds.max.x, playerBounds.max.y, playerBounds.min.z);
-            Ray playerTopRay0 = new Ray(playerTop0, cameraDir);
-            Ray playerTopRay1 = new Ray(playerTop1, cameraDir);
-            Ray playerTopRay2 = new Ray(playerTop2, cameraDir);
-            Ray playerTopRay3 = new Ray(playerTop3, cameraDir);
+            Vector3 playerTop1 = new (playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
+            Vector3 playerTop2 = new (playerBounds.min.x, playerBounds.max.y, playerBounds.max.z);
+            Vector3 playerTop3 = new (playerBounds.max.x, playerBounds.max.y, playerBounds.min.z);
+            Ray playerTopRay0 = new (playerTop0, cameraDir);
+            Ray playerTopRay1 = new (playerTop1, cameraDir);
+            Ray playerTopRay2 = new (playerTop2, cameraDir);
+            Ray playerTopRay3 = new (playerTop3, cameraDir);
 
             for (int i = 0; i < _buildings.Count; i++)
             {
@@ -179,15 +179,15 @@ namespace ProjectTolerance.Buildings
 
         private Bounds RoomBoundsToFloat(BoundsInt bounds)
         {
-            Vector3 center = new Vector3(bounds.center.x, 1.65f, bounds.center.y);
-            Vector3 size = new Vector3(bounds.size.x, 3.3f, bounds.size.y);
+            Vector3 center = new (bounds.center.x, 1.65f, bounds.center.y);
+            Vector3 size = new (bounds.size.x, 3.3f, bounds.size.y);
             return new Bounds(center, size);
         }
 
         private Bounds DoorFrameToBoundsFloat(Vector2Int pos)
         {
-            Vector3 center = new Vector3(pos.x + 0.5f, 1.5f, pos.y + 0.5f);
-            Vector3 size = new Vector3(1, 3, 1);
+            Vector3 center = new (pos.x + 0.5f, 1.5f, pos.y + 0.5f);
+            Vector3 size = new (1, 3, 1);
             return new Bounds(center, size);
         }
 

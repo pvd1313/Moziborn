@@ -9,7 +9,7 @@ namespace ProjectTolerance.Player
         
         public void Update()
         {
-            PlayerInputState inputState = new PlayerInputState();
+            PlayerInputState inputState = new ();
 
             int forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
             int right = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;

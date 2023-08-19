@@ -15,15 +15,15 @@ namespace ProjectTolerance.Buildings
         {
             resultBuildings.Clear();
             
-            HashSet<Vector2Int> occupiedCells = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> occupiedCells = new ();
             GetTilemapOccupiedCells(floor1Frame, occupiedCells);
 
-            HashSet<Vector2Int> adjustedCells = new HashSet<Vector2Int>();
-            List<MeshRenderer> renderers = new List<MeshRenderer>();
-            List<BoundsInt> rooms = new List<BoundsInt>();
-            List<Vector2Int> doorFrames = new List<Vector2Int>();
-            List<Vector2Int> walls = new List<Vector2Int>();
-            List<Vector2Int> doors = new List<Vector2Int>();
+            HashSet<Vector2Int> adjustedCells = new ();
+            List<MeshRenderer> renderers = new ();
+            List<BoundsInt> rooms = new ();
+            List<Vector2Int> doorFrames = new ();
+            List<Vector2Int> walls = new ();
+            List<Vector2Int> doors = new ();
 
             while (occupiedCells.Count > 0)
             {
@@ -178,7 +178,7 @@ namespace ProjectTolerance.Buildings
                                                HashSet<Vector2Int> resultVisitedPoints)
         {
             resultVisitedPoints.Clear();
-            Stack<Vector2Int> pointsStack = new Stack<Vector2Int>();
+            Stack<Vector2Int> pointsStack = new ();
             
             pointsStack.Push(startPoint);
 
