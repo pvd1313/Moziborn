@@ -49,14 +49,14 @@ namespace ProjectTolerance.Player
             if (input.isMoving)
             {
                 Vector3 cameraForward = Vector3.ProjectOnPlane(_camera.forward, Vector3.up).normalized;
-                Vector3 cameraRight = Vector3.ProjectOnPlane(_camera.right, Vector3.up).normalized;
+                Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward).normalized;
                 Vector3 movement = cameraForward * input.motionForward + cameraRight * input.motionRight;
 
                 Vector3 targetPosition = _playerView.body.position + movement.normalized * Time.fixedDeltaTime * _config.playerSpeed;
                 _playerView.body.MovePosition(targetPosition);
             }
 
-            _camera.SetDesiredPosition(_playerView.body.position);
+            _camera.AnimateMovePosition(_playerView.body.position);
         }
 
         public void Update()

@@ -7,8 +7,10 @@ namespace ProjectTolerance.Cinematics
     public class CameraController : IUnorderedLateUpdatable
     {
         public Vector3 forward => _cameraView.unityCamera.transform.forward;
-        public Vector3 right => _cameraView.unityCamera.transform.right;
-        
+        public Vector3 position => _cameraView.transform.position;
+        public Vector3 rotationDegrees => _cameraView.transform.rotation.eulerAngles;
+        public float orthographicSize => _cameraView.unityCamera.orthographicSize;
+
         private readonly CameraConfig _config;
         
         private CameraView _cameraView;
@@ -23,15 +25,15 @@ namespace ProjectTolerance.Cinematics
         public IEnumerator Initialize()
         {
             _cameraView = Object.Instantiate(_config.viewPrefab);
+            _cameraView.transform.rotation = Quaternion.Euler(_config.rotationAngleDegrees);
+            _cameraView.unityCamera.orthographicSize = _config.orthographicSize;
             
             yield break;
         }
 
-        public void SetDesiredPosition(Vector3 position)
+        public void AnimateMovePosition(Vector3 position)
         {
             _desiredPosition = position;
-
-            _cameraView.unityCamera.ScreenPointToRay(Input.mousePosition);
         }
 
         public Ray ScreenPointToRay(Vector3 screenPosition)
