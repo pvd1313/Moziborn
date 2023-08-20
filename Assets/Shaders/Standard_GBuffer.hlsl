@@ -4,11 +4,16 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 
-
+float2 _AmbientLightMapSize;
 float3 _AmbientLightMapOffset;
 TEXTURE2D(_AmbientLightMapTexture);
 SAMPLER(sampler_AmbientLightMapTexture);
-float2 _AmbientLightMapSize;
+
+float3 _TorchLightMapOffset;
+float2 _TorchLightMapSize;
+float2 _TorchLightMapRotation;
+TEXTURE2D(_TorchLightMapTexture);
+SAMPLER(sampler_TorchLightMapTexture);
 
 float _VerticalCutAlpha;
 float4 _VerticalCutRange;
@@ -194,27 +199,37 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     BRDFData brdfData;
     InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
 
-    half3 color = GlobalIllumination(brdfData, inputData.bakedGI, surfaceData.occlusion, inputData.normalWS, inputData.viewDirectionWS);
+    half3 emissionColor = GlobalIllumination(brdfData, inputData.bakedGI, surfaceData.occlusion, inputData.normalWS, inputData.viewDirectionWS);
     
-    // Modify ambient color based on ambient map
+    // Ambient map
     float3 positionWS = input.positionWS;
     float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
-    color *= ambientMapColor;
+
+    // Torch lighting
+    float2 torchMapPos = (positionWS + _TorchLightMapOffset).xz;
+    
+    torchMapPos = float2(torchMapPos.x * _TorchLightMapRotation.x - torchMapPos.y * _TorchLightMapRotation.y,
+                         torchMapPos.x * _TorchLightMapRotation.y + torchMapPos.y * _TorchLightMapRotation.x);
+    
+    float2 torchMapUV = saturate(torchMapPos / _TorchLightMapSize);
+    float torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
 
     // Cut walls
     float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
-
+    
     // Make backfaces black
     float backface = dot(input.viewDirWS, input.normalWS);
     if (backface < 0)
     {
         brdfData.albedo *= 0;
-        color *= 0;
+        emissionColor *= 0;
     }
+
+    emissionColor = emissionColor * ambientMapColor + brdfData.albedo * torchMapColor * 0.2;
     
-    return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + color);
+    return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emissionColor);
 }
 
 #endif

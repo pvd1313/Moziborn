@@ -6,5 +6,6 @@ namespace ProjectTolerance.Shading.Lighting
     public class TorchLightConfig
     {
         public TorchLightView torchLightViewPrefab;
+        public int renderTextureResolution;
     }
 }

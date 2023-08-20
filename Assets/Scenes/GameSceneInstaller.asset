@@ -31,3 +31,4 @@ MonoBehaviour:
     smoothTime: 0.2
   _torchLightConfig:
     torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
+    renderTextureResolution: 1024

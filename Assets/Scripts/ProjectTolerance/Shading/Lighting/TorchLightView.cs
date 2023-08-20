@@ -5,7 +5,8 @@ namespace ProjectTolerance.Shading.Lighting
 {
     public class TorchLightView : MonoBehaviour
     {
-        private const float SamplesPerRad = 20;
+        private const float SamplesPerRad = 100;
+        private const float HitPenetrationDistance = 0.1f;
         
         [SerializeField] private MeshFilter _meshFilter;
         
@@ -62,11 +63,11 @@ namespace ProjectTolerance.Shading.Lighting
             _rotationRad = rotationRad;
         }
 
-        public void RebuildMesh()
+        public void RebuildMesh(bool debugDraw)
         {
             Vector3 center = _position;
-            float startAngleRad = -0.5f * _spreadAngleRad+ _rotationRad;
             float deltaAngle = _spreadAngleRad / (_sampleCount - 1);
+            float startAngleRad = Mathf.CeilToInt((-0.5f * _spreadAngleRad + _rotationRad) / deltaAngle) * deltaAngle;
 
             _meshVertices[0] = center;
             
@@ -79,47 +80,29 @@ namespace ProjectTolerance.Shading.Lighting
                 Vector3 direction = new Vector3(sin, 0, cos) * _distance;
 
                 Ray ray = new Ray(center, direction);
+
+                Vector3 vertexPos;
                 
                 if (Physics.Raycast(ray, out RaycastHit hitInfo, _distance, 1 << LayerId.ViewObstacle))
                 {
-                    _meshVertices[i + 1] = center + new Vector3(sin, 0, cos) * hitInfo.distance;
+                    vertexPos = center + new Vector3(sin, 0, cos) * (hitInfo.distance + HitPenetrationDistance);
                 }
                 else
                 {
-                    _meshVertices[i + 1] = center + new Vector3(sin, 0, cos) * _distance;
+                    vertexPos = center + new Vector3(sin, 0, cos) * _distance;
+                }
+
+                _meshVertices[i + 1] = vertexPos;
+                
+                if (debugDraw)
+                {
+                    Debug.DrawRay(center, vertexPos - center, Color.blue);
                 }
             }
             
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
             _mesh.SetVertices(_meshVertices);
             _mesh.UploadMeshData(false);
-        }
-
-        public void DebugDrawRaycasts()
-        {
-            Vector3 center = _position;
-            float startAngleRad = -0.5f * _spreadAngleRad + _rotationRad;
-            float deltaAngle = _spreadAngleRad / (_sampleCount - 1);
-
-            for (int i = 0; i < _sampleCount; i++)
-            {
-                float angle = startAngleRad + deltaAngle * i;
-                float sin = Mathf.Sin(angle);
-                float cos = Mathf.Cos(angle);
-
-                Vector3 direction = new Vector3(sin, 0, cos) * _distance;
-
-                Ray ray = new Ray(center, direction);
-                
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, _distance, 1 << LayerId.ViewObstacle))
-                {
-                    Debug.DrawRay(center, new Vector3(sin, 0, cos) * hitInfo.distance, Color.blue);
-                }
-                else
-                {
-                    Debug.DrawRay(center, new Vector3(sin, 0, cos) * _distance, Color.blue);
-                }
-            }
         }
     }
 }

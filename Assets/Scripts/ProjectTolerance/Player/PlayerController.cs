@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ProjectTolerance.Player
 {
-    public class PlayerController : IUnorderedFixedUpdatable, IUnorderedUpdatable
+    public class PlayerController : IUnorderedFixedUpdatable
     {
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;

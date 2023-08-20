@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using ProjectTolerance.Player;
+using ProjectTolerance.Shading.Lighting;
 using UnityEngine;
+using Zenject;
 
 namespace ProjectTolerance.GameCycle
 {
@@ -9,14 +12,17 @@ namespace ProjectTolerance.GameCycle
         private readonly List<IUnorderedUpdatable> _updatables;
         private readonly List<IUnorderedFixedUpdatable> _fixedUpdatables;
         private readonly List<IUnorderedLateUpdatable> _lateUpdatables;
+        private readonly DiContainer _diContainer;
 
         public UpdatingController (List<IUnorderedUpdatable> updatables, 
                                    List<IUnorderedFixedUpdatable> fixedUpdatables,
-                                   List<IUnorderedLateUpdatable> lateUpdatables)
+                                   List<IUnorderedLateUpdatable> lateUpdatables,
+                                   DiContainer diContainer)
         {
             _updatables = updatables;
             _fixedUpdatables = fixedUpdatables;
             _lateUpdatables = lateUpdatables;
+            _diContainer = diContainer;
         }
         
         public IEnumerator Initialize()
@@ -36,6 +42,9 @@ namespace ProjectTolerance.GameCycle
             {
                 entity.Update();
             }
+            
+            _diContainer.TryResolve<PlayerController>()?.Update();
+            _diContainer.TryResolve<TorchLightController>()?.Update();
         }
 
         private void LateUpdate()

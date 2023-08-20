@@ -6,9 +6,16 @@ namespace ProjectTolerance.Shading
     {
         public static readonly int VerticalCutAlpha = Shader.PropertyToID("_VerticalCutAlpha");
         public static readonly int VerticalCutRange = Shader.PropertyToID("_VerticalCutRange");
+        
         public static readonly int AmbientLightMapTexture = Shader.PropertyToID("_AmbientLightMapTexture");
         public static readonly int AmbientLightMapSize = Shader.PropertyToID("_AmbientLightMapSize");
         public static readonly int AmbientLightMapOffset = Shader.PropertyToID("_AmbientLightMapOffset");
+
+        public static readonly int TorchLightMapTexture = Shader.PropertyToID("_TorchLightMapTexture");
+        public static readonly int TorchLightMapSize = Shader.PropertyToID("_TorchLightMapSize");
+        public static readonly int TorchLightMapRotation = Shader.PropertyToID("_TorchLightMapRotation");
+        public static readonly int TorchLightMapOffset = Shader.PropertyToID("_TorchLightMapOffset");
+
         public static readonly int Color = Shader.PropertyToID("_Color");
     }
 }
