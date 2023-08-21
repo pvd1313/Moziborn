@@ -64,7 +64,7 @@ namespace ProjectTolerance.Shading.Lighting
             Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapOffset, 
                 new Vector4(_textureBounds.position.x, 0, _textureBounds.position.y) * -1);
             
-            Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapSize, 
+            Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapWorldSize, 
                 new Vector4(_textureBounds.size.x, _textureBounds.size.y));
             
             Shader.SetGlobalTexture(ShaderPropertyId.AmbientLightMapTexture, _stateTexture);

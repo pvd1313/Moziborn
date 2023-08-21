@@ -8,16 +8,28 @@ namespace ProjectTolerance.Player
     {
         public PlayerInputState state { get; private set; }
 
-        private readonly CameraController _cameraController;
+        private readonly MainCameraController _mainCamera;
+
+        private bool _inputIsFrozen;
         
-        public PlayerInputController (CameraController cameraController)
+        public PlayerInputController (MainCameraController mainCamera)
         {
-            _cameraController = cameraController;
+            _mainCamera = mainCamera;
         }
         
         public void Update()
         {
             PlayerInputState inputState = new ();
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                _inputIsFrozen = !_inputIsFrozen;
+            }
+
+            if (_inputIsFrozen)
+            {
+                return;
+            }
 
             int forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
             int right = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
@@ -29,8 +41,8 @@ namespace ProjectTolerance.Player
                 inputState.motionRight = right;
             }
 
-            Ray cameraCenterRay = _cameraController.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
-            Ray mouseRay = _cameraController.ScreenPointToRay(Input.mousePosition);
+            Ray cameraCenterRay = _mainCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
+            Ray mouseRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
             Plane worldPlane = new Plane(Vector3.up, 0);
 
             if (worldPlane.Raycast(cameraCenterRay, out float cameraCenterRayLength) &&

@@ -2,10 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
-using ProjectTolerance.GameCycle;
 using ProjectTolerance.Layers;
 using UnityEngine;
-
 using Object = UnityEngine.Object;
 
 namespace ProjectTolerance.Shading.Lighting
@@ -13,15 +11,15 @@ namespace ProjectTolerance.Shading.Lighting
     public class TorchLightController : IDisposable
     {
         private readonly TorchLightConfig _config;
-        private readonly CameraController _mainCamera;
-
+        private readonly MainCameraController _mainCamera;
+        
         private Transform _root;
         private Dictionary<int, TorchLightView> _lightViews;
         private int _nextId;
         private RenderTexture _torchTexture;
         private Camera _torchCamera;
 
-        public TorchLightController (TorchLightConfig config, CameraController mainCamera)
+        public TorchLightController (TorchLightConfig config, MainCameraController mainCamera)
         {
             _config = config;
             _mainCamera = mainCamera;
@@ -41,7 +39,8 @@ namespace ProjectTolerance.Shading.Lighting
             _torchCamera.backgroundColor = Color.black;
             _torchCamera.clearFlags = CameraClearFlags.SolidColor;
             _torchCamera.cullingMask = 1 << LayerId.TorchLight;
-
+            _torchCamera.depth = CameraRenderPriority.TorchCameraDepth;
+            
             yield break;
         }
 
@@ -107,10 +106,11 @@ namespace ProjectTolerance.Shading.Lighting
                     _torchTexture.Release();
                     _torchTexture = null;
                 }
-
+                
                 _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.R8);
                 _torchTexture.name = "TorchLight";
                 _torchTexture.filterMode = FilterMode.Bilinear;
+                
                 _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
                 _torchCamera.targetTexture = _torchTexture;
                 _torchCamera.aspect = viewSize.x / viewSize.y;
@@ -127,11 +127,17 @@ namespace ProjectTolerance.Shading.Lighting
             float mapRotationRad = mainCameraRotationDeg.y * Mathf.Deg2Rad;
             Vector2 mapRotationSinCos = new (Mathf.Cos(mapRotationRad), Mathf.Sin(mapRotationRad));
             Vector3 bottomLeft = cameraPosition - viewNorth * viewSize.y - viewEast * viewSize.x;
+            Vector3 bottomRight = cameraPosition - viewNorth * viewSize.y + viewEast * viewSize.x;
+            Vector3 topRight = cameraPosition + viewNorth * viewSize.y + viewEast * viewSize.x;
+            Vector3 topLeft = cameraPosition + viewNorth * viewSize.y - viewEast * viewSize.x;
+            
+            Debug.DrawLine(bottomLeft, topRight, Color.magenta);
+            Debug.DrawLine(bottomRight, topLeft, Color.magenta);
             
             Shader.SetGlobalTexture(ShaderPropertyId.TorchLightMapTexture, _torchTexture);
             Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapRotation, mapRotationSinCos);
             Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapOffset, bottomLeft * -1);
-            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapSize, viewSize * 2);
+            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapWorldSize, viewSize * 2);
         }
 
         private static Vector2 ComputeViewSize(float screenRatio, float orthographicSize, float pitchAngleDegrees)

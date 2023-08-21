@@ -4,13 +4,13 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 
-float2 _AmbientLightMapSize;
+float2 _AmbientLightMapWorldSize;
 float3 _AmbientLightMapOffset;
 TEXTURE2D(_AmbientLightMapTexture);
 SAMPLER(sampler_AmbientLightMapTexture);
 
 float3 _TorchLightMapOffset;
-float2 _TorchLightMapSize;
+float2 _TorchLightMapWorldSize;
 float2 _TorchLightMapRotation;
 TEXTURE2D(_TorchLightMapTexture);
 SAMPLER(sampler_TorchLightMapTexture);
@@ -203,7 +203,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     
     // Ambient map
     float3 positionWS = input.positionWS;
-    float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapSize;
+    float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapWorldSize;
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
 
     // Torch lighting
@@ -212,7 +212,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     torchMapPos = float2(torchMapPos.x * _TorchLightMapRotation.x - torchMapPos.y * _TorchLightMapRotation.y,
                          torchMapPos.x * _TorchLightMapRotation.y + torchMapPos.y * _TorchLightMapRotation.x);
     
-    float2 torchMapUV = saturate(torchMapPos / _TorchLightMapSize);
+    float2 torchMapUV = saturate(torchMapPos / _TorchLightMapWorldSize);
     float torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
 
     // Cut walls
@@ -227,7 +227,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
         emissionColor *= 0;
     }
 
-    emissionColor = emissionColor * ambientMapColor + brdfData.albedo * torchMapColor * 0.2;
+    emissionColor = emissionColor * ambientMapColor + brdfData.albedo * torchMapColor * 0.02;
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emissionColor);
 }

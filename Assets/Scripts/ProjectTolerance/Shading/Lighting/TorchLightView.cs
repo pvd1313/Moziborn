@@ -5,8 +5,8 @@ namespace ProjectTolerance.Shading.Lighting
 {
     public class TorchLightView : MonoBehaviour
     {
-        private const float SamplesPerRad = 100;
-        private const float HitPenetrationDistance = 0.1f;
+        private const float SamplesPerRad = 500;
+        private const float HitPenetrationDistance = 0.05f;
         
         [SerializeField] private MeshFilter _meshFilter;
         
@@ -85,7 +85,8 @@ namespace ProjectTolerance.Shading.Lighting
                 
                 if (Physics.Raycast(ray, out RaycastHit hitInfo, _distance, 1 << LayerId.ViewObstacle))
                 {
-                    vertexPos = center + new Vector3(sin, 0, cos) * (hitInfo.distance + HitPenetrationDistance);
+                    vertexPos = center + new Vector3(sin, 0, cos) * hitInfo.distance;
+                    vertexPos -= hitInfo.normal * HitPenetrationDistance;
                 }
                 else
                 {

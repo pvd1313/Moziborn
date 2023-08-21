@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using ProjectTolerance.Cinematics;
 using ProjectTolerance.Player;
 using ProjectTolerance.Shading.Lighting;
 using UnityEngine;
@@ -44,6 +45,7 @@ namespace ProjectTolerance.GameCycle
             }
             
             _diContainer.TryResolve<PlayerController>()?.Update();
+            _diContainer.TryResolve<MainCameraController>()?.Update();
             _diContainer.TryResolve<TorchLightController>()?.Update();
         }
 

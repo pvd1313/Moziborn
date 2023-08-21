@@ -26,7 +26,7 @@ namespace ProjectTolerance.GameCycle
 
             Container.BindInterfacesAndSelfTo<BuildingController>().AsSingle().WithArguments(_buildingConfig);
             Container.BindInterfacesAndSelfTo<AmbientLightController>().AsSingle().WithArguments(_ambientLightConfig);
-            Container.BindInterfacesAndSelfTo<CameraController>().AsSingle().WithArguments(_cameraConfig);
+            Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().WithArguments(_cameraConfig);
             Container.BindInterfacesAndSelfTo<TorchLightController>().AsSingle().WithArguments(_torchLightConfig);
 
             Container.BindInterfacesAndSelfTo<PlayerController>().AsSingle().WithArguments(_playerConfig);

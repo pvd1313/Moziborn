@@ -21,7 +21,7 @@ namespace ProjectTolerance.Buildings
         public IReadOnlyList<BuildingData> buildings => _buildings;
 
         private readonly BuildingConfig _config;
-        private readonly CameraController _cameraController;
+        private readonly MainCameraController _mainCamera;
 
         private Tilemap _floor0Frame;
         private Tilemap _floor0Interactive;
@@ -29,10 +29,10 @@ namespace ProjectTolerance.Buildings
         private List<BuildingData> _buildings;
         private BuildingTransition[] _transitions;
 
-        public BuildingController (BuildingConfig config, CameraController cameraController)
+        public BuildingController (BuildingConfig config, MainCameraController mainCamera)
         {
             _config = config;
-            _cameraController = cameraController;
+            _mainCamera = mainCamera;
         }
         
         public IEnumerator Initialize()
@@ -84,7 +84,7 @@ namespace ProjectTolerance.Buildings
 
         public void OnPlayerBoundsUpdate(Bounds playerBounds)
         {
-            Vector3 cameraDir = _cameraController.forward;
+            Vector3 cameraDir = _mainCamera.forward;
             
             Vector3 playerBottomCenter = playerBounds.center;
             playerBottomCenter.y = playerBounds.min.y;

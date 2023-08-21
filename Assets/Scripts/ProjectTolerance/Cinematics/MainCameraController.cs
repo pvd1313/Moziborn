@@ -1,10 +1,9 @@
 using System.Collections;
-using ProjectTolerance.GameCycle;
 using UnityEngine;
 
 namespace ProjectTolerance.Cinematics
 {
-    public class CameraController : IUnorderedLateUpdatable
+    public class MainCameraController
     {
         public Vector3 forward => _cameraView.unityCamera.transform.forward;
         public Vector3 position => _cameraView.transform.position;
@@ -17,7 +16,7 @@ namespace ProjectTolerance.Cinematics
         private Vector3 _desiredPosition;
         private Vector3 _velocity;
 
-        public CameraController (CameraConfig config)
+        public MainCameraController (CameraConfig config)
         {
             _config = config;
         }
@@ -27,6 +26,7 @@ namespace ProjectTolerance.Cinematics
             _cameraView = Object.Instantiate(_config.viewPrefab);
             _cameraView.transform.rotation = Quaternion.Euler(_config.rotationAngleDegrees);
             _cameraView.unityCamera.orthographicSize = _config.orthographicSize;
+            _cameraView.unityCamera.depth = CameraRenderPriority.MainCameraDepth;
             
             yield break;
         }
@@ -41,7 +41,7 @@ namespace ProjectTolerance.Cinematics
             return _cameraView.unityCamera.ScreenPointToRay(screenPosition);
         }
         
-        public void LateUpdate()
+        public void Update()
         {
             _cameraView.transform.position = Vector3.SmoothDamp(_cameraView.transform.position, _desiredPosition, ref _velocity, _config.smoothTime);
         }

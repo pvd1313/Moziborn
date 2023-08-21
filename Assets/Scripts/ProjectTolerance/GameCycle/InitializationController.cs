@@ -32,7 +32,7 @@ namespace ProjectTolerance.GameCycle
             yield return _container.TryResolve<BuildingController>()?.Initialize();
             yield return _container.TryResolve<TorchLightController>()?.Initialize();
             yield return _container.TryResolve<AmbientLightController>()?.Initialize();
-            yield return _container.TryResolve<CameraController>()?.Initialize();
+            yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PlayerController>()?.Initialize();
             yield return _container.TryResolve<UpdatingController>()?.Initialize();
         }
