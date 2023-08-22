@@ -5,8 +5,20 @@ namespace ProjectTolerance.Shading.Lighting
 {
     public class TorchLightView : MonoBehaviour
     {
-        private const float SamplesPerRad = 500;
-        private const float HitPenetrationDistance = 0.05f;
+        private struct TorchRaycastHit
+        {
+            public int colliderInstanceId;
+            public float rayTraveledDistance; 
+            public Vector3 surfaceNormal;
+            public Vector3 hitPosition;
+        }
+
+        private const bool DebugDraw = true;
+        
+        private const int BatchSize = 15;
+        private const float MaxSamplesPerRad = 300;
+        private const float HitPenetrationSurfaceNormalDistance = 0.03f;
+        private const float HitDirectionDotApproximation = 0.001f;
         
         [SerializeField] private MeshFilter _meshFilter;
         
@@ -14,7 +26,7 @@ namespace ProjectTolerance.Shading.Lighting
         private float _distance;
         private float _rotationRad;
         private int _sampleCount;
-        private Vector3 _position;
+        private Vector3 _origin;
         
         private Mesh _mesh;
         private Vector3[] _meshVertices;
@@ -23,7 +35,7 @@ namespace ProjectTolerance.Shading.Lighting
 
         public void Initialize(float spreadAngleRad, float distance)
         {
-            _sampleCount = Mathf.Max(2, Mathf.CeilToInt(spreadAngleRad * SamplesPerRad));
+            _sampleCount = Mathf.Max(2, Mathf.CeilToInt(spreadAngleRad * MaxSamplesPerRad));
             _spreadAngleRad = spreadAngleRad;
             _distance = distance;
 
@@ -48,7 +60,7 @@ namespace ProjectTolerance.Shading.Lighting
                 _meshUVs[i] = new Vector2(1, 1);
             }
 
-            _mesh.bounds = new Bounds(_position, Vector3.one * 1000);
+            _mesh.bounds = new Bounds(_origin, Vector3.one * 1000);
             _mesh.SetVertices(_meshVertices);
             _mesh.SetUVs(0, _meshUVs);
             _mesh.SetTriangles(_meshTriangles, 0);
@@ -59,51 +71,116 @@ namespace ProjectTolerance.Shading.Lighting
 
         public void UpdatePositionRotation(Vector3 position, float rotationRad)
         {
-            _position = position;
+            _origin = position + Vector3.up * 0.1f;
             _rotationRad = rotationRad;
         }
 
-        public void RebuildMesh(bool debugDraw)
+        public void RebuildMesh()
         {
-            Vector3 center = _position;
-            float deltaAngle = _spreadAngleRad / (_sampleCount - 1);
-            float startAngleRad = Mathf.CeilToInt((-0.5f * _spreadAngleRad + _rotationRad) / deltaAngle) * deltaAngle;
+            float deltaAngleRad = _spreadAngleRad / (_sampleCount - 1);
+            float startAngleRad = Mathf.CeilToInt((-0.5f * _spreadAngleRad + _rotationRad) / deltaAngleRad) * deltaAngleRad;
 
-            _meshVertices[0] = center;
+            _meshVertices[0] = _origin;
             
-            for (int i = 0; i < _sampleCount; i++)
+            Vector3 rayDirection = DirectionFromAngle(startAngleRad);
+            TorchRaycastHit prevHit = Raycast(_origin, rayDirection, _distance);
+            _meshVertices[1] = VertexFromHit(_origin, rayDirection, prevHit.rayTraveledDistance, prevHit.surfaceNormal);
+            
+            if (DebugDraw) Debug.DrawLine(_origin, _meshVertices[1], Color.red);
+
+            for (int prevHitIndex = 0; prevHitIndex < _sampleCount - 1;)
             {
-                float angle = startAngleRad + deltaAngle * i;
-                float sin = Mathf.Sin(angle);
-                float cos = Mathf.Cos(angle);
+                int curHitIndex = Mathf.Min( _sampleCount - 1, prevHitIndex + BatchSize);
+                int batchSize = curHitIndex - prevHitIndex;
+                float angleRad = startAngleRad + deltaAngleRad * curHitIndex;
 
-                Vector3 direction = new Vector3(sin, 0, cos) * _distance;
-
-                Ray ray = new Ray(center, direction);
-
-                Vector3 vertexPos;
+                rayDirection = DirectionFromAngle(angleRad);
+                TorchRaycastHit curHit = Raycast(_origin, rayDirection, _distance);
+                _meshVertices[curHitIndex + 1] = VertexFromHit(_origin, rayDirection, curHit.rayTraveledDistance, curHit.surfaceNormal);
                 
-                if (Physics.Raycast(ray, out RaycastHit hitInfo, _distance, 1 << LayerId.ViewObstacle))
+                if (DebugDraw) Debug.DrawLine(_origin, _meshVertices[curHitIndex], Color.red);
+
+                if (IsSameSurface(prevHit, curHit))
                 {
-                    vertexPos = center + new Vector3(sin, 0, cos) * hitInfo.distance;
-                    vertexPos -= hitInfo.normal * HitPenetrationDistance;
+                    for (int i = 0; i < batchSize - 1; i++)
+                    {
+                        rayDirection = DirectionFromAngle(startAngleRad + deltaAngleRad * (prevHitIndex + i + 1));
+                        float distance = Mathf.Lerp(prevHit.rayTraveledDistance, curHit.rayTraveledDistance, (i + 1f) / batchSize);
+                        _meshVertices[prevHitIndex + i + 2] = VertexFromHit(_origin, rayDirection, distance, prevHit.surfaceNormal);
+                    }
                 }
                 else
                 {
-                    vertexPos = center + new Vector3(sin, 0, cos) * _distance;
+                    for (int i = 0; i < batchSize - 1; i++)
+                    {
+                        rayDirection = DirectionFromAngle(startAngleRad + deltaAngleRad * (prevHitIndex + i + 1));
+                        TorchRaycastHit curBatchHit = Raycast(_origin, rayDirection, _distance);
+
+                        _meshVertices[prevHitIndex + i + 2] = VertexFromHit(_origin, rayDirection, curBatchHit.rayTraveledDistance, curBatchHit.surfaceNormal);
+                        
+                        if (DebugDraw) Debug.DrawLine(_origin, _meshVertices[prevHitIndex + i + 1], Color.cyan);
+                    }
                 }
 
-                _meshVertices[i + 1] = vertexPos;
-                
-                if (debugDraw)
-                {
-                    Debug.DrawRay(center, vertexPos - center, Color.blue);
-                }
+                prevHitIndex = curHitIndex;
+                prevHit = curHit;
             }
             
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
             _mesh.SetVertices(_meshVertices);
             _mesh.UploadMeshData(false);
+        }
+
+        private static bool IsSameSurface(TorchRaycastHit a, TorchRaycastHit b)
+        {
+            if (a.colliderInstanceId == 0 && b.colliderInstanceId == 0)
+            {
+                return true;
+            }
+
+            if (a.colliderInstanceId == 0 || b.colliderInstanceId == 0)
+            {
+                return false;
+            }
+
+            Vector3 hitDirection = (b.hitPosition - a.hitPosition).normalized;
+            Vector3 surfaceDirection = Vector3.Cross(a.surfaceNormal, Vector3.up);
+            float hitDirectionDot = Vector3.Dot(hitDirection, surfaceDirection);
+            
+            return Mathf.Abs(1 - hitDirectionDot) <= HitDirectionDotApproximation;
+        }
+
+        private static TorchRaycastHit Raycast(Vector3 origin, Vector3 direction, float distance)
+        {
+            Ray ray = new (origin, direction);
+
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, distance, 1 << LayerId.ViewObstacle))
+            {
+                return new TorchRaycastHit
+                {
+                    surfaceNormal = hitInfo.normal,
+                    colliderInstanceId = hitInfo.colliderInstanceID,
+                    rayTraveledDistance = hitInfo.distance,
+                    hitPosition = hitInfo.point
+                };
+            }
+
+            return new TorchRaycastHit
+            {
+                rayTraveledDistance = distance
+            };
+        }
+
+        private static Vector3 VertexFromHit(Vector3 rayOrigin, Vector3 rayDirection, float rayTraveledDistance, Vector3 surfaceNormal)
+        {
+            return rayOrigin + rayDirection * rayTraveledDistance - surfaceNormal * HitPenetrationSurfaceNormalDistance;
+        }
+
+        private static Vector3 DirectionFromAngle(float angleRad)
+        {
+            float sin = Mathf.Sin(angleRad);
+            float cos = Mathf.Cos(angleRad);
+            return new Vector3(sin, 0, cos);
         }
     }
 }

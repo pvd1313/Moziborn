@@ -227,7 +227,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
         emissionColor *= 0;
     }
 
-    emissionColor = emissionColor * ambientMapColor + brdfData.albedo * torchMapColor * 0.02;
+    emissionColor = emissionColor * ambientMapColor + brdfData.albedo * torchMapColor * 0.1;
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emissionColor);
 }

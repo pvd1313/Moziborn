@@ -118,7 +118,7 @@ namespace ProjectTolerance.Shading.Lighting
 
             foreach ((int lightId, TorchLightView lightView) in _lightViews)
             {
-                lightView.RebuildMesh(true);
+                lightView.RebuildMesh();
             }
             
             _torchCamera.transform.position = cameraPosition + Vector3.up;
