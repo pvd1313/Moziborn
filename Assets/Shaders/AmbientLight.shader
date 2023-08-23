@@ -15,26 +15,26 @@ Shader "Hidden/AmbientLight"
         Pass
         {
             CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex Vertex
+            #pragma fragment Fragment
 
             #include "UnityCG.cginc"
 
-            struct appdata
+            struct VertexInput
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
             };
 
-            struct v2f
+            struct FragmentInput
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
             };
 
-            v2f vert (appdata v)
+            FragmentInput Vertex (VertexInput v)
             {
-                v2f o;
+                FragmentInput o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 return o;
@@ -45,7 +45,7 @@ Shader "Hidden/AmbientLight"
             sampler2D _StateTexture;
             float2 _TextureSize;
 
-            fixed4 frag (v2f i) : SV_Target
+            fixed4 Fragment (FragmentInput i) : SV_Target
             {
                 const float falloff = 0.03;
                 
