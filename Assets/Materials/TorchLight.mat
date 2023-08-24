@@ -79,7 +79,7 @@ Material:
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _LightingEnabled: 0
-    - _MaxRayDistance: 5
+    - _MaxRayDistance: -0.9
     - _Metallic: 0
     - _Mode: 3
     - _OcclusionStrength: 1
@@ -90,8 +90,11 @@ Material:
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
-    - _SpreadAngleRad: 90
+    - _SpreadAngleRad: 91.68
     - _SrcBlend: 1
+    - _TiltCenterReduction: 0.2
+    - _TiltOriginReduction: 2
+    - _TiltParallelReduction: 1
     - _UVSec: 0
     - _ZWrite: 0
     m_Colors:

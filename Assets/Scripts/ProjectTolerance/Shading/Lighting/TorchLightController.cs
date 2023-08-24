@@ -85,6 +85,10 @@ namespace ProjectTolerance.Shading.Lighting
             Vector2 viewSize = ComputeViewSize(screenRatio, _mainCamera.orthographicSize, mainCameraRotationDeg.x);
             Vector3 cameraPosition = _mainCamera.position;
 
+            cameraPosition.x = Mathf.CeilToInt(cameraPosition.x);
+            cameraPosition.y = Mathf.CeilToInt(cameraPosition.y);
+            cameraPosition.z = Mathf.CeilToInt(cameraPosition.z);
+
             Vector2Int requiredTextureSize = default;
             if (screenRatio > 0)
             {
@@ -109,7 +113,7 @@ namespace ProjectTolerance.Shading.Lighting
                 
                 _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.R8);
                 _torchTexture.name = "TorchLight";
-                _torchTexture.filterMode = FilterMode.Bilinear;
+                _torchTexture.filterMode = FilterMode.Trilinear;
                 
                 _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
                 _torchCamera.targetTexture = _torchTexture;

@@ -17,8 +17,7 @@ namespace ProjectTolerance.Shading.Lighting
         
         private const int BatchSize = 15;
         private const float MaxSamplesPerRad = 300;
-        private const float HitPenetrationDistance = 0.03f;
-        private const float SameSurfaceNormalDot = 0.001f;
+        private const float SameSurfaceNormalDot = 0.0001f;
         
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _meshRenderer;
@@ -62,7 +61,7 @@ namespace ProjectTolerance.Shading.Lighting
                 _meshTriangles[i * 3 + 2] = i + 2;
             }
 
-            _meshVertices[0] = new Vector3(0, 0, -0.00f);
+            _meshVertices[0] = Vector3.zero;
             for (int i = 0; i < _maxSampleCount; i++)
             {
                 _meshVertices[i + 1] = DirectionFromAngle(-0.5f * _spreadAngleRad + i * _sampleDeltaAngleRad);
@@ -92,16 +91,17 @@ namespace ProjectTolerance.Shading.Lighting
 
         public void RebuildMesh()
         {
-            float startAngleRad = Mathf.CeilToInt((-0.5f * _spreadAngleRad + _torchRotationRad) / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
+            float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
+            float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
-            _torchTransform.forward = DirectionFromAngle(startAngleRad + _sampleDeltaAngleRad * _maxSampleCount * 0.5f);
+            _torchTransform.forward = DirectionFromAngle(torchRotationRad);
             _torchTransform.position = _torchCenter;
-            
-            _meshColors[0] = Float01ToColor(0);
+
+            _meshUVs[0] = Vector2.zero;
             
             Vector3 rayDirection = DirectionFromAngle(startAngleRad);
             TorchRaycastHit prevHit = Raycast(_torchCenter, rayDirection, _torchDistance);
-            _meshColors[1] = Float01ToColor(prevHit.rayTraveledDistance / _torchDistance);
+            _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchDistance, 0);
 
             if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * prevHit.rayTraveledDistance, Color.red);
 
@@ -113,16 +113,31 @@ namespace ProjectTolerance.Shading.Lighting
 
                 rayDirection = DirectionFromAngle(angleRad);
                 TorchRaycastHit curHit = Raycast(_torchCenter, rayDirection, _torchDistance);
-                _meshColors[curHitIndex + 1] = Float01ToColor(curHit.rayTraveledDistance / _torchDistance);
+                _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchDistance, 0);
 
                 if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * curHit.rayTraveledDistance, Color.red);
 
                 if (IsSameSurface(prevHit, curHit))
                 {
-                    for (int i = 0; i < batchSize - 1; i++)
+                    if (prevHit.colliderInstanceId != 0)
                     {
-                        float distance = Mathf.Lerp(prevHit.rayTraveledDistance, curHit.rayTraveledDistance, (i + 1f) / batchSize);
-                        _meshColors[prevHitIndex + i + 2] = Float01ToColor(distance / _torchDistance);
+                        Plane surface = new Plane(prevHit.surfaceNormal, prevHit.hitPosition);
+                    
+                        for (int i = 0; i < batchSize - 1; i++)
+                        {
+                            angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
+                            rayDirection = DirectionFromAngle(angleRad);
+                            Ray ray = new (_torchCenter, rayDirection);
+                            surface.Raycast(ray, out float distance);
+                            _meshUVs[prevHitIndex + i + 2] = new Vector2(distance / _torchDistance, 0);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < batchSize - 1; i++)
+                        {
+                            _meshUVs[prevHitIndex + i + 2] = new Vector2(1, 0);
+                        }
                     }
                 }
                 else
@@ -132,7 +147,7 @@ namespace ProjectTolerance.Shading.Lighting
                         angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
                         rayDirection = DirectionFromAngle(angleRad);
                         TorchRaycastHit curBatchHit = Raycast(_torchCenter, rayDirection, _torchDistance);
-                        _meshColors[prevHitIndex + i + 2] = Float01ToColor(curBatchHit.rayTraveledDistance / _torchDistance);
+                        _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchDistance, 0);
 
                         if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * curBatchHit.rayTraveledDistance, Color.cyan);
                     }
@@ -143,7 +158,7 @@ namespace ProjectTolerance.Shading.Lighting
             }
             
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
-            _mesh.SetColors(_meshColors);
+            _mesh.SetUVs(0, _meshUVs);
             _mesh.UploadMeshData(false);
         }
 
@@ -158,12 +173,14 @@ namespace ProjectTolerance.Shading.Lighting
             {
                 return false;
             }
-
+            
             Vector3 hitDirection = (b.hitPosition - a.hitPosition).normalized;
             Vector3 surfaceDirection = Vector3.Cross(a.surfaceNormal, Vector3.up);
             float hitDirectionDot = Vector3.Dot(hitDirection, surfaceDirection);
+            float surfaceDot = Vector3.Dot(a.surfaceNormal, b.surfaceNormal);
             
-            return Mathf.Abs(1 - hitDirectionDot) <= SameSurfaceNormalDot;
+            return Mathf.Abs(1 - hitDirectionDot) <= SameSurfaceNormalDot &&
+                   Mathf.Abs(1 - surfaceDot) <= SameSurfaceNormalDot;
         }
 
         private static TorchRaycastHit Raycast(Vector3 origin, Vector3 direction, float distance)
@@ -183,7 +200,7 @@ namespace ProjectTolerance.Shading.Lighting
 
             return new TorchRaycastHit
             {
-                rayTraveledDistance = distance
+                rayTraveledDistance = distance,
             };
         }
 
@@ -192,12 +209,6 @@ namespace ProjectTolerance.Shading.Lighting
             float sin = Mathf.Sin(angleRad);
             float cos = Mathf.Cos(angleRad);
             return new Vector3(sin, 0, cos);
-        }
-        
-        private static Color32 Float01ToColor(float float01)
-        {
-            ushort word = (ushort) (float01 * ushort.MaxValue);
-            return new Color32((byte)(word / 256), (byte)(word % 256), 0 , 0);
         }
     }
 }
