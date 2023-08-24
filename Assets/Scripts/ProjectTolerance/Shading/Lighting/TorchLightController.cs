@@ -111,7 +111,7 @@ namespace ProjectTolerance.Shading.Lighting
                     _torchTexture = null;
                 }
                 
-                _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.R8);
+                _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.RG16);
                 _torchTexture.name = "TorchLight";
                 _torchTexture.filterMode = FilterMode.Trilinear;
                 

@@ -2,12 +2,15 @@ Shader "ProjectTolerance/TorchLightSprite"
 {
 	Properties
 	{
-		_MainTex ("Texture", 2D) = "white" { }
 		_SpreadAngleRad("Spread angle", float) = 90
 		_MaxRayDistance("Ray distance", float) = 5
-		_TiltCenterReduction("Tilt center reduction", float) = 0.2
-		_TiltParallelReduction("Tilt parallel reduction", float) = 0.2
-		_TiltOriginReduction("Tilt origin reduction", float) = 2
+		
+		_Intensity("Intensity", float) = 1
+		_CenterReduction("Center reduction", float) = 0.2
+		_zSpreadPower("Z spread", float) = 1
+		_zDistancePower("Z distance", float) = 2
+		_ySpreadPower("Y spread", float) = 0.3
+		_yDistancePower("Y distance", float) = 0.5
 	}
 	SubShader
 	{
@@ -37,12 +40,14 @@ Shader "ProjectTolerance/TorchLightSprite"
 				float4 vertexSS : SV_POSITION;
 			};
 
-			sampler2D _MainTex;
 			float _SpreadAngleRad;
 			float _MaxRayDistance;
-			float _TiltCenterReduction;
-			float _TiltParallelReduction;
-			float _TiltOriginReduction;
+			float _CenterReduction;
+			float _zSpreadPower;
+			float _zDistancePower;
+			float _ySpreadPower;
+			float _yDistancePower;
+			float _Intensity;
 			
 			FragmentInput Vertex (VertexInput input)
 			{
@@ -61,23 +66,22 @@ Shader "ProjectTolerance/TorchLightSprite"
 				return output;
 			}
 			
-			float4 Fragment (FragmentInput input) : SV_Target
+			float2 Fragment (FragmentInput input) : SV_Target
 			{
-				float PI = 3.1415926;
-				
-				float4 col = tex2D(_MainTex, input.uv);
-
-				float tilt = 1 - max(_TiltCenterReduction, abs(atan2(input.vertexOS.x, input.vertexOS.z) / (_SpreadAngleRad * 0.5)));
-				
-				float vertexArc = 2 * PI * length(input.vertexOS.xz);
-				float spreadArc = 2 * PI * _MaxRayDistance * _SpreadAngleRad;
+				// Basic, z-axis, distance and spread fall
 				float angle = atan2(input.vertexOS.x, input.vertexOS.z);
-				
-				tilt -= vertexArc * abs(angle) / spreadArc * _TiltParallelReduction;
+				float zSpread01 = 1 - max(_CenterReduction, abs(angle / _SpreadAngleRad * 2));
+				float zDistance01 = 1 - length(input.vertexOS.xz) / _MaxRayDistance;
+				zDistance01 = pow(zDistance01, _zDistancePower);
+				zSpread01 = pow(zSpread01, _zSpreadPower);
 
-				tilt *= pow(length(input.vertexOS.xz) / _MaxRayDistance, _TiltOriginReduction);
+				// Circle shape on walls, y-axis
+				float yDistance01 = length(input.vertexOS.xz) / _MaxRayDistance;
+				float ySpread01 = 1 - max(_CenterReduction, abs(angle / _SpreadAngleRad * 2));
+				ySpread01 = pow(ySpread01, _ySpreadPower);
+				yDistance01 = pow(yDistance01, _yDistancePower);
 				
-				return col * tilt;
+				return float2(zSpread01 * zDistance01 * _Intensity, ySpread01 * yDistance01);
 			}
 			
 			ENDCG

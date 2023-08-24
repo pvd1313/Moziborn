@@ -37,14 +37,12 @@ float4 GetShadowPositionHClip(Attributes input)
 
     float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
 
-    // * TOLERANCE START
 #if UNITY_REVERSED_Z
-    // * Add / remove small margin to fix weird light + shadow issues
+    // Add / remove small margin to fix weird light + shadow issues
     positionCS.z = min(positionCS.z - 0.0001, UNITY_NEAR_CLIP_VALUE);
 #else
     positionCS.z = max(positionCS.z + 0.0001, UNITY_NEAR_CLIP_VALUE);
 #endif
-    // * TOLERANCE END
     
     return positionCS;
 }

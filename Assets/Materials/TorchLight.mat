@@ -64,6 +64,7 @@ Material:
     - _CameraFadingEnabled: 0
     - _CameraFarFadeDistance: 2
     - _CameraNearFadeDistance: 1
+    - _CenterReduction: 0.2
     - _ColorMode: 0
     - _Cull: 2
     - _Cutoff: 0.5
@@ -78,8 +79,9 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _Intensity: 1
     - _LightingEnabled: 0
-    - _MaxRayDistance: -0.9
+    - _MaxRayDistance: 1
     - _Metallic: 0
     - _Mode: 3
     - _OcclusionStrength: 1
@@ -90,13 +92,17 @@ Material:
     - _SoftParticlesFarFadeDistance: 1
     - _SoftParticlesNearFadeDistance: 0
     - _SpecularHighlights: 1
-    - _SpreadAngleRad: 91.68
+    - _SpreadAngleRad: 90
     - _SrcBlend: 1
     - _TiltCenterReduction: 0.2
     - _TiltOriginReduction: 2
     - _TiltParallelReduction: 1
     - _UVSec: 0
     - _ZWrite: 0
+    - _yDistancePower: 0.5
+    - _ySpreadPower: 0.3
+    - _zDistancePower: 2
+    - _zSpreadPower: 2
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
