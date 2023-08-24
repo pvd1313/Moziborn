@@ -82,12 +82,12 @@ namespace ProjectTolerance.Shading.Lighting
             Vector3 viewEast = Vector3.Cross(Vector3.up, viewNorth);
             float screenRatio = Screen.width / (float) Screen.height;
             Vector3 mainCameraRotationDeg = _mainCamera.rotationDegrees;
-            Vector2 viewSize = ComputeViewSize(screenRatio, _mainCamera.orthographicSize, mainCameraRotationDeg.x);
+            Vector2 viewSize = ComputeViewSize(screenRatio, _mainCamera.orthographicSize, mainCameraRotationDeg.x) + Vector2.one;
+            
             Vector3 cameraPosition = _mainCamera.position;
-
-            cameraPosition.x = Mathf.CeilToInt(cameraPosition.x);
-            cameraPosition.y = Mathf.CeilToInt(cameraPosition.y);
-            cameraPosition.z = Mathf.CeilToInt(cameraPosition.z);
+            cameraPosition.x = Mathf.RoundToInt(cameraPosition.x);
+            cameraPosition.y = Mathf.RoundToInt(cameraPosition.y);
+            cameraPosition.z = Mathf.RoundToInt(cameraPosition.z);
 
             Vector2Int requiredTextureSize = default;
             if (screenRatio > 0)

@@ -3,8 +3,8 @@ Shader "ProjectTolerance/TorchLightSprite"
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" { }
-		[HideInInspector] _SpreadAngleRad("Spread angle", float) = 90
-		[HideInInspector] _MaxRayDistance("Ray distance", float) = 5
+		_SpreadAngleRad("Spread angle", float) = 90
+		_MaxRayDistance("Ray distance", float) = 5
 		_TiltCenterReduction("Tilt center reduction", float) = 0.2
 		_TiltParallelReduction("Tilt parallel reduction", float) = 0.2
 		_TiltOriginReduction("Tilt origin reduction", float) = 2
@@ -21,9 +21,6 @@ Shader "ProjectTolerance/TorchLightSprite"
 			#pragma vertex Vertex
 			#pragma fragment Fragment
 			
-			// make fog work
-			#pragma multi_compile_fog
-			
 			#include "UnityCG.cginc"
 
 			struct VertexInput
@@ -35,14 +32,12 @@ Shader "ProjectTolerance/TorchLightSprite"
 
 			struct FragmentInput
 			{
-				float3 vertexOS : COLOR1;
+				float3 vertexOS : TEXCOORD1;
 				float2 uv : TEXCOORD0;
-				UNITY_FOG_COORDS(1)
 				float4 vertexSS : SV_POSITION;
 			};
 
 			sampler2D _MainTex;
-			float4 _MainTex_ST;
 			float _SpreadAngleRad;
 			float _MaxRayDistance;
 			float _TiltCenterReduction;
@@ -61,33 +56,28 @@ Shader "ProjectTolerance/TorchLightSprite"
 
 				output.vertexOS = vertexOS;
 				output.vertexSS = UnityObjectToClipPos(vertexOS);
-				output.uv = float2(0.5, 0.5) + input.vertexOS.xz * 0.5 * hitDistance01;
-				
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				output.uv = input.vertexOS.xz * 0.5 * hitDistance01 + float2(0.5, 0.5);
 				
 				return output;
 			}
 			
-			float Fragment (FragmentInput input) : SV_Target
+			float4 Fragment (FragmentInput input) : SV_Target
 			{
 				float PI = 3.1415926;
 				
 				float4 col = tex2D(_MainTex, input.uv);
-				
-				UNITY_APPLY_FOG(i.fogCoord, col);
 
 				float tilt = 1 - max(_TiltCenterReduction, abs(atan2(input.vertexOS.x, input.vertexOS.z) / (_SpreadAngleRad * 0.5)));
 				
-				float perimeter = 2 * PI * length(input.vertexOS.xz);
+				float vertexArc = 2 * PI * length(input.vertexOS.xz);
+				float spreadArc = 2 * PI * _MaxRayDistance * _SpreadAngleRad;
 				float angle = atan2(input.vertexOS.x, input.vertexOS.z);
-
-				float fullP = 2 * PI * _MaxRayDistance * _SpreadAngleRad;
 				
-				tilt -= perimeter * abs(angle) / fullP * _TiltParallelReduction;
+				tilt -= vertexArc * abs(angle) / spreadArc * _TiltParallelReduction;
 
 				tilt *= pow(length(input.vertexOS.xz) / _MaxRayDistance, _TiltOriginReduction);
 				
-				return tilt * col;
+				return col * tilt;
 			}
 			
 			ENDCG

@@ -10,7 +10,7 @@ namespace ProjectTolerance.Shading.Lighting
             public int colliderInstanceId;
             public float rayTraveledDistance; 
             public Vector3 surfaceNormal;
-            public Vector3 hitPosition;
+            public Vector3 rayEndPoint;
         }
 
         private const bool DebugDraw = true;
@@ -18,6 +18,7 @@ namespace ProjectTolerance.Shading.Lighting
         private const int BatchSize = 15;
         private const float MaxSamplesPerRad = 300;
         private const float SameSurfaceNormalDot = 0.0001f;
+        private const float BatchSampleDistanceCheckMultiplier = 2f;
         
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _meshRenderer;
@@ -94,16 +95,20 @@ namespace ProjectTolerance.Shading.Lighting
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
+            Vector3 a = DirectionFromAngle(0) * _torchDistance;
+            Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchDistance;
+            float maxOptimizedBatchSampleDistance = (b - a).magnitude * BatchSampleDistanceCheckMultiplier;
+
             _torchTransform.forward = DirectionFromAngle(torchRotationRad);
             _torchTransform.position = _torchCenter;
 
             _meshUVs[0] = Vector2.zero;
             
-            Vector3 rayDirection = DirectionFromAngle(startAngleRad);
-            TorchRaycastHit prevHit = Raycast(_torchCenter, rayDirection, _torchDistance);
+            Vector3 direction = DirectionFromAngle(startAngleRad);
+            TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchDistance);
             _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchDistance, 0);
 
-            if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * prevHit.rayTraveledDistance, Color.red);
+            if (DebugDraw) Debug.DrawRay(_torchCenter, direction * prevHit.rayTraveledDistance, Color.red);
 
             for (int prevHitIndex = 0; prevHitIndex < _maxSampleCount - 1;)
             {
@@ -111,23 +116,26 @@ namespace ProjectTolerance.Shading.Lighting
                 int batchSize = curHitIndex - prevHitIndex;
                 float angleRad = startAngleRad + _sampleDeltaAngleRad * curHitIndex;
 
-                rayDirection = DirectionFromAngle(angleRad);
-                TorchRaycastHit curHit = Raycast(_torchCenter, rayDirection, _torchDistance);
+                direction = DirectionFromAngle(angleRad);
+                TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchDistance);
                 _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchDistance, 0);
 
-                if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * curHit.rayTraveledDistance, Color.red);
+                if (DebugDraw) Debug.DrawRay(_torchCenter, direction * curHit.rayTraveledDistance, Color.red);
 
-                if (IsSameSurface(prevHit, curHit))
+                float sampleDistance = (prevHit.rayEndPoint - curHit.rayEndPoint).magnitude;
+
+                if (sampleDistance <= maxOptimizedBatchSampleDistance && 
+                    IsSameSurface(prevHit, curHit))
                 {
                     if (prevHit.colliderInstanceId != 0)
                     {
-                        Plane surface = new Plane(prevHit.surfaceNormal, prevHit.hitPosition);
+                        Plane surface = new Plane(prevHit.surfaceNormal, prevHit.rayEndPoint);
                     
                         for (int i = 0; i < batchSize - 1; i++)
                         {
                             angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
-                            rayDirection = DirectionFromAngle(angleRad);
-                            Ray ray = new (_torchCenter, rayDirection);
+                            direction = DirectionFromAngle(angleRad);
+                            Ray ray = new (_torchCenter, direction);
                             surface.Raycast(ray, out float distance);
                             _meshUVs[prevHitIndex + i + 2] = new Vector2(distance / _torchDistance, 0);
                         }
@@ -145,11 +153,11 @@ namespace ProjectTolerance.Shading.Lighting
                     for (int i = 0; i < batchSize - 1; i++)
                     {
                         angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
-                        rayDirection = DirectionFromAngle(angleRad);
-                        TorchRaycastHit curBatchHit = Raycast(_torchCenter, rayDirection, _torchDistance);
+                        direction = DirectionFromAngle(angleRad);
+                        TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchDistance);
                         _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchDistance, 0);
 
-                        if (DebugDraw) Debug.DrawRay(_torchCenter, rayDirection * curBatchHit.rayTraveledDistance, Color.cyan);
+                        if (DebugDraw) Debug.DrawRay(_torchCenter, direction * curBatchHit.rayTraveledDistance, Color.cyan);
                     }
                 }
 
@@ -174,7 +182,7 @@ namespace ProjectTolerance.Shading.Lighting
                 return false;
             }
             
-            Vector3 hitDirection = (b.hitPosition - a.hitPosition).normalized;
+            Vector3 hitDirection = (b.rayEndPoint - a.rayEndPoint).normalized;
             Vector3 surfaceDirection = Vector3.Cross(a.surfaceNormal, Vector3.up);
             float hitDirectionDot = Vector3.Dot(hitDirection, surfaceDirection);
             float surfaceDot = Vector3.Dot(a.surfaceNormal, b.surfaceNormal);
@@ -194,13 +202,14 @@ namespace ProjectTolerance.Shading.Lighting
                     surfaceNormal = hitInfo.normal,
                     colliderInstanceId = hitInfo.colliderInstanceID,
                     rayTraveledDistance = hitInfo.distance,
-                    hitPosition = hitInfo.point
+                    rayEndPoint = hitInfo.point
                 };
             }
 
             return new TorchRaycastHit
             {
                 rayTraveledDistance = distance,
+                rayEndPoint = ray.origin + ray.direction * distance
             };
         }
 
