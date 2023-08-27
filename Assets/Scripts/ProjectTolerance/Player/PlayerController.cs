@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Shading.Lighting;
@@ -19,6 +20,8 @@ namespace ProjectTolerance.Player
         private Vector3 _playerMeshVelocity;
         private int _torchLightId;
 
+        private List<int> _tempLights;
+
         public PlayerController (PlayerConfig config, 
                                  PlayerInputController input, 
                                  MainCameraController mainCamera,
@@ -35,8 +38,12 @@ namespace ProjectTolerance.Player
         public IEnumerator Initialize()
         {
             _playerView = Object.Instantiate(_config.playerViewPrefab);
+
+            _tempLights = new List<int>();
             
-            _torchLightId = _torchLightController.CreateLight(_config.torchLightAngleDeg * Mathf.Deg2Rad, _config.torchLightDistance);
+            _torchLightId = _torchLightController.CreateLight(
+                _config.torchLightAngleDeg * Mathf.Deg2Rad, 
+                _config.torchLightDistance);
 
             yield break;
         }
@@ -55,6 +62,27 @@ namespace ProjectTolerance.Player
                 _playerView.body.MovePosition(targetPosition);
             }
 
+            if (input.isDropFlareKeyPressed)
+            {
+                int lightId = _torchLightController.CreateLight(
+                    _config.torchLightAngleDeg * Mathf.Deg2Rad,
+                    _config.torchLightDistance);
+
+                _torchLightController.SetLightTransform(lightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
+
+                _tempLights.Add(lightId);
+            }
+
+            if (input.isRemoveAllFlaresKeyPressed)
+            {
+                foreach (int lightId in _tempLights)
+                {
+                    _torchLightController.RemoveLight(lightId);
+                }
+                
+                _tempLights.Clear();
+            }
+
             _mainCamera.AnimateMovePosition(_playerView.body.position);
             
             _playerMeshPosition = Vector3.SmoothDamp(
@@ -65,7 +93,7 @@ namespace ProjectTolerance.Player
             
             _playerView.meshTransform.position = _playerMeshPosition;
             
-            _torchLightController.UpdateLightData(_torchLightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
+            _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
 
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds);
         }

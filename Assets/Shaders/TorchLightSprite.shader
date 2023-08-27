@@ -4,17 +4,15 @@ Shader "ProjectTolerance/TorchLightSprite"
 	{
 		_SpreadAngleRad("Spread angle", float) = 90
 		_MaxRayDistance("Ray distance", float) = 5
+		_StartOffset("Start offset", float) = 0.3
 		
 		_Intensity("Intensity", float) = 1
-		_CenterReduction("Center reduction", float) = 0.2
-		_zSpreadPower("Z spread", float) = 1
-		_zDistancePower("Z distance", float) = 2
-		_ySpreadPower("Y spread", float) = 0.3
-		_yDistancePower("Y distance", float) = 0.5
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType"="Transparent" "Queue"="Transparent"}
+		
+		Blend OneMinusDstColor One
 		
 		LOD 100
 
@@ -23,6 +21,8 @@ Shader "ProjectTolerance/TorchLightSprite"
 			CGPROGRAM
 			#pragma vertex Vertex
 			#pragma fragment Fragment
+
+			#pragma multi_compile_local START_OFFSET_ON START_OFSET_OFF
 			
 			#include "UnityCG.cginc"
 
@@ -40,24 +40,20 @@ Shader "ProjectTolerance/TorchLightSprite"
 				float4 vertexSS : SV_POSITION;
 			};
 
+			#define HIT_PENETRATION_DISTANCE 0.03
+
 			float _SpreadAngleRad;
 			float _MaxRayDistance;
-			float _CenterReduction;
-			float _zSpreadPower;
-			float _zDistancePower;
-			float _ySpreadPower;
-			float _yDistancePower;
 			float _Intensity;
+			float _StartOffset;
 			
 			FragmentInput Vertex (VertexInput input)
 			{
-				const float HitPenetrationDistance = 0.03;
-				
 				FragmentInput output;
 				
 				float hitDistance01 = input.uv.x;
 				float3 vertexOS = input.vertexOS * hitDistance01 * _MaxRayDistance;
-				vertexOS += input.vertexOS * HitPenetrationDistance;
+				vertexOS += input.vertexOS * HIT_PENETRATION_DISTANCE;
 
 				output.vertexOS = vertexOS;
 				output.vertexSS = UnityObjectToClipPos(vertexOS);
@@ -66,22 +62,14 @@ Shader "ProjectTolerance/TorchLightSprite"
 				return output;
 			}
 			
-			float2 Fragment (FragmentInput input) : SV_Target
+			float Fragment (FragmentInput input) : SV_Target
 			{
-				// Basic, z-axis, distance and spread fall
-				float angle = atan2(input.vertexOS.x, input.vertexOS.z);
-				float zSpread01 = 1 - max(_CenterReduction, abs(angle / _SpreadAngleRad * 2));
-				float zDistance01 = 1 - length(input.vertexOS.xz) / _MaxRayDistance;
-				zDistance01 = pow(zDistance01, _zDistancePower);
-				zSpread01 = pow(zSpread01, _zSpreadPower);
-
-				// Circle shape on walls, y-axis
-				float yDistance01 = length(input.vertexOS.xz) / _MaxRayDistance;
-				float ySpread01 = 1 - max(_CenterReduction, abs(angle / _SpreadAngleRad * 2));
-				ySpread01 = pow(ySpread01, _ySpreadPower);
-				yDistance01 = pow(yDistance01, _yDistancePower);
+				float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
+				float spread = 1 - pow(angle / _SpreadAngleRad * 2, 1.5);
+				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
+				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.1);
 				
-				return float2(zSpread01 * zDistance01 * _Intensity, ySpread01 * yDistance01);
+				return pow(spread, 2) * pow(distance, 2) * _Intensity * offset;
 			}
 			
 			ENDCG

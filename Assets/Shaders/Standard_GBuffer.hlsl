@@ -227,7 +227,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
         emission *= 0;
     }
 
-    float maxHeight = 2 * torchMapColor.g;
+    float maxHeight = 2 * pow(torchMapColor.r, 0.2);
     float heightMul = 1 - saturate(positionWS.y / maxHeight);
 
     emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * heightMul;

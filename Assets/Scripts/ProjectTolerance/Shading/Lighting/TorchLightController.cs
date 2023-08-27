@@ -66,7 +66,7 @@ namespace ProjectTolerance.Shading.Lighting
             _lightViews.Remove(lightId);
         }
 
-        public void UpdateLightData(int lightId, Vector3 position, float rotationRad)
+        public void SetLightTransform(int lightId, Vector3 position, float rotationRad)
         {
             if (!_lightViews.TryGetValue(lightId, out TorchLightView lightView))
             {
@@ -111,7 +111,7 @@ namespace ProjectTolerance.Shading.Lighting
                     _torchTexture = null;
                 }
                 
-                _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.RG16);
+                _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.R16);
                 _torchTexture.name = "TorchLight";
                 _torchTexture.filterMode = FilterMode.Trilinear;
                 

@@ -33,7 +33,11 @@ namespace ProjectTolerance.Player
 
             int forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
             int right = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
-            
+
+            inputState.isDropFlareKeyPressed = Input.GetKeyDown(KeyCode.E);
+
+            inputState.isRemoveAllFlaresKeyPressed = Input.GetKeyDown(KeyCode.Q);
+
             if (forward != 0 || right != 0)
             {
                 inputState.isMoving = true;

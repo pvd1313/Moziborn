@@ -94,6 +94,7 @@ Material:
     - _SpecularHighlights: 1
     - _SpreadAngleRad: 90
     - _SrcBlend: 1
+    - _StartOffset: 0.3
     - _TiltCenterReduction: 0.2
     - _TiltOriginReduction: 2
     - _TiltParallelReduction: 1
@@ -101,8 +102,8 @@ Material:
     - _ZWrite: 0
     - _yDistancePower: 0.5
     - _ySpreadPower: 0.3
-    - _zDistancePower: 2
-    - _zSpreadPower: 2
+    - _zDistancePower: 1.5
+    - _zSpreadPower: 1.5
     m_Colors:
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
