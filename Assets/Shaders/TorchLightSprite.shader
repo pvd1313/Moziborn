@@ -69,7 +69,7 @@ Shader "ProjectTolerance/TorchLightSprite"
 				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
 				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.1);
 				
-				return pow(spread, 2) * pow(distance, 2) * _Intensity * offset;
+				return spread * pow(distance, 2) * _Intensity * offset;
 			}
 			
 			ENDCG

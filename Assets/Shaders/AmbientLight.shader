@@ -9,7 +9,6 @@ Shader "Hidden/AmbientLight"
     }
     SubShader
     {
-        // No culling or depth
         Cull Off ZWrite Off ZTest Always
 
         Pass
@@ -32,12 +31,13 @@ Shader "Hidden/AmbientLight"
                 float4 vertex : SV_POSITION;
             };
 
-            FragmentInput Vertex (VertexInput v)
+            FragmentInput Vertex (VertexInput input)
             {
-                FragmentInput o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
-                return o;
+                FragmentInput output;
+                output.vertex = UnityObjectToClipPos(input.vertex);
+                output.uv = input.uv;
+                
+                return output;
             }
 
             sampler2D _WallsTexture;

@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
 using UnityEngine;
+using UnityEngine.Rendering;
+
 using Object = UnityEngine.Object;
 
 namespace ProjectTolerance.Shading.Lighting
 {
     public class TorchLightController : IDisposable
     {
+        private const RenderTextureFormat TorchTextureFormat = RenderTextureFormat.R16;
+
         private readonly TorchLightConfig _config;
         private readonly MainCameraController _mainCamera;
         
@@ -18,6 +22,7 @@ namespace ProjectTolerance.Shading.Lighting
         private int _nextId;
         private RenderTexture _torchTexture;
         private Camera _torchCamera;
+        private Material _postMaterial;
 
         public TorchLightController (TorchLightConfig config, MainCameraController mainCamera)
         {
@@ -32,6 +37,8 @@ namespace ProjectTolerance.Shading.Lighting
             GameObject rootGameObject = new ("TorchLight");
             _root = rootGameObject.transform;
 
+            _postMaterial = new Material(_config.postShader);
+
             GameObject torchCameraGameObject = new GameObject("TorchLightCamera");
             torchCameraGameObject.transform.SetParent(_root);
             _torchCamera = torchCameraGameObject.AddComponent<Camera>();
@@ -41,7 +48,40 @@ namespace ProjectTolerance.Shading.Lighting
             _torchCamera.cullingMask = 1 << LayerId.TorchLight;
             _torchCamera.depth = CameraRenderPriority.TorchCameraDepth;
             
+            RenderPipelineManager.endCameraRendering += OnCameraRenderingFinished;
+            
             yield break;
+        }
+
+        private void OnCameraRenderingFinished(ScriptableRenderContext context, Camera camera)
+        {
+            if (camera == _torchCamera && _torchTexture != null)
+            {
+                RenderTexture tempTexture = RenderTexture.GetTemporary(
+                    _torchTexture.width, 
+                    _torchTexture.height, 
+                    _torchTexture.depth, 
+                    _torchTexture.format);
+
+                RenderTexture sourceTexture = _torchTexture;
+                RenderTexture destTexture = tempTexture;
+
+                foreach (int blurPixelSize in _config.postprocessBlurMatrix)
+                {
+                    _postMaterial.SetFloat("_BlurPixelSize", blurPixelSize);
+                    
+                    Graphics.Blit(sourceTexture, destTexture, _postMaterial);
+
+                    (sourceTexture, destTexture) = (destTexture, sourceTexture);
+                }
+
+                if (_config.postprocessBlurMatrix.Count % 2 == 1)
+                {
+                    Graphics.Blit(tempTexture, _torchTexture);
+                }
+
+                RenderTexture.ReleaseTemporary(tempTexture);
+            }
         }
 
         public int CreateLight(float spreadAngleRad, float spreadRange)
@@ -111,10 +151,15 @@ namespace ProjectTolerance.Shading.Lighting
                     _torchTexture = null;
                 }
                 
-                _torchTexture = RenderTexture.GetTemporary(requiredTextureSize.x, requiredTextureSize.y, 0, RenderTextureFormat.R16);
-                _torchTexture.name = "TorchLight";
-                _torchTexture.filterMode = FilterMode.Trilinear;
-                
+                _torchTexture = new RenderTexture(requiredTextureSize.x, requiredTextureSize.y, 0, TorchTextureFormat)
+                {
+                    name = "TorchLight",
+                    filterMode = FilterMode.Trilinear
+                };
+
+                _postMaterial.mainTexture = _torchTexture;
+                _postMaterial.SetVector("_TextureSize", new Vector2(_torchTexture.width, _torchTexture.height));
+
                 _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
                 _torchCamera.targetTexture = _torchTexture;
                 _torchCamera.aspect = viewSize.x / viewSize.y;
@@ -155,6 +200,8 @@ namespace ProjectTolerance.Shading.Lighting
 
         public void Dispose()
         {
+            RenderPipelineManager.endCameraRendering -= OnCameraRenderingFinished;
+            
             if (_torchTexture != null)
             {
                 _torchTexture.Release();

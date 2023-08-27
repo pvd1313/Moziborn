@@ -30,5 +30,7 @@ MonoBehaviour:
     viewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
     smoothTime: 0.2
   _torchLightConfig:
+    postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
     torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
     renderTextureResolution: 1024
+    postprocessBlurMatrix: 040000000200000001000000
