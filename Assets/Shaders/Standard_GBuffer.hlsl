@@ -206,7 +206,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     float2 ambientMapUV = (positionWS + _AmbientLightMapOffset).xz / _AmbientLightMapWorldSize;
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
 
-    // Torch lighting
+    // Torch light
     float2 torchMapPos = (positionWS + _TorchLightMapOffset).xz;
     
     torchMapPos = float2(torchMapPos.x * _TorchLightMapRotation.x - torchMapPos.y * _TorchLightMapRotation.y,
@@ -215,23 +215,15 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     float2 torchMapUV = saturate(torchMapPos / _TorchLightMapWorldSize);
     float2 torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
 
+    float torchViewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
+    float maxHeight = 2 * pow(torchMapColor.r, 0.2);
+    float torchHeight01 = 1 - saturate(positionWS.y / maxHeight);
+
     // Cut walls
     float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
-    
-    // Make backfaces black
-    float backface = dot(input.viewDirWS, input.normalWS);
-    if (backface < 0)
-    {
-        brdfData.albedo *= 0;
-        emission *= 0;
-    }
 
-    float viewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
-    float maxHeight = 2 * pow(torchMapColor.r, 0.2);
-    float heightMul = 1 - saturate(positionWS.y / maxHeight);
-
-    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * heightMul * viewDot;
+    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * torchHeight01 * torchViewDot;
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emission);
 }
