@@ -227,10 +227,11 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
         emission *= 0;
     }
 
+    float viewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
     float maxHeight = 2 * pow(torchMapColor.r, 0.2);
     float heightMul = 1 - saturate(positionWS.y / maxHeight);
 
-    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * heightMul;
+    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * heightMul * viewDot;
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emission);
 }
