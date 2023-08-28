@@ -65,21 +65,22 @@ namespace ProjectTolerance.Shading.Lighting
 
                 RenderTexture sourceTexture = _torchTexture;
                 RenderTexture destTexture = tempTexture;
-
-                foreach (int blurPixelSize in _config.postprocessBlurMatrix)
+                
+                foreach (int blurPixelSize in _config.postMatrix)
                 {
-                    _postMaterial.SetFloat("_BlurPixelSize", blurPixelSize);
+                    _postMaterial.SetFloat("_PixelOffset", blurPixelSize);
+                    _postMaterial.mainTexture = sourceTexture;
                     
                     Graphics.Blit(sourceTexture, destTexture, _postMaterial);
 
                     (sourceTexture, destTexture) = (destTexture, sourceTexture);
                 }
 
-                if (_config.postprocessBlurMatrix.Count % 2 == 1)
+                if (_config.postMatrix.Count % 2 == 1)
                 {
-                    Graphics.Blit(tempTexture, _torchTexture);
+                    Graphics.Blit(sourceTexture, _torchTexture);
                 }
-
+                
                 RenderTexture.ReleaseTemporary(tempTexture);
             }
         }
@@ -156,10 +157,7 @@ namespace ProjectTolerance.Shading.Lighting
                     name = "TorchLight",
                     filterMode = FilterMode.Trilinear
                 };
-
-                _postMaterial.mainTexture = _torchTexture;
-                _postMaterial.SetVector("_TextureSize", new Vector2(_torchTexture.width, _torchTexture.height));
-
+                
                 _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
                 _torchCamera.targetTexture = _torchTexture;
                 _torchCamera.aspect = viewSize.x / viewSize.y;

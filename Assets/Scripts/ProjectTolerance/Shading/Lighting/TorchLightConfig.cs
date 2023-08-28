@@ -10,6 +10,6 @@ namespace ProjectTolerance.Shading.Lighting
         public Shader postShader;
         public TorchLightView torchLightViewPrefab;
         public int renderTextureResolution;
-        public List<int> postprocessBlurMatrix;
+        public List<int> postMatrix;
     }
 }

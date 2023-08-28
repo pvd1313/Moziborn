@@ -59,7 +59,6 @@ namespace ProjectTolerance.Shading.Lighting
             _ambientLightMaterial.SetTexture("_WallsTexture", _wallsTexture);
             _ambientLightMaterial.SetTexture("_SunLightTexture", _sunLightTexture);
             _ambientLightMaterial.SetTexture("_StateTexture", _stateTexture);
-            _ambientLightMaterial.SetVector("_TextureSize", new Vector4(_textureBounds.size.x, _textureBounds.size.y));
             
             Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapOffset, 
                 new Vector4(_textureBounds.position.x, 0, _textureBounds.position.y) * -1);

@@ -43,13 +43,14 @@ Shader "Hidden/AmbientLight"
             sampler2D _WallsTexture;
             sampler2D _SunLightTexture;
             sampler2D _StateTexture;
+            float4 _StateTexture_TexelSize;
             float2 _TextureSize;
 
             fixed4 Fragment (FragmentInput i) : SV_Target
             {
                 const float falloff = 0.03;
                 
-                float2 pixel = 1 / _TextureSize;
+                float2 pixel = _StateTexture_TexelSize.xy;
                 
                 float4 col1 = tex2D(_StateTexture, i.uv + float2(pixel.x, 0));
                 float4 col2 = tex2D(_StateTexture, i.uv - float2(pixel.x, 0));

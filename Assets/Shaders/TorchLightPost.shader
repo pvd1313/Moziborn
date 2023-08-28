@@ -1,11 +1,5 @@
 Shader "Hidden/TorchLightPost"
 {
-	Properties
-	{
-		_MainTex ("Texture", 2D) = "white" { }
-		_TextureSize("TextureSize", Vector) = (1, 1, 0, 0)
-		_BlurSize("_BlurPixelSize", float) = 16
-	}
 	SubShader
 	{
 		Cull Off ZWrite Off ZTest Always
@@ -13,6 +7,7 @@ Shader "Hidden/TorchLightPost"
 		Pass
 		{
 			CGPROGRAM
+			
 			#pragma vertex Vertex
 			#pragma fragment Fragment
 			
@@ -40,20 +35,19 @@ Shader "Hidden/TorchLightPost"
 			}
 			
 			sampler2D _MainTex;
-			float2 _TextureSize;
-			float _BlurPixelSize;
+			float4 _MainTex_TexelSize;
+			float _PixelOffset;
 
 			float4 Fragment (FragmentInput i) : SV_Target
 			{
-				float2 pixel = 1 / _TextureSize * _BlurPixelSize;
+				float2 pixel = _MainTex_TexelSize.xy * _PixelOffset;
 
-				float4 col1 = tex2D(_MainTex, i.uv + float2(pixel.x, 0));
-                float4 col2 = tex2D(_MainTex, i.uv - float2(pixel.x, 0));
-                float4 col3 = tex2D(_MainTex, i.uv + float2(0, pixel.y));
-                float4 col4 = tex2D(_MainTex, i.uv - float2(0, pixel.y));
-				float4 avgCol = (col1 + col2 + col3 + col4) * 0.25;
+				float4 color0 = tex2D(_MainTex, i.uv + float2(pixel.x, 0));
+                float4 color1 = tex2D(_MainTex, i.uv - float2(pixel.x, 0));
+                float4 color2 = tex2D(_MainTex, i.uv + float2(0, pixel.y));
+                float4 color3 = tex2D(_MainTex, i.uv - float2(0, pixel.y));
 				
-				return avgCol;
+				return (color0 + color1 + color2 + color3) * 0.25;
 			}
 			ENDCG
 		}

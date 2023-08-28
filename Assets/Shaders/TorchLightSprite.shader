@@ -12,7 +12,7 @@ Shader "ProjectTolerance/TorchLightSprite"
 	{
 		Tags { "RenderType"="Transparent" "Queue"="Transparent"}
 		
-		Blend OneMinusDstColor One
+		Blend One One
 		
 		LOD 100
 
@@ -58,16 +58,16 @@ Shader "ProjectTolerance/TorchLightSprite"
 				output.vertexOS = vertexOS;
 				output.vertexSS = UnityObjectToClipPos(vertexOS);
 				output.uv = input.vertexOS.xz * 0.5 * hitDistance01 + float2(0.5, 0.5);
-				
+
 				return output;
 			}
 			
 			float Fragment (FragmentInput input) : SV_Target
 			{
 				float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
-				float spread = 1 - pow(angle / _SpreadAngleRad * 2, 1.5);
+				float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
 				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
-				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.1);
+				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.01);
 				
 				return spread * pow(distance, 2) * _Intensity * offset;
 			}

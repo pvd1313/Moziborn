@@ -32,5 +32,5 @@ MonoBehaviour:
   _torchLightConfig:
     postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
     torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
-    renderTextureResolution: 1024
-    postprocessBlurMatrix: 040000000200000001000000
+    renderTextureResolution: 2048
+    postMatrix: 0200000001000000
