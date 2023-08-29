@@ -43,7 +43,13 @@ namespace ProjectTolerance.Cinematics
         
         public void Update()
         {
-            _cameraView.transform.position = Vector3.SmoothDamp(_cameraView.transform.position, _desiredPosition, ref _velocity, _config.smoothTime);
+            _cameraView.transform.position = Vector3.SmoothDamp(
+                _cameraView.transform.position, 
+                _desiredPosition, 
+                ref _velocity, 
+                _config.smoothTime,
+                float.PositiveInfinity,
+                Time.unscaledDeltaTime);
         }
     }
 }

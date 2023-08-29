@@ -16,9 +16,9 @@ namespace ProjectTolerance.Player
         private readonly TorchLightController _torchLightController;
 
         private PlayerView _playerView;
+        private int _torchLightId;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
-        private int _torchLightId;
 
         private List<int> _tempLights;
 
@@ -48,19 +48,26 @@ namespace ProjectTolerance.Player
             yield break;
         }
 
-        public void Update()
+        public void FixedUpdate()
         {
             PlayerInputState input = _input.state;
 
-            if (input.isMoving)
-            {
-                Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
-                Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward).normalized;
-                Vector3 movement = cameraForward * input.motionForward + cameraRight * input.motionRight;
+            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
+            Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward).normalized;
+            Vector3 movement = cameraForward * input.motionForward + cameraRight * input.motionRight;
+            
+            _playerView.body.velocity = movement.normalized * _config.playerSpeed;
+        }
 
-                Vector3 targetPosition = _playerView.body.position + movement.normalized * Time.deltaTime * _config.playerSpeed;
-                _playerView.body.MovePosition(targetPosition);
-            }
+        public void Update()
+        {
+            PlayerInputState input = _input.state;
+            
+            _playerMeshPosition = Vector3.SmoothDamp(
+                _playerMeshPosition, 
+                _playerView.body.position, 
+                ref _playerMeshVelocity, 
+                _config.meshSmoothTime);
 
             if (input.isDropFlareKeyPressed)
             {
@@ -82,17 +89,11 @@ namespace ProjectTolerance.Player
                 
                 _tempLights.Clear();
             }
-
-            _mainCamera.AnimateMovePosition(_playerView.body.position);
-            
-            _playerMeshPosition = Vector3.SmoothDamp(
-                _playerMeshPosition, 
-                _playerView.body.position, 
-                ref _playerMeshVelocity, 
-                _config.meshSmoothTime);
             
             _playerView.meshTransform.position = _playerMeshPosition;
-            
+
+            _mainCamera.AnimateMovePosition(_playerView.body.position);
+
             _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
 
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds);

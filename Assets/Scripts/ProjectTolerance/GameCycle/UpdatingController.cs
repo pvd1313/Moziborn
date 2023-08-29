@@ -36,6 +36,16 @@ namespace ProjectTolerance.GameCycle
             
             yield break;
         }
+        
+        private void FixedUpdate()
+        {
+            foreach (IUnorderedFixedUpdatable entity in _fixedUpdatables)
+            {
+                entity.FixedUpdate();
+            }
+            
+            _diContainer.TryResolve<PlayerController>()?.FixedUpdate();
+        }
 
         private void Update()
         {
@@ -54,14 +64,6 @@ namespace ProjectTolerance.GameCycle
             foreach (IUnorderedLateUpdatable entity in _lateUpdatables)
             {
                 entity.LateUpdate();
-            }
-        }
-
-        private void FixedUpdate()
-        {
-            foreach (IUnorderedFixedUpdatable entity in _fixedUpdatables)
-            {
-                entity.FixedUpdate();
             }
         }
     }
