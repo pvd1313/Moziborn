@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ProjectTolerance.Cinematics
 {
@@ -15,6 +16,7 @@ namespace ProjectTolerance.Cinematics
         private CameraView _cameraView;
         private Vector3 _desiredPosition;
         private Vector3 _velocity;
+        private Vector3 _cameraPosition;
 
         public MainCameraController (CameraConfig config)
         {
@@ -43,13 +45,42 @@ namespace ProjectTolerance.Cinematics
         
         public void Update()
         {
-            _cameraView.transform.position = Vector3.SmoothDamp(
-                _cameraView.transform.position, 
+            _cameraPosition = Vector3.SmoothDamp(
+                _cameraPosition, 
                 _desiredPosition, 
                 ref _velocity, 
                 _config.smoothTime,
                 float.PositiveInfinity,
-                Time.unscaledDeltaTime);
+                Time.deltaTime);
+
+            _cameraView.transform.position = SnapToGrid(_cameraPosition);
+        }
+
+        public Vector3 SnapToGrid(Vector3 position)
+        {
+            float texelSize0 = 2 * orthographicSize / Screen.height;
+            float inclination = Mathf.Cos((90 - _config.rotationAngleDegrees.x) * Mathf.Deg2Rad);
+            float texelSize1 = 2 * orthographicSize / inclination / Screen.height;
+            
+            Vector2 pos2D = new (position.z, position.x);
+            pos2D = RotateDirection(pos2D, _config.rotationAngleDegrees.y * -1 * Mathf.Deg2Rad);
+            pos2D.x = Mathf.CeilToInt(pos2D.x / texelSize1) * texelSize1;
+            pos2D.y = Mathf.CeilToInt(pos2D.y / texelSize0) * texelSize0;
+            pos2D = RotateDirection(pos2D, _config.rotationAngleDegrees.y * Mathf.Deg2Rad);
+            
+            float y = Mathf.CeilToInt(position.y / texelSize0) * texelSize0;
+            
+            return new Vector3(pos2D.y, y, pos2D.x);
+        }
+        
+        private static Vector2 RotateDirection(Vector2 direction, float angleRad)
+        {
+            float sin = Mathf.Sin(angleRad);
+            float cos = Mathf.Cos(angleRad);
+            float x = cos * direction.x - sin * direction.y;
+            float y = sin * direction.x + cos * direction.y;
+
+            return new Vector2(x, y);
         }
     }
 }
