@@ -1,11 +1,10 @@
 using System.Collections;
 using ProjectTolerance.Buildings;
-using ProjectTolerance.GameCycle;
 using UnityEngine;
 
 namespace ProjectTolerance.Shading.Lighting
 {
-    public class AmbientLightController : IUnorderedLateUpdatable
+    public class AmbientLightController
     {
         private readonly AmbientLightConfig _config;
         private BuildingController _buildingController;
@@ -101,7 +100,7 @@ namespace ProjectTolerance.Shading.Lighting
             return _stateTexture.GetPixelBilinear(uv.x, uv.y).r;
         }
 
-        public void LateUpdate()
+        public void Update()
         {
             foreach (BuildingData building in _buildingController.buildings)
                 foreach (DoorData door in building.doors)

@@ -2,14 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Debugging;
-using ProjectTolerance.GameCycle;
 using ProjectTolerance.Shading;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace ProjectTolerance.Buildings
 {
-    public class BuildingController : IUnorderedUpdatable, IGizmosDrawer
+    public class BuildingController : IGizmosDrawer
     {
         private class BuildingTransition
         {

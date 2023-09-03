@@ -20,8 +20,7 @@ namespace ProjectTolerance.GameCycle
 
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<InitializationController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<UpdatingController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<GameCycle>().AsSingle();
             Container.BindInterfacesAndSelfTo<CoroutineController>().AsSingle();
             Container.BindInterfacesAndSelfTo<GizmosController>().AsSingle();
 

@@ -1,10 +1,9 @@
 using ProjectTolerance.Cinematics;
-using ProjectTolerance.GameCycle;
 using UnityEngine;
 
 namespace ProjectTolerance.Player
 {
-    public class PlayerInputController : IUnorderedUpdatable
+    public class PlayerInputController
     {
         public PlayerInputState state { get; private set; }
 
