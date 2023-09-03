@@ -5,6 +5,8 @@ using ProjectTolerance.Cinematics;
 using ProjectTolerance.Shading.Lighting;
 using UnityEngine;
 
+using Object = UnityEngine.Object;
+
 namespace ProjectTolerance.Player
 {
     public class PlayerController
@@ -19,6 +21,7 @@ namespace ProjectTolerance.Player
         private int _torchLightId;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
+        private float _playerAngleVelocity;
 
         private List<int> _tempLights;
 
@@ -52,35 +55,53 @@ namespace ProjectTolerance.Player
         {
             PlayerInputState input = _input.state;
 
-            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
-            Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward).normalized;
-            Vector3 movement = cameraForward * input.motionForward + cameraRight * input.motionRight;
-            
-            _playerView.body.velocity = movement.normalized * _config.playerSpeed;
+            Vector3 targetDirection = InputToWorldDirection(input.mode == PlayerInputMode.Movement ? input.movementDirection : input.aimDirection);
+
+            float currentAngle = _playerView.body.rotation.eulerAngles.y;
+            float targetAngle = Quaternion.LookRotation(targetDirection).eulerAngles.y;
+            float resultAngle = Mathf.SmoothDampAngle(
+                currentAngle, 
+                targetAngle, 
+                ref _playerAngleVelocity, 
+                _config.rotationSmoothTime, 
+                float.PositiveInfinity, 
+                Time.fixedDeltaTime);
+            _playerView.body.rotation = Quaternion.AngleAxis(resultAngle, Vector3.up);
+
+            if (input.mode == PlayerInputMode.Movement)
+            {
+                float dot = Mathf.Max(0, Vector3.Dot(_playerView.body.rotation * Vector3.forward, targetDirection));
+                _playerView.body.velocity = targetDirection * _config.playerSpeed * dot;
+            }
+            else
+            {
+                _playerView.body.velocity = Vector3.zero;
+            }
         }
 
         public void Update()
         {
-            PlayerInputState input = _input.state;
-            
             _playerMeshPosition = Vector3.SmoothDamp(
-                _playerMeshPosition, 
-                _playerView.body.position, 
-                ref _playerMeshVelocity, 
-                _config.meshSmoothTime);
+                _playerMeshPosition,
+                _playerView.body.position,
+                ref _playerMeshVelocity,
+                _config.positionSmoothTime);
 
-            if (input.isDropFlareKeyPressed)
+            Vector3 playerDirectionWorld = _playerView.body.rotation * Vector3.forward;
+            Vector3 aimDirectionWorld = InputToWorldDirection(_input.state.aimDirection);
+
+            if (_input.state.isDropFlareKeyPressed)
             {
                 int lightId = _torchLightController.CreateLight(
                     _config.torchLightAngleDeg * Mathf.Deg2Rad,
                     _config.torchLightDistance);
 
-                _torchLightController.SetLightTransform(lightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
+                _torchLightController.SetLightTransform(lightId, _playerMeshPosition, playerDirectionWorld);
 
                 _tempLights.Add(lightId);
             }
 
-            if (input.isRemoveAllFlaresKeyPressed)
+            if (_input.state.isRemoveAllFlaresKeyPressed)
             {
                 foreach (int lightId in _tempLights)
                 {
@@ -94,9 +115,17 @@ namespace ProjectTolerance.Player
 
             _mainCamera.AnimateMovePosition(_playerView.body.position);
 
-            _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirectionAngleRad);
+            _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
+            
+            _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
+        }
 
-            _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds);
+        private Vector3 InputToWorldDirection(Vector2 inputDirection)
+        {
+            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
+            Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward);
+
+            return cameraForward * inputDirection.y + cameraRight * inputDirection.x;
         }
     }
 }

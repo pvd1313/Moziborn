@@ -107,14 +107,14 @@ namespace ProjectTolerance.Shading.Lighting
             _lightViews.Remove(lightId);
         }
 
-        public void SetLightTransform(int lightId, Vector3 position, float rotationRad)
+        public void SetLightTransform(int lightId, Vector3 position, Vector3 direction)
         {
             if (!_lightViews.TryGetValue(lightId, out TorchLightView lightView))
             {
                 throw new InvalidOperationException($"Torch light with id {lightId} was not found");
             }
             
-            lightView.UpdatePositionRotation(position, rotationRad);
+            lightView.UpdatePositionRotation(position, Mathf.Atan2(direction.x, direction.z));
         }
 
         public void Update()

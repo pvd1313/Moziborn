@@ -18,6 +18,8 @@ namespace ProjectTolerance.Buildings
             public MaterialPropertyBlock materialProperty;
         }
 
+        private const bool DebugDraw = true;
+
         public IReadOnlyList<BuildingData> buildings => _buildings;
 
         private readonly BuildingConfig _config;
@@ -70,25 +72,15 @@ namespace ProjectTolerance.Buildings
             }
         }
 
-        public bool HasWallAtCell(Vector3Int cell)
+        public void OnPlayerBoundsUpdate(Bounds playerBounds, Vector3 aimDirection)
         {
-            GameObject gameObject = _floor0Frame.GetInstantiatedObject(cell);
-            if (gameObject == null)
-            {
-                return false;
-            }
-
-            BuildingPartView structure = gameObject.GetComponentInChildren<BuildingPartView>();
-            return structure.partType == EBuildingPartType.Wall;
-        }
-
-        public void OnPlayerBoundsUpdate(Bounds playerBounds)
-        {
+            const float WallHeight = 3.2f;
+            
             Vector3 cameraDir = _mainCamera.forward;
-            
+
             Vector3 playerBottomCenter = playerBounds.center;
-            playerBottomCenter.y = playerBounds.min.y;
-            
+            playerBottomCenter.y = playerBounds.min.y + 0.01f;
+
             Vector3 playerBottom0 = playerBounds.min;
             Vector3 playerBottom1 = new (playerBounds.max.x, playerBounds.min.y, playerBounds.min.z);
             Vector3 playerBottom2 = new (playerBounds.min.x, playerBounds.min.y, playerBounds.max.z);
@@ -99,18 +91,35 @@ namespace ProjectTolerance.Buildings
             Ray playerBottomRay2 = new (playerBottom2, -cameraDir);
             Ray playerBottomRay3 = new (playerBottom3, -cameraDir);
             
-            Vector3 playerTop0 = playerBounds.max;
-            Vector3 playerTop1 = new (playerBounds.min.x, playerBounds.max.y, playerBounds.min.z);
-            Vector3 playerTop2 = new (playerBounds.min.x, playerBounds.max.y, playerBounds.max.z);
-            Vector3 playerTop3 = new (playerBounds.max.x, playerBounds.max.y, playerBounds.min.z);
-            Ray playerTopRay0 = new (playerTop0, cameraDir);
-            Ray playerTopRay1 = new (playerTop1, cameraDir);
-            Ray playerTopRay2 = new (playerTop2, cameraDir);
-            Ray playerTopRay3 = new (playerTop3, cameraDir);
+            Vector3 aimRayOffset = Vector3.Cross(aimDirection, Vector3.up) * Mathf.Cos(_mainCamera.rotationDegrees.x * Mathf.Deg2Rad) * WallHeight;
+            Ray aimRay0 = new (playerBottomCenter + aimRayOffset, aimDirection);
+            Ray aimRay1 = new (playerBottomCenter - aimRayOffset, aimDirection);
+
+            if (DebugDraw)
+            {
+                Debug.DrawRay(aimRay0.origin, aimRay0.direction * _mainCamera.orthographicSize, Color.cyan);
+                Debug.DrawRay(aimRay1.origin, aimRay1.direction * _mainCamera.orthographicSize, Color.cyan);
+            }
+
+            bool playerInsideBuilding = false;
+
+            for (int i = 0; i < _buildings.Count && !playerInsideBuilding; i++)
+            {
+                foreach (BoundsInt room in buildings[i].rooms)
+                {
+                    Bounds roomBounds = RoomBoundsToFloat(room);
+                    if (roomBounds.Contains(playerBottomCenter))
+                    {
+                        playerInsideBuilding = true;
+                        break;
+                    }
+                }
+            }
 
             for (int i = 0; i < _buildings.Count; i++)
             {
                 bool blocksView = false;
+                
                 foreach (BoundsInt room in _buildings[i].rooms)
                 {
                     Bounds roomBounds = RoomBoundsToFloat(room);
@@ -124,6 +133,16 @@ namespace ProjectTolerance.Buildings
                         break;
                     }
 
+                    if (!playerInsideBuilding)
+                    {
+                        if (roomBounds.IntersectRay(aimRay0) ||
+                            roomBounds.IntersectRay(aimRay1))
+                        {
+                            blocksView = true;
+                            break;
+                        }
+                    }
+
                     BoundsInt extendedRoom = room;
                     extendedRoom.position -= new Vector3Int(1, 1, 0);
                     extendedRoom.size += new Vector3Int(2, 2, 0);
@@ -132,20 +151,6 @@ namespace ProjectTolerance.Buildings
                     {
                         blocksView = true;
                         break;
-                    }
-                    
-                    foreach (Vector2Int doorFrame in _buildings[i].doorFrames)
-                    {
-                        Bounds doorBounds = DoorFrameToBoundsFloat(doorFrame);
-                    
-                        if (doorBounds.IntersectRay(playerTopRay0) || 
-                            doorBounds.IntersectRay(playerTopRay1) ||
-                            doorBounds.IntersectRay(playerTopRay2) ||
-                            doorBounds.IntersectRay(playerTopRay3))
-                        {
-                            blocksView = true;
-                            break;
-                        }
                     }
                 }
 
@@ -184,17 +189,12 @@ namespace ProjectTolerance.Buildings
             return new Bounds(center, size);
         }
 
-        private Bounds DoorFrameToBoundsFloat(Vector2Int pos)
-        {
-            Vector3 center = new (pos.x + 0.5f, 1.5f, pos.y + 0.5f);
-            Vector3 size = new (1, 3, 1);
-            return new Bounds(center, size);
-        }
-
-#pragma warning disable CS0162
         public void OnDrawGizmos()
         {
-            return;
+            if (!DebugDraw)
+            {
+                return;
+            }
             
             foreach (BuildingData building in _buildings)
             {
@@ -204,16 +204,7 @@ namespace ProjectTolerance.Buildings
                     Bounds bounds = RoomBoundsToFloat(room);
                     Gizmos.DrawWireCube(bounds.center, bounds.size);
                 }
-
-                Gizmos.color = Color.cyan;
-                foreach (Vector2Int doorFrame in building.doorFrames)
-                {
-                    Bounds bounds = DoorFrameToBoundsFloat(doorFrame);
-                    Gizmos.DrawWireCube(bounds.center, bounds.size);
-                }
             }
         }
-#pragma warning restore CS0162
-        
     }
 }

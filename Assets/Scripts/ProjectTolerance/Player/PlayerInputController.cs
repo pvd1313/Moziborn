@@ -19,7 +19,7 @@ namespace ProjectTolerance.Player
         
         public void Update()
         {
-            PlayerInputState inputState = new ();
+            PlayerInputState inputState = default;
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -40,9 +40,8 @@ namespace ProjectTolerance.Player
 
             if (forward != 0 || right != 0)
             {
-                inputState.isMoving = true;
-                inputState.motionForward = forward;
-                inputState.motionRight = right;
+                inputState.mode = PlayerInputMode.Movement;
+                inputState.movementDirection = new Vector2(right, forward).normalized;
             }
 
             Ray cameraCenterRay = _mainCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
@@ -55,10 +54,16 @@ namespace ProjectTolerance.Player
                 Vector3 cameraCenter = cameraCenterRay.origin + cameraCenterRay.direction * cameraCenterRayLength;
                 Vector3 mousePosition = mouseRay.origin + mouseRay.direction * mouseRayLength;
                 Vector3 viewDirection = (mousePosition - cameraCenter).normalized;
-                inputState.aimDirectionAngleRad = Mathf.Atan2(viewDirection.x, viewDirection.z);
-                
+                viewDirection = Quaternion.AngleAxis(_mainCamera.rotationDegrees.y * -1, Vector3.up) * viewDirection;
+                inputState.aimDirection = new Vector2(viewDirection.x, viewDirection.z);
+
                 Debug.DrawRay(mousePosition - Vector3.forward * 0.5f, Vector3.forward, Color.gray);
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
+            }
+
+            if (inputState.mode == PlayerInputMode.Unknown)
+            {
+                inputState.mode = Input.GetKey(KeyCode.LeftShift) ? PlayerInputMode.Fire : PlayerInputMode.Interact;
             }
 
             state = inputState;
