@@ -14,6 +14,8 @@ namespace ProjectTolerance.Shading.Lighting
     {
         private const RenderTextureFormat TorchTextureFormat = RenderTextureFormat.R16;
 
+        private static readonly bool DrawGizmos = false;
+
         private readonly TorchLightConfig _config;
         private readonly MainCameraController _mainCamera;
         
@@ -177,10 +179,13 @@ namespace ProjectTolerance.Shading.Lighting
             Vector3 bottomRight = cameraPosition - viewNorth * viewSize.y + viewEast * viewSize.x;
             Vector3 topRight = cameraPosition + viewNorth * viewSize.y + viewEast * viewSize.x;
             Vector3 topLeft = cameraPosition + viewNorth * viewSize.y - viewEast * viewSize.x;
-            
-            Debug.DrawLine(bottomLeft, topRight, Color.magenta);
-            Debug.DrawLine(bottomRight, topLeft, Color.magenta);
-            
+
+            if (DrawGizmos)
+            {
+                Debug.DrawLine(bottomLeft, topRight, Color.magenta);
+                Debug.DrawLine(bottomRight, topLeft, Color.magenta);
+            }
+
             Shader.SetGlobalTexture(ShaderPropertyId.TorchLightMapTexture, _torchTexture);
             Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapRotation, mapRotationSinCos);
             Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapOffset, bottomLeft * -1);

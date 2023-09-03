@@ -18,7 +18,7 @@ namespace ProjectTolerance.Buildings
             public MaterialPropertyBlock materialProperty;
         }
 
-        private const bool DebugDraw = true;
+        private static readonly bool DrawGizmos = false;
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
 
@@ -95,7 +95,7 @@ namespace ProjectTolerance.Buildings
             Ray aimRay0 = new (playerBottomCenter + aimRayOffset, aimDirection);
             Ray aimRay1 = new (playerBottomCenter - aimRayOffset, aimDirection);
 
-            if (DebugDraw)
+            if (DrawGizmos)
             {
                 Debug.DrawRay(aimRay0.origin, aimRay0.direction * _mainCamera.orthographicSize, Color.cyan);
                 Debug.DrawRay(aimRay1.origin, aimRay1.direction * _mainCamera.orthographicSize, Color.cyan);
@@ -191,18 +191,16 @@ namespace ProjectTolerance.Buildings
 
         public void OnDrawGizmos()
         {
-            if (!DebugDraw)
+            if (DrawGizmos)
             {
-                return;
-            }
-            
-            foreach (BuildingData building in _buildings)
-            {
-                Gizmos.color = Color.yellow;
-                foreach (BoundsInt room in building.rooms)
+                foreach (BuildingData building in _buildings)
                 {
-                    Bounds bounds = RoomBoundsToFloat(room);
-                    Gizmos.DrawWireCube(bounds.center, bounds.size);
+                    Gizmos.color = Color.yellow;
+                    foreach (BoundsInt room in building.rooms)
+                    {
+                        Bounds bounds = RoomBoundsToFloat(room);
+                        Gizmos.DrawWireCube(bounds.center, bounds.size);
+                    }
                 }
             }
         }

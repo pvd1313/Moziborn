@@ -13,7 +13,7 @@ namespace ProjectTolerance.Shading.Lighting
             public Vector3 rayEndPoint;
         }
 
-        private const bool DebugDraw = true;
+        private static readonly bool DrawGizmos = false;
         
         private const int BatchSize = 15;
         private const float MaxSamplesPerRad = 300;
@@ -108,7 +108,7 @@ namespace ProjectTolerance.Shading.Lighting
             TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchDistance);
             _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchDistance, 0);
 
-            if (DebugDraw) Debug.DrawRay(_torchCenter, direction * prevHit.rayTraveledDistance, Color.red);
+            if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * prevHit.rayTraveledDistance, Color.red);
 
             for (int prevHitIndex = 0; prevHitIndex < _maxSampleCount - 1;)
             {
@@ -120,7 +120,7 @@ namespace ProjectTolerance.Shading.Lighting
                 TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchDistance);
                 _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchDistance, 0);
 
-                if (DebugDraw) Debug.DrawRay(_torchCenter, direction * curHit.rayTraveledDistance, Color.red);
+                if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curHit.rayTraveledDistance, Color.red);
 
                 float sampleDistance = (prevHit.rayEndPoint - curHit.rayEndPoint).magnitude;
 
@@ -157,7 +157,7 @@ namespace ProjectTolerance.Shading.Lighting
                         TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchDistance);
                         _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchDistance, 0);
 
-                        if (DebugDraw) Debug.DrawRay(_torchCenter, direction * curBatchHit.rayTraveledDistance, Color.cyan);
+                        if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curBatchHit.rayTraveledDistance, Color.cyan);
                     }
                 }
 
