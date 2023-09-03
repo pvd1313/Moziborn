@@ -16,6 +16,8 @@ namespace ProjectTolerance.Player
         private readonly MainCameraController _mainCamera;
         private readonly BuildingController _buildingController;
         private readonly TorchLightController _torchLightController;
+        private readonly AmbientLightController _ambientLight;
+        private readonly WeatherController _weatherController;
 
         private PlayerView _playerView;
         private int _torchLightId;
@@ -29,13 +31,17 @@ namespace ProjectTolerance.Player
                                  PlayerInputController input, 
                                  MainCameraController mainCamera,
                                  BuildingController buildingController,
-                                 TorchLightController torchLightController)
+                                 TorchLightController torchLightController,
+                                 AmbientLightController ambientLight,
+                                 WeatherController weatherController)
         {
             _config = config;
             _input = input;
             _mainCamera = mainCamera;
             _buildingController = buildingController;
             _torchLightController = torchLightController;
+            _ambientLight = ambientLight;
+            _weatherController = weatherController;
         }
 
         public IEnumerator Initialize()
@@ -118,6 +124,10 @@ namespace ProjectTolerance.Player
             _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
             
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
+
+            float lightAmount = _ambientLight.GetRawAmbientLightAmount(_playerView.body.position);
+
+            _weatherController.SetLightIntensity(lightAmount, 1);
         }
 
         private Vector3 InputToWorldDirection(Vector2 inputDirection)

@@ -35,3 +35,5 @@ MonoBehaviour:
     torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
     renderTextureResolution: 2048
     postMatrix: 0200000001000000
+  _weatherConfig:
+    weatherViewPrefab: {fileID: 4944705672053266457, guid: 11d5d5391511179498121b81ada3e77b, type: 3}

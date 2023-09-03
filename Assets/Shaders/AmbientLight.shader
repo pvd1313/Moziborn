@@ -48,7 +48,7 @@ Shader "Hidden/AmbientLight"
 
             fixed4 Fragment (FragmentInput i) : SV_Target
             {
-                const float falloff = 0.03;
+                const float falloff = 0.05;
                 
                 float2 pixel = _StateTexture_TexelSize.xy;
                 

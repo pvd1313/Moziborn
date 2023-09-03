@@ -14,7 +14,7 @@ namespace ProjectTolerance.Shading.Lighting
         private Texture2D _wallsTexture;
         private BoundsInt _textureBounds;
         private Material _ambientLightMaterial;
-        private RenderTexture _stateTexture;
+        private Texture2D _stateTexture;
 
         public AmbientLightController(AmbientLightConfig config, BuildingController buildingController)
         {
@@ -38,20 +38,20 @@ namespace ProjectTolerance.Shading.Lighting
             bounds.min -= new Vector3Int(1, 1, 0);
             bounds.max += new Vector3Int(1, 1, 0);
 
-            _sunLightTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R8, false, true)
+            _sunLightTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
             {
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _wallsTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R8, false, true)
+            _wallsTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
             {
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _stateTexture = new RenderTexture(bounds.size.x, bounds.size.y, 0, RenderTextureFormat.R8)
+            _stateTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, false)
             {
                 wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Bilinear
+                filterMode = FilterMode.Bilinear,
             };
             _textureBounds = bounds;
             
@@ -92,7 +92,15 @@ namespace ProjectTolerance.Shading.Lighting
 
             yield break;
         }
-        
+
+        public float GetRawAmbientLightAmount(Vector3 point)
+        {
+            Vector3 offset = point - new Vector3(_textureBounds.position.x + 0.5f, 0, _textureBounds.position.y + 0.5f);
+            Vector2 uv = new Vector2(offset.x, offset.z) / new Vector2(_textureBounds.size.x, _textureBounds.size.y);
+
+            return _stateTexture.GetPixelBilinear(uv.x, uv.y).r;
+        }
+
         public void LateUpdate()
         {
             foreach (BuildingData building in _buildingController.buildings)
@@ -107,12 +115,17 @@ namespace ProjectTolerance.Shading.Lighting
                 _textureBounds.size.x, 
                 _textureBounds.size.y, 
                 0, 
-                RenderTextureFormat.R8);
+                RenderTextureFormat.R16);
         
             Graphics.Blit(_stateTexture, tempTexture, _ambientLightMaterial);
-            
-            Graphics.Blit(tempTexture, _stateTexture);
-            
+
+            RenderTexture.active = tempTexture;
+
+            _stateTexture.ReadPixels(new Rect(0, 0, _stateTexture.width, _stateTexture.height), 0, 0, false);
+            _stateTexture.Apply();
+
+            RenderTexture.active = null;
+
             RenderTexture.ReleaseTemporary(tempTexture);
         }
 

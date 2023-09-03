@@ -16,6 +16,7 @@ namespace ProjectTolerance.GameCycle
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private CameraConfig _cameraConfig;
         [SerializeField] private TorchLightConfig _torchLightConfig;
+        [SerializeField] private WeatherConfig _weatherConfig;
 
         public override void InstallBindings()
         {
@@ -28,6 +29,7 @@ namespace ProjectTolerance.GameCycle
             Container.BindInterfacesAndSelfTo<AmbientLightController>().AsSingle().WithArguments(_ambientLightConfig);
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().WithArguments(_cameraConfig);
             Container.BindInterfacesAndSelfTo<TorchLightController>().AsSingle().WithArguments(_torchLightConfig);
+            Container.BindInterfacesAndSelfTo<WeatherController>().AsSingle().WithArguments(_weatherConfig);
 
             Container.BindInterfacesAndSelfTo<PlayerController>().AsSingle().WithArguments(_playerConfig);
             Container.BindInterfacesAndSelfTo<PlayerInputController>().AsSingle();
