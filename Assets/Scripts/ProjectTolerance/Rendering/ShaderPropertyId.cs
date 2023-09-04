@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ProjectTolerance.Shading
+namespace ProjectTolerance.Rendering
 {
     public static class ShaderPropertyId
     {

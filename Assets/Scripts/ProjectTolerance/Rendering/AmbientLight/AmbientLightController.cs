@@ -2,7 +2,7 @@ using System.Collections;
 using ProjectTolerance.Buildings;
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.AmbientLight
 {
     public class AmbientLightController
     {

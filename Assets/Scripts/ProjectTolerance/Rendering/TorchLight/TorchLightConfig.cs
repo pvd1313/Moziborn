@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.TorchLight
 {
     [Serializable]
     public class TorchLightConfig

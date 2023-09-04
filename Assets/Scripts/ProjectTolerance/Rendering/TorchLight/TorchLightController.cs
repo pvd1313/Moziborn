@@ -5,10 +5,9 @@ using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
 using UnityEngine;
 using UnityEngine.Rendering;
-
 using Object = UnityEngine.Object;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.TorchLight
 {
     public class TorchLightController : IDisposable
     {

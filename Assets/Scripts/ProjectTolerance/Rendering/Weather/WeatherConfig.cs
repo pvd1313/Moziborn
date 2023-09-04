@@ -1,6 +1,6 @@
 using System;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.Weather
 {
     [Serializable]
     public class WeatherConfig

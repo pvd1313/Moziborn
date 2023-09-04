@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Debugging;
-using ProjectTolerance.Shading;
+using ProjectTolerance.Rendering;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

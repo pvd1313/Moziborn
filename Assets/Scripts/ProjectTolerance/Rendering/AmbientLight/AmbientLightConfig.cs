@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.AmbientLight
 {
     [Serializable]
     public class AmbientLightConfig

@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.Weather
 {
     public class WeatherController
     {

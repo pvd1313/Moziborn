@@ -3,7 +3,9 @@ using ProjectTolerance.Cinematics;
 using ProjectTolerance.Coroutines;
 using ProjectTolerance.Debugging;
 using ProjectTolerance.Player;
-using ProjectTolerance.Shading.Lighting;
+using ProjectTolerance.Rendering.AmbientLight;
+using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
 using Zenject;
 

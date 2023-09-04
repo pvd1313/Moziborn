@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.Weather
 {
     public class WeatherView : MonoBehaviour
     {

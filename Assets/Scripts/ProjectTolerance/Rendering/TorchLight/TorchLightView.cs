@@ -1,7 +1,7 @@
 using ProjectTolerance.Layers;
 using UnityEngine;
 
-namespace ProjectTolerance.Shading.Lighting
+namespace ProjectTolerance.Rendering.TorchLight
 {
     public class TorchLightView : MonoBehaviour
     {

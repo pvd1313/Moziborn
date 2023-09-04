@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
-using ProjectTolerance.Shading.Lighting;
+using ProjectTolerance.Rendering.AmbientLight;
+using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
