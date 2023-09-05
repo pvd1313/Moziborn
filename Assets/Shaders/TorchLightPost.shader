@@ -1,4 +1,4 @@
-Shader "Hidden/TorchLightPost"
+Shader "ProjectTolerance/TorchLightPost"
 {
 	SubShader
 	{
@@ -49,6 +49,7 @@ Shader "Hidden/TorchLightPost"
 				
 				return (color0 + color1 + color2 + color3) * 0.25;
 			}
+			
 			ENDCG
 		}
 	}

@@ -5,6 +5,7 @@ using ProjectTolerance.Debugging;
 using ProjectTolerance.Player;
 using ProjectTolerance.Rendering.AmbientLight;
 using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.WarFog;
 using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
 using Zenject;
@@ -19,6 +20,7 @@ namespace ProjectTolerance.GameCycle
         [SerializeField] private CameraConfig _cameraConfig;
         [SerializeField] private TorchLightConfig _torchLightConfig;
         [SerializeField] private WeatherConfig _weatherConfig;
+        [SerializeField] private WarFogConfig _warFogConfig;
 
         public override void InstallBindings()
         {
@@ -31,6 +33,7 @@ namespace ProjectTolerance.GameCycle
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().WithArguments(_cameraConfig);
             Container.BindInterfacesAndSelfTo<TorchLightController>().AsSingle().WithArguments(_torchLightConfig);
             Container.BindInterfacesAndSelfTo<WeatherController>().AsSingle().WithArguments(_weatherConfig);
+            Container.BindInterfacesAndSelfTo<WarFogController>().AsSingle().WithArguments(_warFogConfig);
 
             Container.BindInterfacesAndSelfTo<PlayerController>().AsSingle().WithArguments(_playerConfig);
             Container.BindInterfacesAndSelfTo<PlayerInputController>().AsSingle();

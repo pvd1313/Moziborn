@@ -6,6 +6,7 @@ using ProjectTolerance.Debugging;
 using ProjectTolerance.Player;
 using ProjectTolerance.Rendering.AmbientLight;
 using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.WarFog;
 using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
 using Zenject;
@@ -39,6 +40,7 @@ namespace ProjectTolerance.GameCycle
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PlayerController>()?.Initialize();
             yield return _container.TryResolve<WeatherController>()?.Initialize();
+            yield return _container.TryResolve<WarFogController>()?.Initialize();
             
             UpdatingBehaviour behaviour = new GameObject("GameCycle").AddComponent<UpdatingBehaviour>();
             behaviour.onUpdate += Update;
@@ -57,6 +59,7 @@ namespace ProjectTolerance.GameCycle
             _container.TryResolve<MainCameraController>()?.Update();
             _container.TryResolve<TorchLightController>()?.Update();
             _container.TryResolve<AmbientLightController>()?.Update();
+            _container.TryResolve<WarFogController>()?.Update();
             _container.TryResolve<BuildingController>()?.Update();
         }
     }

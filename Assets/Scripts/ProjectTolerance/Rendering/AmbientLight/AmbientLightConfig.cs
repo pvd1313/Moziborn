@@ -7,5 +7,8 @@ namespace ProjectTolerance.Rendering.AmbientLight
     public class AmbientLightConfig
     {
         public Shader ambientLightShader;
+        public float linearFall;
+        public float bilinearFall;
+        public float blur;
     }
 }

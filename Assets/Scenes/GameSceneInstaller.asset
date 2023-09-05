@@ -18,6 +18,9 @@ MonoBehaviour:
     verticalCutRange: {x: 1, y: 3.3}
   _ambientLightConfig:
     ambientLightShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
+    linearFall: 0
+    bilinearFall: 0.5
+    blur: 0.5
   _playerConfig:
     playerViewPrefab: {fileID: 6194257065066083958, guid: d897ea1f4fe894c47b457d95c8039308, type: 3}
     positionSmoothTime: 0.05
@@ -37,3 +40,8 @@ MonoBehaviour:
     postMatrix: 0200000001000000
   _weatherConfig:
     weatherViewPrefab: {fileID: 4944705672053266457, guid: 11d5d5391511179498121b81ada3e77b, type: 3}
+  _warFogConfig:
+    ambientShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
+    linearFall: 0.15
+    bilinearFall: 1
+    blur: 0

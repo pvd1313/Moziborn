@@ -6,14 +6,15 @@ namespace ProjectTolerance.Rendering.AmbientLight
 {
     public class AmbientLightController
     {
-        private readonly AmbientLightConfig _config;
-        private BuildingController _buildingController;
+        public Texture2D wallTexture { get; private set; }
+        public BoundsInt textureBounds { get; private set; }
         
-        private Texture2D _sunLightTexture;
-        private Texture2D _wallsTexture;
-        private BoundsInt _textureBounds;
+        private readonly AmbientLightConfig _config;
+        private readonly BuildingController _buildingController;
+        
+        private Texture2D _sunTexture;
         private Material _ambientLightMaterial;
-        private Texture2D _stateTexture;
+        private RenderTexture _stateTexture;
 
         public AmbientLightController(AmbientLightConfig config, BuildingController buildingController)
         {
@@ -23,81 +24,66 @@ namespace ProjectTolerance.Rendering.AmbientLight
 
         public IEnumerator Initialize()
         {
-            BoundsInt bounds = new (Vector3Int.zero, Vector3Int.zero);
-            
-            if (_buildingController.buildings.Count > 0)
-            {
-                bounds = _buildingController.buildings[0].rooms[0];
-                
-                foreach (BuildingData building in _buildingController.buildings)
-                    foreach (BoundsInt room in building.rooms)
-                        bounds = JoinBounds(room, bounds);
-            }
+            BoundsInt bounds = _buildingController.levelBounds;
 
-            bounds.min -= new Vector3Int(1, 1, 0);
-            bounds.max += new Vector3Int(1, 1, 0);
-
-            _sunLightTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
+            _sunTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
             {
+                name = "AmbientLight_Sun",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _wallsTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
+            wallTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
             {
+                name = "AmbientLight_Wall",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _stateTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, false)
+            _stateTexture = new RenderTexture(bounds.size.x, bounds.size.y, 0, RenderTextureFormat.R16)
             {
+                name = "AmbientLight_State",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Bilinear,
             };
-            _textureBounds = bounds;
+            textureBounds = bounds;
             
             _ambientLightMaterial = new Material(_config.ambientLightShader);
-            _ambientLightMaterial.SetTexture("_WallsTexture", _wallsTexture);
-            _ambientLightMaterial.SetTexture("_SunLightTexture", _sunLightTexture);
-            _ambientLightMaterial.SetTexture("_StateTexture", _stateTexture);
+            _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, wallTexture);
+            _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
+            _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
             
-            Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapOffset, 
-                new Vector4(_textureBounds.position.x, 0, _textureBounds.position.y) * -1);
+            Shader.SetGlobalVector(
+                ShaderPropertyId.AmbientLightMapOffset, 
+                new Vector4(textureBounds.position.x, 0, textureBounds.position.y) * -1);
             
-            Shader.SetGlobalVector(ShaderPropertyId.AmbientLightMapWorldSize, 
-                new Vector4(_textureBounds.size.x, _textureBounds.size.y));
+            Shader.SetGlobalVector(
+                ShaderPropertyId.AmbientLightMapWorldSize, 
+                new Vector4(textureBounds.size.x, textureBounds.size.y));
             
             Shader.SetGlobalTexture(ShaderPropertyId.AmbientLightMapTexture, _stateTexture);
-            
+
             foreach (BuildingData building in _buildingController.buildings)
                 foreach (BoundsInt room in building.rooms)
                     foreach (Vector3Int pos in room.allPositionsWithin)
                     {
                         Vector3Int localPoint = pos - bounds.position;
-                        _sunLightTexture.SetPixel(localPoint.x, localPoint.y, Color.black);
+                        _sunTexture.SetPixel(localPoint.x, localPoint.y, Color.black);
                     }
 
-            for (int x = 0; x < _textureBounds.size.x; x++)
-                for (int y = 0; y < _textureBounds.size.y; y++)
-                    _wallsTexture.SetPixel(x, y, Color.black);
-            
+            for (int x = 0; x < textureBounds.size.x; x++)
+                for (int y = 0; y < textureBounds.size.y; y++)
+                    wallTexture.SetPixel(x, y, Color.black);
+
             foreach (BuildingData building in _buildingController.buildings)
                 foreach (Vector2Int wallPos in building.walls)
                 {
                     Vector2Int localPoint = wallPos - new Vector2Int(bounds.position.x, bounds.position.y);
-                    _wallsTexture.SetPixel(localPoint.x, localPoint.y, Color.white);
+                    wallTexture.SetPixel(localPoint.x, localPoint.y, Color.white);
                 }
             
-            _wallsTexture.Apply();
-            _sunLightTexture.Apply();
+            wallTexture.Apply();
+            _sunTexture.Apply();
 
             yield break;
-        }
-
-        public float GetRawAmbientLightAmount(Vector3 point)
-        {
-            Vector3 offset = point - new Vector3(_textureBounds.position.x + 0.5f, 0, _textureBounds.position.y + 0.5f);
-            Vector2 uv = new Vector2(offset.x, offset.z) / new Vector2(_textureBounds.size.x, _textureBounds.size.y);
-
-            return _stateTexture.GetPixelBilinear(uv.x, uv.y).r;
         }
 
         public void Update()
@@ -105,44 +91,33 @@ namespace ProjectTolerance.Rendering.AmbientLight
             foreach (BuildingData building in _buildingController.buildings)
                 foreach (DoorData door in building.doors)
                 {
-                    Vector2Int pos = door.position - new Vector2Int(_textureBounds.position.x, _textureBounds.position.y);
-                    _wallsTexture.SetPixel(pos.x, pos.y, Color.white * door.view.doorState);
+                    Vector2Int pos = door.position - new Vector2Int(textureBounds.position.x, textureBounds.position.y);
+                    wallTexture.SetPixel(pos.x, pos.y, Color.white * door.view.doorState);
                 }
-            _wallsTexture.Apply();
+
+            wallTexture.Apply();
         
             RenderTexture tempTexture = RenderTexture.GetTemporary(
-                _textureBounds.size.x, 
-                _textureBounds.size.y, 
+                textureBounds.size.x, 
+                textureBounds.size.y, 
                 0, 
                 RenderTextureFormat.R16);
+
+            _ambientLightMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.blur);
+            _ambientLightMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.linearFall);
+            _ambientLightMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.bilinearFall);
         
             Graphics.Blit(_stateTexture, tempTexture, _ambientLightMaterial);
-
-            RenderTexture.active = tempTexture;
-
-            _stateTexture.ReadPixels(new Rect(0, 0, _stateTexture.width, _stateTexture.height), 0, 0, false);
-            _stateTexture.Apply();
-
-            RenderTexture.active = null;
+            
+            Graphics.Blit(tempTexture, _stateTexture);
 
             RenderTexture.ReleaseTemporary(tempTexture);
-        }
-
-        private BoundsInt JoinBounds(BoundsInt a, BoundsInt b)
-        {
-            int xMin = Mathf.Min(a.min.x, b.min.x);
-            int yMin = Mathf.Min(a.min.y, b.min.y);
-            int zMin = Mathf.Min(a.min.z, b.min.z);
-            int xMax = Mathf.Max(a.max.x, b.max.x);
-            int yMax = Mathf.Max(a.max.y, b.max.y);
-            int zMax = Mathf.Max(a.max.z, b.max.z);
-            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - yMin);
         }
 
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-            Bounds bounds = TileToWorldBounds(_textureBounds);
+            Bounds bounds = TileToWorldBounds(textureBounds);
             Gizmos.DrawWireCube(bounds.center, bounds.size);
         }
 

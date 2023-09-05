@@ -9,6 +9,9 @@ float3 _AmbientLightMapOffset;
 TEXTURE2D(_AmbientLightMapTexture);
 SAMPLER(sampler_AmbientLightMapTexture);
 
+TEXTURE2D(_WarFogMapTexture);
+SAMPLER(sampler_WarFogMapTexture);
+
 float3 _TorchLightMapOffset;
 float2 _TorchLightMapWorldSize;
 float2 _TorchLightMapRotation;
@@ -213,17 +216,46 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
                          torchMapPos.x * _TorchLightMapRotation.y + torchMapPos.y * _TorchLightMapRotation.x);
     
     float2 torchMapUV = saturate(torchMapPos / _TorchLightMapWorldSize);
-    float2 torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
+    float torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
 
     float torchViewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
-    float maxHeight = 2 * pow(torchMapColor.r, 0.2);
+    float maxHeight = 2 * pow(torchMapColor, 0.2);
     float torchHeight01 = 1 - saturate(positionWS.y / maxHeight);
+    torchMapColor *= torchHeight01 * torchViewDot;
 
     // Cut walls
     float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
 
-    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor.r * torchHeight01 * torchViewDot;
+    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor;
+
+    // War fog
+    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
+    float warFogDesaturation =  (1 - pow(warFogColor, 0.1)) * 0.9;
+    float warFogIntensity =  0.1 + 0.9 * pow(warFogColor, 0.1);
+    
+    float3 grayAlbedo = dot(brdfData.albedo, float3(0.3, 0.59, 0.11));
+    brdfData.albedo = lerp(brdfData.albedo, grayAlbedo, warFogDesaturation);
+    brdfData.albedo *= warFogIntensity;
+
+    float3 grayEmission = dot(emission, float3(0.3, 0.59, 0.11));
+    emission = lerp(emission, grayEmission, warFogDesaturation);
+    emission *= warFogIntensity;
+    
+#if DEBUG_WARFOG
+     brdfData.albedo = 0;
+     emission = warFogColor;
+#endif
+
+#if DEBUG_AMBIENT
+    brdfData.albedo = 0;
+    emission = ambientMapColor;
+#endif
+
+#if DEBUG_TORCH
+    brdfData.albedo = 0;
+    emission = torchMapColor;
+#endif
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission + emission);
 }

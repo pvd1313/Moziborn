@@ -20,6 +20,8 @@ namespace ProjectTolerance.Buildings
         private static readonly bool DrawGizmos = false;
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
+        
+        public BoundsInt levelBounds { get; private set; }
 
         private readonly BuildingConfig _config;
         private readonly MainCameraController _mainCamera;
@@ -42,6 +44,11 @@ namespace ProjectTolerance.Buildings
             _floor0Frame = levelPrefab.floor0Frame;
             _floor0Interactive = levelPrefab.floor0Interactive;
             _floor1Frame = levelPrefab.floor1Frame;
+
+            BoundsInt bounds = _floor0Frame.cellBounds;
+            bounds = JoinBounds(bounds, _floor0Interactive.cellBounds);
+            bounds = JoinBounds(bounds, _floor1Frame.cellBounds);
+            levelBounds = bounds;
 
             // Wait for tilemap GameObjects be spawned.
             yield return null;
@@ -179,6 +186,18 @@ namespace ProjectTolerance.Buildings
                     }
                 }
             }
+        }
+        
+        private static BoundsInt JoinBounds(BoundsInt a, BoundsInt b)
+        {
+            int xMin = Mathf.Min(a.min.x, b.min.x);
+            int yMin = Mathf.Min(a.min.y, b.min.y);
+            int zMin = Mathf.Min(a.min.z, b.min.z);
+            int xMax = Mathf.Max(a.max.x, b.max.x);
+            int yMax = Mathf.Max(a.max.y, b.max.y);
+            int zMax = Mathf.Max(a.max.z, b.max.z);
+            
+            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - yMin);
         }
 
         private Bounds RoomBoundsToFloat(BoundsInt bounds)
