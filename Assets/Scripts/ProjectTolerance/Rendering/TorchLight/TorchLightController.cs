@@ -156,7 +156,7 @@ namespace ProjectTolerance.Rendering.TorchLight
                 _torchTexture = new RenderTexture(requiredTextureSize.x, requiredTextureSize.y, 0, TorchTextureFormat)
                 {
                     name = "TorchLight",
-                    filterMode = FilterMode.Trilinear
+                    filterMode = FilterMode.Point
                 };
                 
                 _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
