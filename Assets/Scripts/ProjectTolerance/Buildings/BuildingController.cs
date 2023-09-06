@@ -8,7 +8,7 @@ using UnityEngine.Tilemaps;
 
 namespace ProjectTolerance.Buildings
 {
-    public class BuildingController
+    public class BuildingController : IGizmosDrawer
     {
         private class BuildingTransition
         {
@@ -197,7 +197,7 @@ namespace ProjectTolerance.Buildings
             int yMax = Mathf.Max(a.max.y, b.max.y);
             int zMax = Mathf.Max(a.max.z, b.max.z);
             
-            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - zMin);
+            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - yMin);
         }
 
         private Bounds RoomBoundsToFloat(BoundsInt bounds)

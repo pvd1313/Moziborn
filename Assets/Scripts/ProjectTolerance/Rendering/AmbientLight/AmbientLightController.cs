@@ -1,12 +1,10 @@
 using System.Collections;
 using ProjectTolerance.Buildings;
-using ProjectTolerance.Debugging;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ProjectTolerance.Rendering.AmbientLight
 {
-    public class AmbientLightController : IGizmosDrawer
+    public class AmbientLightController
     {
         public Texture2D wallTexture { get; private set; }
         public BoundsInt textureBounds { get; private set; }
@@ -116,7 +114,7 @@ namespace ProjectTolerance.Rendering.AmbientLight
             RenderTexture.ReleaseTemporary(tempTexture);
         }
 
-        public void OnDrawGizmos()
+        private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
             Bounds bounds = TileToWorldBounds(textureBounds);
