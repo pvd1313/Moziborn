@@ -48,7 +48,7 @@ namespace ProjectTolerance.Rendering.TorchLight
             _torchCamera.clearFlags = CameraClearFlags.SolidColor;
             _torchCamera.cullingMask = 1 << LayerId.TorchLight;
             _torchCamera.depth = CameraRenderPriority.TorchCameraDepth;
-            
+
             RenderPipelineManager.endCameraRendering += OnCameraRenderingFinished;
             
             yield break;
