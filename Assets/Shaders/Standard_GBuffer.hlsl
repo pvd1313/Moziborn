@@ -231,8 +231,8 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
 
     // War fog
     float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
-    float warFogDesaturation =  (1 - pow(warFogColor, 0.1)) * 0.9;
-    float warFogIntensity =  0.1 + 0.9 * pow(warFogColor, 0.1);
+    float warFogDesaturation = (1 - pow(warFogColor, 0.01)) * 0.9;
+    float warFogIntensity = 1 * pow(warFogColor, 0.1);
     
     float3 grayAlbedo = dot(brdfData.albedo, float3(0.3, 0.59, 0.11));
     brdfData.albedo = lerp(brdfData.albedo, grayAlbedo, warFogDesaturation);
