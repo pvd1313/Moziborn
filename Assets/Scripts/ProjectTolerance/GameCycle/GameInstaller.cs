@@ -21,7 +21,7 @@ namespace ProjectTolerance.GameCycle
         [SerializeField] private PointLightManagerConfig _pointLightManagerConfig;
         [SerializeField] private PointLightRenderConfig _pointLightRenderConfig;
         [SerializeField] private WeatherConfig _weatherConfig;
-        [SerializeField] private WarFogConfig _warFogConfig;
+        [SerializeField] private WarFogRenderConfig _warFogRenderConfig;
 
         public override void InstallBindings()
         {
@@ -35,7 +35,7 @@ namespace ProjectTolerance.GameCycle
             Bind<PointLightManager>(_pointLightManagerConfig);
             Bind<PointLightRender>(_pointLightRenderConfig);
             Bind<WeatherController>(_weatherConfig);
-            Bind<WarFogRender>(_warFogConfig);
+            Bind<WarFogRender>(_warFogRenderConfig);
 
             Bind<PlayerController>(_playerConfig);
             Bind<PlayerInputController>();

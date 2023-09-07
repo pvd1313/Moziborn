@@ -21,11 +21,14 @@ namespace ProjectTolerance.Rendering
         public static readonly int AmbientLightMapWorldSize = Shader.PropertyToID("_AmbientLightMapWorldSize");
         public static readonly int AmbientLightMapOffset = Shader.PropertyToID("_AmbientLightMapOffset");
 
-        public static readonly int WarFogMapTexture = Shader.PropertyToID("_WarFogMapTexture");
-
         public static readonly int PointLightMapTexture = Shader.PropertyToID("_PointLightMapTexture");
         public static readonly int PointLightMapWorldSize = Shader.PropertyToID("_PointLightMapWorldSize");
         public static readonly int PointLightMapRotation = Shader.PropertyToID("_PointLightMapRotation");
         public static readonly int PointLightMapOffset = Shader.PropertyToID("_PointLightMapOffset");
+        
+        public static readonly int WarFogMapTexture = Shader.PropertyToID("_WarFogMapTexture");
+        public static readonly int WarFogMapWorldSize = Shader.PropertyToID("_WarFogMapWorldSize");
+        public static readonly int WarFogMapRotation = Shader.PropertyToID("_WarFogMapRotation");
+        public static readonly int WarFogMapOffset = Shader.PropertyToID("_WarFogMapOffset");
     }
 }

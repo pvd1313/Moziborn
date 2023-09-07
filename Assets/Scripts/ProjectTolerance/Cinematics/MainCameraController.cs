@@ -28,7 +28,7 @@ namespace ProjectTolerance.Cinematics
             _cameraView = Object.Instantiate(_config.viewPrefab);
             _cameraView.transform.rotation = Quaternion.Euler(_config.rotationAngleDegrees);
             _cameraView.unityCamera.orthographicSize = _config.orthographicSize;
-            _cameraView.unityCamera.depth = CameraRenderPriority.MainCameraDepth;
+            _cameraView.unityCamera.depth = CameraDepth.Main;
             
             yield break;
         }

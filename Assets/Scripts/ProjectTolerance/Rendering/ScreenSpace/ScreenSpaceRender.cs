@@ -7,11 +7,12 @@ namespace ProjectTolerance.Rendering.ScreenSpace
     {
         public ScreenSpaceRenderResult lastRenderResult { get; private set; }
         
+        private readonly Camera _renderCamera;
+        private readonly ScreenSpaceRenderSetup _setup;
+        private readonly MainCameraController _mainCamera;
+        private readonly Material _blurMaterial;
+        
         private RenderTexture _renderTexture;
-        private Camera _renderCamera;
-        private ScreenSpaceRenderSetup _setup;
-        private MainCameraController _mainCamera;
-        private Material _blurMaterial;
         
         public ScreenSpaceRender (ScreenSpaceRenderSetup setup)
         {

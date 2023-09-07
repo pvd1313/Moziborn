@@ -9,14 +9,17 @@ float3 _AmbientLightMapOffset;
 TEXTURE2D(_AmbientLightMapTexture);
 SAMPLER(sampler_AmbientLightMapTexture);
 
-TEXTURE2D(_WarFogMapTexture);
-SAMPLER(sampler_WarFogMapTexture);
-
 float3 _PointLightMapOffset;
 float2 _PointLightMapWorldSize;
 float2 _PointLightMapRotation;
 TEXTURE2D(_PointLightMapTexture);
 SAMPLER(sampler_PointLightMapTexture);
+
+float3 _WarFogMapOffset;
+float2 _WarFogMapWorldSize;
+float2 _WarFogMapRotation;
+TEXTURE2D(_WarFogMapTexture);
+SAMPLER(sampler_WarFogMapTexture);
 
 float _VerticalCutAlpha;
 float4 _VerticalCutRange;
@@ -215,29 +218,30 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     torchMapPos = float2(torchMapPos.x * _PointLightMapRotation.x - torchMapPos.y * _PointLightMapRotation.y,
                          torchMapPos.x * _PointLightMapRotation.y + torchMapPos.y * _PointLightMapRotation.x);
     
-    float2 torchMapUV = saturate(torchMapPos / _PointLightMapWorldSize);
-    float torchMapColor = SAMPLE_TEXTURE2D(_PointLightMapTexture, sampler_PointLightMapTexture, torchMapUV);
+    float2 pointLightMapUV = saturate(torchMapPos / _PointLightMapWorldSize);
+    float pointLightMapColor = SAMPLE_TEXTURE2D(_PointLightMapTexture, sampler_PointLightMapTexture, pointLightMapUV);
 
-    float torchViewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
-    float maxHeight = 2 * pow(torchMapColor, 0.2);
-    float torchHeight01 = 1 - saturate(positionWS.y / maxHeight);
-    torchMapColor *= torchHeight01 * torchViewDot;
+    float pointLightViewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
+    float maxHeight = 2 * pow(pointLightMapColor, 0.2);
+    float pointLightHeight01 = 1 - saturate(positionWS.y / maxHeight);
+    pointLightMapColor *= pointLightHeight01 * pointLightViewDot;
 
     // Cut walls
     float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
 
-    emission = emission * ambientMapColor + brdfData.albedo * torchMapColor;
+    emission = emission * ambientMapColor + brdfData.albedo * pointLightMapColor;
     
     // War fog
-    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
-    
-    //float3 grayAlbedo = dot(brdfData.albedo, float3(0.3, 0.59, 0.11));
-    //brdfData.albedo = lerp(brdfData.albedo, grayAlbedo, 1 - warFogColor);
-    brdfData.albedo *= warFogColor;
+    float2 warFogMapPos = (positionWS + _WarFogMapOffset).xz;
 
-    //float3 grayEmission = dot(emission, float3(0.3, 0.59, 0.11));
-    //emission = lerp(emission, grayEmission, 1 - warFogColor);
+    warFogMapPos = float2(warFogMapPos.x * _WarFogMapRotation.x - warFogMapPos.y * _WarFogMapRotation.y,
+                         warFogMapPos.x * _WarFogMapRotation.y + warFogMapPos.y * _WarFogMapRotation.x);
+
+    float2 warFogMapUV = saturate(warFogMapPos / _PointLightMapWorldSize);
+    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, warFogMapUV);
+    
+    brdfData.albedo *= warFogColor;
     emission *= warFogColor;
     
 #if DEBUG_WARFOG

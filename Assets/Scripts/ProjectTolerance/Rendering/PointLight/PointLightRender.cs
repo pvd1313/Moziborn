@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
-using ProjectTolerance.Rendering.PointLight;
 using ProjectTolerance.Rendering.ScreenSpace;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -13,6 +12,7 @@ namespace ProjectTolerance.Rendering.PointLight
     {
         private readonly MainCameraController _mainCamera;
         private readonly PointLightRenderConfig _config;
+        
         private ScreenSpaceRender _renderer;
 
         public PointLightRender (MainCameraController mainCamera, PointLightRenderConfig config)
@@ -23,6 +23,9 @@ namespace ProjectTolerance.Rendering.PointLight
         
         public IEnumerator Initialize()
         {
+            RenderPipelineManager.beginCameraRendering += BeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += EndCameraRendering;
+            
             _renderer = new ScreenSpaceRender(new ScreenSpaceRenderSetup
             {
                 mainCamera = _mainCamera,
@@ -31,23 +34,20 @@ namespace ProjectTolerance.Rendering.PointLight
                 textureResolution = _config.textureResolution,
                 cameraCullingMask = 1 << LayerIndex.PointLight,
                 textureFilterMode = FilterMode.Point,
-                cameraDepth = CameraRenderPriority.TorchCameraDepth,
+                cameraDepth = CameraDepth.PointLight,
                 textureFormat = RenderTextureFormat.R16,
-                renderName = "PointLight"
+                renderName = nameof(PointLightRender)
             });
-            
-            RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
-            RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
-            
+
             yield break;
         }
         
-        private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
+        private void BeginCameraRendering(ScriptableRenderContext context, Camera camera)
         {
             _renderer.BeginCameraRendering(camera);
         }
 
-        private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
+        private void EndCameraRendering(ScriptableRenderContext context, Camera camera)
         {
             _renderer.EndCameraRendering(camera);
 
@@ -59,8 +59,8 @@ namespace ProjectTolerance.Rendering.PointLight
         
         public void Dispose()
         {
-            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
-            RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
+            RenderPipelineManager.beginCameraRendering -= BeginCameraRendering;
+            RenderPipelineManager.endCameraRendering -= EndCameraRendering;
         }
     }
 }

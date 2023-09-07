@@ -40,7 +40,7 @@ Shader "ProjectTolerance/PointLight"
 				float4 vertexSS : SV_POSITION;
 			};
 
-			#define HIT_PENETRATION_DISTANCE 0.03
+			#define HIT_PENETRATION_DISTANCE 0.00
 
 			float _SpreadAngleRad;
 			float _MaxRayDistance;

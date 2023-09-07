@@ -40,7 +40,7 @@ Shader "ProjectTolerance/WarFogLight"
 				float4 vertexSS : SV_POSITION;
 			};
 
-			#define HIT_PENETRATION_DISTANCE 0.03
+			#define HIT_PENETRATION_DISTANCE 0.00
 
 			float _SpreadAngleRad;
 			float _MaxRayDistance;
@@ -65,9 +65,8 @@ Shader "ProjectTolerance/WarFogLight"
 			float Fragment (FragmentInput input) : SV_Target
 			{
 				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
-				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.01);
 				
-				return _Intensity * pow(distance, 0.1);
+				return _Intensity * pow(distance, 2);
 			}
 			
 			ENDCG
