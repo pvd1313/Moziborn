@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 
 namespace ProjectTolerance.Rendering.WarFog
 {
-    public class WarFogController : IDisposable
+    public class WarFogRender : IDisposable
     {
         private const int TextureSizeMultiplier = 16;
         
@@ -22,8 +22,8 @@ namespace ProjectTolerance.Rendering.WarFog
         private Material _ambientMaterial;
         private Camera _warFogCamera;
 
-        public WarFogController (WarFogConfig config, 
-                                 AmbientLightController ambientLight)
+        public WarFogRender (WarFogConfig config, 
+                             AmbientLightController ambientLight)
         {
             _config = config;
             _ambientLight = ambientLight;

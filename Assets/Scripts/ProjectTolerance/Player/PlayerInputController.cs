@@ -53,7 +53,7 @@ namespace ProjectTolerance.Player
                 Vector3 cameraCenter = cameraCenterRay.origin + cameraCenterRay.direction * cameraCenterRayLength;
                 Vector3 mousePosition = mouseRay.origin + mouseRay.direction * mouseRayLength;
                 Vector3 viewDirection = (mousePosition - cameraCenter).normalized;
-                viewDirection = Quaternion.AngleAxis(_mainCamera.rotationDegrees.y * -1, Vector3.up) * viewDirection;
+                viewDirection = Quaternion.AngleAxis(_mainCamera.rotationDeg.y * -1, Vector3.up) * viewDirection;
                 inputState.aimDirection = new Vector2(viewDirection.x, viewDirection.z);
 
                 Debug.DrawRay(mousePosition - Vector3.forward * 0.5f, Vector3.forward, Color.gray);

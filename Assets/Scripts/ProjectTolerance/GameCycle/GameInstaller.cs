@@ -33,7 +33,7 @@ namespace ProjectTolerance.GameCycle
             Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().WithArguments(_cameraConfig);
             Container.BindInterfacesAndSelfTo<TorchLightController>().AsSingle().WithArguments(_torchLightConfig);
             Container.BindInterfacesAndSelfTo<WeatherController>().AsSingle().WithArguments(_weatherConfig);
-            Container.BindInterfacesAndSelfTo<WarFogController>().AsSingle().WithArguments(_warFogConfig);
+            Container.BindInterfacesAndSelfTo<WarFogRender>().AsSingle().WithArguments(_warFogConfig);
 
             Container.BindInterfacesAndSelfTo<PlayerController>().AsSingle().WithArguments(_playerConfig);
             Container.BindInterfacesAndSelfTo<PlayerInputController>().AsSingle();

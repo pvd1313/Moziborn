@@ -3,29 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
+using ProjectTolerance.Rendering.ScreenSpace;
 using UnityEngine;
 using UnityEngine.Rendering;
+
 using Object = UnityEngine.Object;
 
 namespace ProjectTolerance.Rendering.TorchLight
 {
     public class TorchLightController : IDisposable
     {
-        private const RenderTextureFormat TorchTextureFormat = RenderTextureFormat.R16;
-
-        private static readonly bool DrawGizmos = false;
-
         private readonly TorchLightConfig _config;
         private readonly MainCameraController _mainCamera;
         
         private Transform _root;
         private Dictionary<int, TorchLightView> _lightViews;
         private int _nextId;
-        private RenderTexture _torchTexture;
-        private Camera _torchCamera;
-        private Material _postMaterial;
         private Material _torchSpriteMaterial;
         private Material _warFogSpriteMaterial;
+
+        private ScreenSpaceRender _renderer;
 
         public TorchLightController (TorchLightConfig config, MainCameraController mainCamera)
         {
@@ -37,58 +34,44 @@ namespace ProjectTolerance.Rendering.TorchLight
         {
             _lightViews = new Dictionary<int, TorchLightView>();
 
+            _renderer = new ScreenSpaceRender(new ScreenSpaceRenderConfig
+            {
+                mainCamera = _mainCamera,
+                blurMatrix = _config.postMatrix,
+                blurShader = _config.postShader,
+                textureResolution = _config.renderTextureResolution,
+                cameraCullingMask = 1 << LayerIndex.TorchLight,
+                textureFilterMode = FilterMode.Point,
+                cameraDepth = CameraRenderPriority.TorchCameraDepth,
+                textureFormat = RenderTextureFormat.R16,
+                renderName = "TorchLight"
+            });
+
             GameObject rootGameObject = new ("TorchLight");
             _root = rootGameObject.transform;
-
-            _postMaterial = new Material(_config.postShader);
-
-            GameObject torchCameraGameObject = new GameObject("TorchLightCamera");
-            torchCameraGameObject.transform.SetParent(_root);
-            _torchCamera = torchCameraGameObject.AddComponent<Camera>();
-            _torchCamera.orthographic = true;
-            _torchCamera.backgroundColor = Color.black;
-            _torchCamera.clearFlags = CameraClearFlags.SolidColor;
-            _torchCamera.cullingMask = 1 << LayerIndex.TorchLight;
-            _torchCamera.depth = CameraRenderPriority.TorchCameraDepth;
 
             _torchSpriteMaterial = new Material(_config.torchLightShader);
             _warFogSpriteMaterial = new Material(_config.warFogSpriteShader);
             
-            RenderPipelineManager.endCameraRendering += OnCameraRenderingFinished;
+            RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
             
             yield break;
         }
 
-        private void OnCameraRenderingFinished(ScriptableRenderContext context, Camera camera)
+        private void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
         {
-            if (camera == _torchCamera && _torchTexture != null)
-            {
-                RenderTexture tempTexture = RenderTexture.GetTemporary(
-                    _torchTexture.width, 
-                    _torchTexture.height, 
-                    _torchTexture.depth, 
-                    _torchTexture.format);
+            _renderer.BeginCameraRendering(camera);
+        }
 
-                RenderTexture sourceTexture = _torchTexture;
-                RenderTexture destTexture = tempTexture;
-                
-                foreach (int blurPixelSize in _config.postMatrix)
-                {
-                    _postMaterial.SetFloat("_PixelOffset", blurPixelSize);
-                    _postMaterial.mainTexture = sourceTexture;
-                    
-                    Graphics.Blit(sourceTexture, destTexture, _postMaterial);
+        private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
+        {
+            _renderer.EndCameraRendering(camera);
 
-                    (sourceTexture, destTexture) = (destTexture, sourceTexture);
-                }
-
-                if (_config.postMatrix.Count % 2 == 1)
-                {
-                    Graphics.Blit(sourceTexture, _torchTexture);
-                }
-                
-                RenderTexture.ReleaseTemporary(tempTexture);
-            }
+            Shader.SetGlobalTexture(ShaderPropertyId.TorchLightMapTexture, _renderer.lastRenderResult.texture);
+            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapRotation, _renderer.lastRenderResult.textureRotationSinCosWorldSpace);
+            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapOffset, _renderer.lastRenderResult.textureOffsetWorldSpace);
+            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapWorldSize, _renderer.lastRenderResult.textureSizeWorldSpace);
         }
 
         public int CreatePointLight(TorchLightSetup lightSetup)
@@ -139,95 +122,16 @@ namespace ProjectTolerance.Rendering.TorchLight
 
         public void Update()
         {
-            Vector3 viewNorth = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
-            Vector3 viewEast = Vector3.Cross(Vector3.up, viewNorth);
-            float screenRatio = Screen.width / (float) Screen.height;
-            Vector3 mainCameraRotationDeg = _mainCamera.rotationDegrees;
-            Vector2 viewSize = ComputeViewSize(screenRatio, _mainCamera.orthographicSize, mainCameraRotationDeg.x) + Vector2.one;
-            
-            Vector3 cameraPosition = _mainCamera.position;
-            cameraPosition.x = Mathf.RoundToInt(cameraPosition.x);
-            cameraPosition.y = Mathf.RoundToInt(cameraPosition.y);
-            cameraPosition.z = Mathf.RoundToInt(cameraPosition.z);
-
-            Vector2Int requiredTextureSize = default;
-            if (screenRatio > 0)
-            {
-                requiredTextureSize.x = Mathf.CeilToInt(_config.renderTextureResolution * screenRatio);
-                requiredTextureSize.y = _config.renderTextureResolution;
-            }
-            else
-            {
-                requiredTextureSize.x = _config.renderTextureResolution;
-                requiredTextureSize.y = Mathf.CeilToInt(_config.renderTextureResolution / screenRatio);
-            }
-
-            if (_torchTexture == null ||
-                _torchTexture.width != requiredTextureSize.x ||
-                _torchTexture.height != requiredTextureSize.y)
-            {
-                if (_torchTexture != null)
-                {
-                    _torchTexture.Release();
-                    _torchTexture = null;
-                }
-                
-                _torchTexture = new RenderTexture(requiredTextureSize.x, requiredTextureSize.y, 0, TorchTextureFormat)
-                {
-                    name = "TorchLight",
-                    filterMode = FilterMode.Point
-                };
-                
-                _torchCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
-                _torchCamera.targetTexture = _torchTexture;
-                _torchCamera.aspect = viewSize.x / viewSize.y;
-            }
-
             foreach ((int lightId, TorchLightView lightView) in _lightViews)
             {
                 lightView.RebuildMesh();
             }
-            
-            _torchCamera.transform.position = cameraPosition + Vector3.up;
-            _torchCamera.transform.rotation = Quaternion.Euler(90, mainCameraRotationDeg.y, 0);
-
-            float mapRotationRad = mainCameraRotationDeg.y * Mathf.Deg2Rad;
-            Vector2 mapRotationSinCos = new (Mathf.Cos(mapRotationRad), Mathf.Sin(mapRotationRad));
-            Vector3 bottomLeft = cameraPosition - viewNorth * viewSize.y - viewEast * viewSize.x;
-            Vector3 bottomRight = cameraPosition - viewNorth * viewSize.y + viewEast * viewSize.x;
-            Vector3 topRight = cameraPosition + viewNorth * viewSize.y + viewEast * viewSize.x;
-            Vector3 topLeft = cameraPosition + viewNorth * viewSize.y - viewEast * viewSize.x;
-
-            if (DrawGizmos)
-            {
-                Debug.DrawLine(bottomLeft, topRight, Color.magenta);
-                Debug.DrawLine(bottomRight, topLeft, Color.magenta);
-            }
-
-            Shader.SetGlobalTexture(ShaderPropertyId.TorchLightMapTexture, _torchTexture);
-            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapRotation, mapRotationSinCos);
-            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapOffset, bottomLeft * -1);
-            Shader.SetGlobalVector(ShaderPropertyId.TorchLightMapWorldSize, viewSize * 2);
-        }
-
-        private static Vector2 ComputeViewSize(float screenRatio, float orthographicSize, float pitchAngleDegrees)
-        {
-            return new Vector2
-            {
-                x = orthographicSize * screenRatio,
-                y = orthographicSize / Mathf.Cos((90 - pitchAngleDegrees) * Mathf.Deg2Rad)
-            };
         }
 
         public void Dispose()
         {
-            RenderPipelineManager.endCameraRendering -= OnCameraRenderingFinished;
-            
-            if (_torchTexture != null)
-            {
-                _torchTexture.Release();
-                _torchTexture = null;
-            }
+            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRendering;
+            RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
         }
     }
 }

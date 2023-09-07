@@ -27,7 +27,7 @@ MonoBehaviour:
     rotationSmoothTime: 0.2
     flashlightAngleDeg: 45
     flashlightRange: 5
-    viewRange: 5
+    viewRange: 6
     playerSpeed: 3
   _cameraConfig:
     rotationAngleDegrees: {x: 60, y: 45, z: 0}

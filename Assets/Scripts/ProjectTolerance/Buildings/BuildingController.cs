@@ -82,7 +82,7 @@ namespace ProjectTolerance.Buildings
         {
             const float WallHeight = 3.2f;
             
-            Vector3 cameraDir = _mainCamera.forward;
+            Vector3 cameraDir = _mainCamera.lookDirection;
 
             Vector3 playerBottomCenter = playerBounds.center;
             playerBottomCenter.y = playerBounds.min.y + 0.01f;
@@ -97,7 +97,7 @@ namespace ProjectTolerance.Buildings
             Ray playerBottomRay2 = new (playerBottom2, -cameraDir);
             Ray playerBottomRay3 = new (playerBottom3, -cameraDir);
             
-            Vector3 aimRayOffset = Vector3.Cross(aimDirection, Vector3.up) * Mathf.Cos(_mainCamera.rotationDegrees.x * Mathf.Deg2Rad) * WallHeight;
+            Vector3 aimRayOffset = Vector3.Cross(aimDirection, Vector3.up) * Mathf.Cos(_mainCamera.rotationDeg.x * Mathf.Deg2Rad) * WallHeight;
             Ray aimRay0 = new (playerBottomCenter + aimRayOffset, aimDirection);
             Ray aimRay1 = new (playerBottomCenter - aimRayOffset, aimDirection);
 

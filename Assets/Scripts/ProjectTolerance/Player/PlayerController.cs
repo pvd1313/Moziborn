@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
-using ProjectTolerance.Rendering.AmbientLight;
 using ProjectTolerance.Rendering.TorchLight;
-using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -80,6 +78,7 @@ namespace ProjectTolerance.Player
                 _config.rotationSmoothTime, 
                 float.PositiveInfinity, 
                 Time.fixedDeltaTime);
+            
             _playerView.body.rotation = Quaternion.AngleAxis(resultAngle, Vector3.up);
 
             if (input.mode == PlayerInputMode.Movement)
@@ -141,7 +140,7 @@ namespace ProjectTolerance.Player
 
         private Vector3 InputToWorldDirection(Vector2 inputDirection)
         {
-            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
+            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.lookDirection, Vector3.up).normalized;
             Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward);
 
             return cameraForward * inputDirection.y + cameraRight * inputDirection.x;

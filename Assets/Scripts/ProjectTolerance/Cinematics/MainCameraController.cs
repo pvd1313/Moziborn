@@ -6,9 +6,9 @@ namespace ProjectTolerance.Cinematics
 {
     public class MainCameraController
     {
-        public Vector3 forward => _cameraView.unityCamera.transform.forward;
-        public Vector3 position => _cameraView.transform.position;
-        public Vector3 rotationDegrees => _cameraView.transform.rotation.eulerAngles;
+        public Vector3 lookDirection => _cameraView.unityCamera.transform.forward;
+        public Vector3 pivot => _cameraView.transform.position;
+        public Vector3 rotationDeg => _cameraView.transform.rotation.eulerAngles;
         public float orthographicSize => _cameraView.unityCamera.orthographicSize;
 
         private readonly CameraConfig _config;
@@ -56,24 +56,24 @@ namespace ProjectTolerance.Cinematics
             _cameraView.transform.position = SnapToGrid(_cameraPosition);
         }
 
-        public Vector3 SnapToGrid(Vector3 position)
+        private Vector3 SnapToGrid(Vector3 position)
         {
             float texelSize0 = 2 * orthographicSize / Screen.height;
             float inclination = Mathf.Cos((90 - _config.rotationAngleDegrees.x) * Mathf.Deg2Rad);
             float texelSize1 = 2 * orthographicSize / inclination / Screen.height;
             
             Vector2 pos2D = new (position.z, position.x);
-            pos2D = RotateDirection(pos2D, _config.rotationAngleDegrees.y * -1 * Mathf.Deg2Rad);
+            pos2D = RotateVector(pos2D, _config.rotationAngleDegrees.y * -1 * Mathf.Deg2Rad);
             pos2D.x = Mathf.CeilToInt(pos2D.x / texelSize1) * texelSize1;
             pos2D.y = Mathf.CeilToInt(pos2D.y / texelSize0) * texelSize0;
-            pos2D = RotateDirection(pos2D, _config.rotationAngleDegrees.y * Mathf.Deg2Rad);
+            pos2D = RotateVector(pos2D, _config.rotationAngleDegrees.y * Mathf.Deg2Rad);
             
             float y = Mathf.CeilToInt(position.y / texelSize0) * texelSize0;
             
             return new Vector3(pos2D.y, y, pos2D.x);
         }
         
-        private static Vector2 RotateDirection(Vector2 direction, float angleRad)
+        private static Vector2 RotateVector(Vector2 direction, float angleRad)
         {
             float sin = Mathf.Sin(angleRad);
             float cos = Mathf.Cos(angleRad);
