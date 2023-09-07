@@ -13,7 +13,7 @@ namespace ProjectTolerance.Rendering.TorchLight
             public Vector3 rayEndPoint;
         }
 
-        private static readonly bool DrawGizmos = false;
+        private static readonly bool DrawGizmos = true;
         
         private const int BatchSize = 15;
         private const float MaxSamplesPerRad = 300;
@@ -24,7 +24,7 @@ namespace ProjectTolerance.Rendering.TorchLight
         [SerializeField] private MeshRenderer _meshRenderer;
         
         private float _spreadAngleRad;
-        private float _torchDistance;
+        private float _torchRange;
         private float _torchRotationRad;
         private float _sampleDeltaAngleRad;
         private int _maxSampleCount;
@@ -37,13 +37,16 @@ namespace ProjectTolerance.Rendering.TorchLight
         private Color32[] _meshColors;
         private int[] _meshTriangles;
 
-        public void Initialize(float spreadAngleRad, float distance)
+        public void Initialize(TorchLightSetup lightSetup)
         {
+            _meshRenderer.sharedMaterial = lightSetup.material;
+            gameObject.layer = lightSetup.layerIndex;
+            
             _torchTransform = transform;
-            _maxSampleCount = Mathf.Max(2, Mathf.CeilToInt(spreadAngleRad * MaxSamplesPerRad));
-            _spreadAngleRad = spreadAngleRad;
+            _maxSampleCount = Mathf.Max(2, Mathf.CeilToInt(lightSetup.spreadAngleRad * MaxSamplesPerRad));
+            _spreadAngleRad = lightSetup.spreadAngleRad;
             _sampleDeltaAngleRad = _spreadAngleRad / (_maxSampleCount - 1);
-            _torchDistance = distance;
+            _torchRange = lightSetup.range;
 
             _mesh = new Mesh
             {
@@ -68,7 +71,7 @@ namespace ProjectTolerance.Rendering.TorchLight
                 _meshVertices[i + 1] = DirectionFromAngle(-0.5f * _spreadAngleRad + i * _sampleDeltaAngleRad);
             }
 
-            _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * distance);
+            _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * lightSetup.range);
             _mesh.SetVertices(_meshVertices);
             _mesh.SetColors(_meshColors);
             _mesh.SetUVs(0, _meshUVs);
@@ -78,10 +81,12 @@ namespace ProjectTolerance.Rendering.TorchLight
             _meshFilter.mesh = _mesh;
 
             MaterialPropertyBlock propertyBlock = new ();
-            propertyBlock.SetFloat("_MaxRayDistance", distance);
-            propertyBlock.SetFloat("_SpreadAngleRad", spreadAngleRad);
-
+            propertyBlock.SetFloat("_MaxRayDistance", lightSetup.range);
+            propertyBlock.SetFloat("_SpreadAngleRad", lightSetup.spreadAngleRad);
             _meshRenderer.SetPropertyBlock(propertyBlock);
+
+            _torchCenter = lightSetup.position + Vector3.up * 0.1f;
+            _torchRotationRad = lightSetup.rotationRad;
         }
 
         public void UpdatePositionRotation(Vector3 position, float rotationRad)
@@ -95,8 +100,8 @@ namespace ProjectTolerance.Rendering.TorchLight
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
-            Vector3 a = DirectionFromAngle(0) * _torchDistance;
-            Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchDistance;
+            Vector3 a = DirectionFromAngle(0) * _torchRange;
+            Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchRange;
             float maxOptimizedBatchSampleDistance = (b - a).magnitude * BatchSampleDistanceCheckMultiplier;
 
             _torchTransform.forward = DirectionFromAngle(torchRotationRad);
@@ -105,8 +110,8 @@ namespace ProjectTolerance.Rendering.TorchLight
             _meshUVs[0] = Vector2.zero;
             
             Vector3 direction = DirectionFromAngle(startAngleRad);
-            TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchDistance);
-            _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchDistance, 0);
+            TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchRange);
+            _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchRange, 0);
 
             if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * prevHit.rayTraveledDistance, Color.red);
 
@@ -117,8 +122,8 @@ namespace ProjectTolerance.Rendering.TorchLight
                 float angleRad = startAngleRad + _sampleDeltaAngleRad * curHitIndex;
 
                 direction = DirectionFromAngle(angleRad);
-                TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchDistance);
-                _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchDistance, 0);
+                TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchRange);
+                _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchRange, 0);
 
                 if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curHit.rayTraveledDistance, Color.red);
 
@@ -137,7 +142,7 @@ namespace ProjectTolerance.Rendering.TorchLight
                             direction = DirectionFromAngle(angleRad);
                             Ray ray = new (_torchCenter, direction);
                             surface.Raycast(ray, out float distance);
-                            _meshUVs[prevHitIndex + i + 2] = new Vector2(distance / _torchDistance, 0);
+                            _meshUVs[prevHitIndex + i + 2] = new Vector2(distance / _torchRange, 0);
                         }
                     }
                     else
@@ -154,8 +159,8 @@ namespace ProjectTolerance.Rendering.TorchLight
                     {
                         angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
                         direction = DirectionFromAngle(angleRad);
-                        TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchDistance);
-                        _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchDistance, 0);
+                        TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchRange);
+                        _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchRange, 0);
 
                         if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curBatchHit.rayTraveledDistance, Color.cyan);
                     }
@@ -195,7 +200,7 @@ namespace ProjectTolerance.Rendering.TorchLight
         {
             Ray ray = new (origin, direction);
 
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, distance, 1 << LayerId.ViewObstacle))
+            if (Physics.Raycast(ray, out RaycastHit hitInfo, distance, 1 << LayerIndex.LightObstacle))
             {
                 return new TorchRaycastHit
                 {

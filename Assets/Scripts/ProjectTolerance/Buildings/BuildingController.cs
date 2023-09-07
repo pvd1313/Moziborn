@@ -17,7 +17,7 @@ namespace ProjectTolerance.Buildings
             public MaterialPropertyBlock materialProperty;
         }
 
-        private static readonly bool DrawGizmos = false;
+        private static readonly bool DrawGizmos = true;
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
         
@@ -197,7 +197,7 @@ namespace ProjectTolerance.Buildings
             int yMax = Mathf.Max(a.max.y, b.max.y);
             int zMax = Mathf.Max(a.max.z, b.max.z);
             
-            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - yMin);
+            return new BoundsInt(xMin, yMin, zMin, xMax - xMin, yMax - yMin, zMax - zMin);
         }
 
         private Bounds RoomBoundsToFloat(BoundsInt bounds)

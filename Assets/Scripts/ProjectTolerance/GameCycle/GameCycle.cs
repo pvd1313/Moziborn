@@ -59,7 +59,6 @@ namespace ProjectTolerance.GameCycle
             _container.TryResolve<MainCameraController>()?.Update();
             _container.TryResolve<TorchLightController>()?.Update();
             _container.TryResolve<AmbientLightController>()?.Update();
-            _container.TryResolve<WarFogController>()?.Update();
             _container.TryResolve<BuildingController>()?.Update();
         }
     }

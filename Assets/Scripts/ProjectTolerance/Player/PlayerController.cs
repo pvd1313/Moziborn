@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
+using ProjectTolerance.Layers;
 using ProjectTolerance.Rendering.AmbientLight;
 using ProjectTolerance.Rendering.TorchLight;
 using ProjectTolerance.Rendering.Weather;
@@ -13,8 +14,6 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController
     {
-        public Vector3 position => _playerView.body.position;
-        
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly MainCameraController _mainCamera;
@@ -23,6 +22,7 @@ namespace ProjectTolerance.Player
 
         private PlayerView _playerView;
         private int _torchLightId;
+        private int _warFogLightId;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
         private float _playerAngleVelocity;
@@ -47,10 +47,20 @@ namespace ProjectTolerance.Player
             _playerView = Object.Instantiate(_config.playerViewPrefab);
 
             _tempLights = new List<int>();
-            
-            _torchLightId = _torchLightController.CreateLight(
-                _config.torchLightAngleDeg * Mathf.Deg2Rad, 
-                _config.torchLightDistance);
+
+            _torchLightId = _torchLightController.CreatePointLight(new TorchLightSetup
+            {
+                layerIndex = LayerIndex.TorchLight,
+                range = _config.flashlightRange,
+                spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
+            });
+
+            _warFogLightId = _torchLightController.CreateWarFogLight(new TorchLightSetup
+            {
+                layerIndex = LayerIndex.WarFogLight,
+                range = _config.viewRange,
+                spreadAngleRad = 360 * Mathf.Deg2Rad
+            });
 
             yield break;
         }
@@ -96,9 +106,12 @@ namespace ProjectTolerance.Player
 
             if (_input.state.isDropFlareKeyPressed)
             {
-                int lightId = _torchLightController.CreateLight(
-                    _config.torchLightAngleDeg * Mathf.Deg2Rad,
-                    _config.torchLightDistance);
+                int lightId = _torchLightController.CreatePointLight(new TorchLightSetup
+                {
+                    layerIndex = LayerIndex.TorchLight,
+                    range = _config.flashlightRange,
+                    spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
+                });
 
                 _torchLightController.SetLightTransform(lightId, _playerMeshPosition, playerDirectionWorld);
 
@@ -120,6 +133,8 @@ namespace ProjectTolerance.Player
             _mainCamera.AnimateMovePosition(_playerView.body.position);
 
             _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
+
+            _torchLightController.SetLightTransform(_warFogLightId, _playerMeshPosition, playerDirectionWorld);
             
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
         }

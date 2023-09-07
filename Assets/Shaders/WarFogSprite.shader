@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/TorchLightSprite"
+Shader "ProjectTolerance/WarFogSprite"
 {
 	Properties
 	{
@@ -64,12 +64,10 @@ Shader "ProjectTolerance/TorchLightSprite"
 			
 			float Fragment (FragmentInput input) : SV_Target
 			{
-				float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
-				float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
 				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
 				float offset = saturate(saturate(input.vertexOS.z - _StartOffset) / 0.01);
 				
-				return spread * pow(distance, 2) * _Intensity * offset;
+				return _Intensity * pow(distance, 0.1);
 			}
 			
 			ENDCG

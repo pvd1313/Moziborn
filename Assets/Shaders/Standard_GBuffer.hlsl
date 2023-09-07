@@ -228,19 +228,17 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
 
     emission = emission * ambientMapColor + brdfData.albedo * torchMapColor;
-
+    
     // War fog
     float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
-    float warFogDesaturation = (1 - pow(warFogColor, 0.01)) * 0.9;
-    float warFogIntensity = 1 * pow(warFogColor, 0.1);
     
-    float3 grayAlbedo = dot(brdfData.albedo, float3(0.3, 0.59, 0.11));
-    brdfData.albedo = lerp(brdfData.albedo, grayAlbedo, warFogDesaturation);
-    brdfData.albedo *= warFogIntensity;
+    //float3 grayAlbedo = dot(brdfData.albedo, float3(0.3, 0.59, 0.11));
+    //brdfData.albedo = lerp(brdfData.albedo, grayAlbedo, 1 - warFogColor);
+    brdfData.albedo *= warFogColor;
 
-    float3 grayEmission = dot(emission, float3(0.3, 0.59, 0.11));
-    emission = lerp(emission, grayEmission, warFogDesaturation);
-    emission *= warFogIntensity;
+    //float3 grayEmission = dot(emission, float3(0.3, 0.59, 0.11));
+    //emission = lerp(emission, grayEmission, 1 - warFogColor);
+    emission *= warFogColor;
     
 #if DEBUG_WARFOG
      brdfData.albedo = 0;

@@ -1,52 +1,48 @@
+using System;
 using System.Collections;
-using ProjectTolerance.Player;
+using ProjectTolerance.Cinematics;
+using ProjectTolerance.Layers;
 using ProjectTolerance.Rendering.AmbientLight;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 
 namespace ProjectTolerance.Rendering.WarFog
 {
-    public class WarFogController
+    public class WarFogController : IDisposable
     {
-        private const int TextureSizeMultiplier = 4;
+        private const int TextureSizeMultiplier = 16;
         
         private readonly WarFogConfig _config;
         private readonly AmbientLightController _ambientLight;
-        private readonly PlayerController _player;
 
-        private Texture2D _sunTexture;
-        private RenderTexture _stateTextureSpread;
+        private RenderTexture _sunTexture;
+        private RenderTexture _stateTexture;
         private RenderTexture _stateTextureSpreadAndBlur;
         private Vector2Int _playerPrevPosition;
         private Material _ambientMaterial;
+        private Camera _warFogCamera;
 
         public WarFogController (WarFogConfig config, 
-                                 AmbientLightController ambientLight, 
-                                 PlayerController player)
+                                 AmbientLightController ambientLight)
         {
             _config = config;
             _ambientLight = ambientLight;
-            _player = player;
         }
         
         public IEnumerator Initialize()
         {
+            RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
+            
             Texture2D wallTexture = _ambientLight.wallTexture;
 
-            _sunTexture = new Texture2D(wallTexture.width * TextureSizeMultiplier, wallTexture.height * TextureSizeMultiplier, wallTexture.graphicsFormat, TextureCreationFlags.None)
+            _sunTexture = new RenderTexture(wallTexture.width * TextureSizeMultiplier, wallTexture.height * TextureSizeMultiplier, 0, wallTexture.graphicsFormat)
             {
-                name = "WarFog_Sun",
+                name = "WarFogSun",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            
-            for (int i = 0; i < _sunTexture.width; i++)
-                for (int j = 0; j < _sunTexture.height; j++)
-                    _sunTexture.SetPixel(i, j, Color.black);
 
-            _sunTexture.Apply();
-
-            _stateTextureSpread = new RenderTexture(wallTexture.width * TextureSizeMultiplier, wallTexture.height * TextureSizeMultiplier, 0, wallTexture.graphicsFormat)
+            _stateTexture = new RenderTexture(wallTexture.width * TextureSizeMultiplier, wallTexture.height * TextureSizeMultiplier, 0, wallTexture.graphicsFormat)
             {
                 name = "WarFogStateTextureRaw",
                 wrapMode = TextureWrapMode.Clamp,
@@ -55,29 +51,34 @@ namespace ProjectTolerance.Rendering.WarFog
 
             _ambientMaterial = new Material(_config.ambientShader);
 
-            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureSpread);
-            
+            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _sunTexture);
+
+            _warFogCamera = new GameObject("WarFogCamera").AddComponent<Camera>();
+            _warFogCamera.orthographic = true;
+            _warFogCamera.clearFlags = CameraClearFlags.SolidColor;
+            _warFogCamera.backgroundColor = Color.black;
+            _warFogCamera.cullingMask = 1 << LayerIndex.WarFogLight;
+            _warFogCamera.depth = CameraRenderPriority.WarFogCameraDepth;
+            _warFogCamera.aspect = wallTexture.width / (float) wallTexture.height;
+            _warFogCamera.orthographicSize = Mathf.Min(wallTexture.width, wallTexture.height) * 0.5f;
+            _warFogCamera.targetTexture = _sunTexture;
+
+            Vector3 center = _ambientLight.textureBounds.center;
+            _warFogCamera.transform.position = new Vector3(center.x, 1, center.y);
+            _warFogCamera.transform.rotation = Quaternion.Euler(90, 0, 0);
+
             yield break;
         }
 
-        public void Update()
+        private void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
         {
-            BoundsInt textureBounds = _ambientLight.textureBounds;
-
-            Vector3 offset = _player.position - new Vector3(textureBounds.position.x, 0, textureBounds.position.y);
-            float u = Mathf.Clamp01(offset.x / _ambientLight.textureBounds.size.x);
-            float v = Mathf.Clamp01(offset.z / _ambientLight.textureBounds.size.y);
-            Vector2Int playerPosition = new (Mathf.FloorToInt(u * _sunTexture.width), Mathf.FloorToInt(v * _sunTexture.height));
-            
-            if (playerPosition != _playerPrevPosition)
+            if (_warFogCamera != camera)
             {
-                _sunTexture.SetPixel(_playerPrevPosition.x, _playerPrevPosition.y, Color.black);
-                _sunTexture.SetPixel(playerPosition.x, playerPosition.y, Color.white);
-                _sunTexture.Apply();
-
-                _playerPrevPosition = playerPosition;
+                return;
             }
             
+            BoundsInt textureBounds = _ambientLight.textureBounds;
+
             RenderTexture tempTexture = RenderTexture.GetTemporary(
                 textureBounds.size.x * TextureSizeMultiplier, 
                 textureBounds.size.y * TextureSizeMultiplier, 
@@ -86,15 +87,20 @@ namespace ProjectTolerance.Rendering.WarFog
             
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _ambientLight.wallTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTextureSpread);
+            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.blur);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.linearFall / TextureSizeMultiplier);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.bilinearFall);
 
             Graphics.Blit(null, tempTexture, _ambientMaterial);
-            Graphics.Blit(tempTexture, _stateTextureSpread);
+            Graphics.Blit(tempTexture, _stateTexture);
 
             RenderTexture.ReleaseTemporary(tempTexture);
+        }
+
+        public void Dispose()
+        {
+            RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
         }
     }
 }

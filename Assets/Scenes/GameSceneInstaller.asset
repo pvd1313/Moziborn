@@ -25,8 +25,9 @@ MonoBehaviour:
     playerViewPrefab: {fileID: 6194257065066083958, guid: d897ea1f4fe894c47b457d95c8039308, type: 3}
     positionSmoothTime: 0.05
     rotationSmoothTime: 0.2
-    torchLightAngleDeg: 45
-    torchLightDistance: 5
+    flashlightAngleDeg: 45
+    flashlightRange: 5
+    viewRange: 5
     playerSpeed: 3
   _cameraConfig:
     rotationAngleDegrees: {x: 60, y: 45, z: 0}
@@ -35,6 +36,8 @@ MonoBehaviour:
     smoothTime: 0.2
   _torchLightConfig:
     postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
+    torchLightShader: {fileID: 4800000, guid: b15064f9a5bd4e15add6291ddfdadd22, type: 3}
+    warFogSpriteShader: {fileID: 4800000, guid: df1401d05a3b4b3a9455d392d2e3e668, type: 3}
     torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
     renderTextureResolution: 256
     postMatrix: 0200000001000000
@@ -42,6 +45,6 @@ MonoBehaviour:
     weatherViewPrefab: {fileID: 4944705672053266457, guid: 11d5d5391511179498121b81ada3e77b, type: 3}
   _warFogConfig:
     ambientShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
-    linearFall: 0.0001
-    bilinearFall: 0.4
-    blur: 0.95
+    linearFall: 0
+    bilinearFall: 0
+    blur: 0.2

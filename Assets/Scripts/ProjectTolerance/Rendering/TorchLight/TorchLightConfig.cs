@@ -8,6 +8,8 @@ namespace ProjectTolerance.Rendering.TorchLight
     public class TorchLightConfig
     {
         public Shader postShader;
+        public Shader torchLightShader;
+        public Shader warFogSpriteShader;
         public TorchLightView torchLightViewPrefab;
         public int renderTextureResolution;
         public List<int> postMatrix;

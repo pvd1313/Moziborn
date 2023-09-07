@@ -24,6 +24,8 @@ namespace ProjectTolerance.Rendering.TorchLight
         private RenderTexture _torchTexture;
         private Camera _torchCamera;
         private Material _postMaterial;
+        private Material _torchSpriteMaterial;
+        private Material _warFogSpriteMaterial;
 
         public TorchLightController (TorchLightConfig config, MainCameraController mainCamera)
         {
@@ -46,8 +48,11 @@ namespace ProjectTolerance.Rendering.TorchLight
             _torchCamera.orthographic = true;
             _torchCamera.backgroundColor = Color.black;
             _torchCamera.clearFlags = CameraClearFlags.SolidColor;
-            _torchCamera.cullingMask = 1 << LayerId.TorchLight;
+            _torchCamera.cullingMask = 1 << LayerIndex.TorchLight;
             _torchCamera.depth = CameraRenderPriority.TorchCameraDepth;
+
+            _torchSpriteMaterial = new Material(_config.torchLightShader);
+            _warFogSpriteMaterial = new Material(_config.warFogSpriteShader);
             
             RenderPipelineManager.endCameraRendering += OnCameraRenderingFinished;
             
@@ -86,10 +91,24 @@ namespace ProjectTolerance.Rendering.TorchLight
             }
         }
 
-        public int CreateLight(float spreadAngleRad, float spreadRange)
+        public int CreatePointLight(TorchLightSetup lightSetup)
         {
+            lightSetup.material = _torchSpriteMaterial;
+            
             TorchLightView lightView = Object.Instantiate(_config.torchLightViewPrefab, _root);
-            lightView.Initialize(spreadAngleRad, spreadRange);
+            lightView.Initialize(lightSetup);
+            
+            _lightViews[_nextId] = lightView;
+
+            return _nextId++;
+        }
+
+        public int CreateWarFogLight(TorchLightSetup lightSetup)
+        {
+            lightSetup.material = _warFogSpriteMaterial;
+            
+            TorchLightView lightView = Object.Instantiate(_config.torchLightViewPrefab, _root);
+            lightView.Initialize(lightSetup);
             
             _lightViews[_nextId] = lightView;
 
