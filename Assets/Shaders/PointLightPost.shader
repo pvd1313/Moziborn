@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/TorchLightPost"
+Shader "ProjectTolerance/PointLightPost"
 {
 	SubShader
 	{

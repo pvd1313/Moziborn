@@ -9,23 +9,23 @@ namespace ProjectTolerance.Rendering.ScreenSpace
         
         private RenderTexture _renderTexture;
         private Camera _renderCamera;
-        private ScreenSpaceRenderConfig _config;
+        private ScreenSpaceRenderSetup _setup;
         private MainCameraController _mainCamera;
         private Material _blurMaterial;
         
-        public ScreenSpaceRender (ScreenSpaceRenderConfig config)
+        public ScreenSpaceRender (ScreenSpaceRenderSetup setup)
         {
-            _config = config;
-            _mainCamera = config.mainCamera;
+            _setup = setup;
+            _mainCamera = setup.mainCamera;
             
-            _renderCamera = new GameObject(config.renderName + "Camera").AddComponent<Camera>();
+            _renderCamera = new GameObject(setup.renderName + "Camera").AddComponent<Camera>();
             _renderCamera.orthographic = true;
             _renderCamera.backgroundColor = Color.black;
             _renderCamera.clearFlags = CameraClearFlags.SolidColor;
-            _renderCamera.cullingMask = config.cameraCullingMask;
-            _renderCamera.depth = config.cameraDepth;
+            _renderCamera.cullingMask = setup.cameraCullingMask;
+            _renderCamera.depth = setup.cameraDepth;
 
-            _blurMaterial = new Material(_config.blurShader);
+            _blurMaterial = new Material(_setup.postShader);
         }
 
         public void BeginCameraRendering(Camera camera)
@@ -40,13 +40,13 @@ namespace ProjectTolerance.Rendering.ScreenSpace
             
             if (screenRatio > 0)
             {
-                requiredTextureSize.x = Mathf.CeilToInt(_config.textureResolution * screenRatio);
-                requiredTextureSize.y = _config.textureResolution;
+                requiredTextureSize.x = Mathf.CeilToInt(_setup.textureResolution * screenRatio);
+                requiredTextureSize.y = _setup.textureResolution;
             }
             else
             {
-                requiredTextureSize.x = _config.textureResolution;
-                requiredTextureSize.y = Mathf.CeilToInt(_config.textureResolution / screenRatio);
+                requiredTextureSize.x = _setup.textureResolution;
+                requiredTextureSize.y = Mathf.CeilToInt(_setup.textureResolution / screenRatio);
             }
             
             Vector2 viewSize = ComputeViewSize(screenRatio, _mainCamera.orthographicSize, _mainCamera.rotationDeg.x) + Vector2.one;
@@ -60,10 +60,10 @@ namespace ProjectTolerance.Rendering.ScreenSpace
                     _renderTexture.Release();
                 }
                 
-                _renderTexture = new RenderTexture(requiredTextureSize.x, requiredTextureSize.y, 0, _config.textureFormat)
+                _renderTexture = new RenderTexture(requiredTextureSize.x, requiredTextureSize.y, 0, _setup.textureFormat)
                 {
-                    name = _config.renderName,
-                    filterMode = _config.textureFilterMode
+                    name = _setup.renderName,
+                    filterMode = _setup.textureFilterMode
                 };
                 
                 _renderCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
@@ -100,7 +100,7 @@ namespace ProjectTolerance.Rendering.ScreenSpace
                 return;
             }
 
-            if (_config.blurMatrix.Count > 0)
+            if (_setup.postMatrix.Count > 0)
             {
                 RenderTexture tempTexture = RenderTexture.GetTemporary(
                     _renderTexture.width,
@@ -111,7 +111,7 @@ namespace ProjectTolerance.Rendering.ScreenSpace
                 RenderTexture sourceTexture = _renderTexture;
                 RenderTexture destTexture = tempTexture;
             
-                foreach (int blurPixelSize in _config.blurMatrix)
+                foreach (int blurPixelSize in _setup.postMatrix)
                 {
                     _blurMaterial.SetFloat("_PixelOffset", blurPixelSize);
                     _blurMaterial.mainTexture = sourceTexture;
@@ -121,7 +121,7 @@ namespace ProjectTolerance.Rendering.ScreenSpace
                     (sourceTexture, destTexture) = (destTexture, sourceTexture);
                 }
 
-                if (_config.blurMatrix.Count % 2 == 1)
+                if (_setup.postMatrix.Count % 2 == 1)
                 {
                     Graphics.Blit(sourceTexture, _renderTexture);
                 }

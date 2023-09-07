@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5113675903520633482}
   - component: {fileID: 30323960490114601}
   m_Layer: 7
-  m_Name: TorchLightView
+  m_Name: PointLightView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

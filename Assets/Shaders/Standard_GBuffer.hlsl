@@ -12,11 +12,11 @@ SAMPLER(sampler_AmbientLightMapTexture);
 TEXTURE2D(_WarFogMapTexture);
 SAMPLER(sampler_WarFogMapTexture);
 
-float3 _TorchLightMapOffset;
-float2 _TorchLightMapWorldSize;
-float2 _TorchLightMapRotation;
-TEXTURE2D(_TorchLightMapTexture);
-SAMPLER(sampler_TorchLightMapTexture);
+float3 _PointLightMapOffset;
+float2 _PointLightMapWorldSize;
+float2 _PointLightMapRotation;
+TEXTURE2D(_PointLightMapTexture);
+SAMPLER(sampler_PointLightMapTexture);
 
 float _VerticalCutAlpha;
 float4 _VerticalCutRange;
@@ -210,13 +210,13 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     float ambientMapColor = SAMPLE_TEXTURE2D(_AmbientLightMapTexture, sampler_AmbientLightMapTexture, ambientMapUV);
 
     // Torch light
-    float2 torchMapPos = (positionWS + _TorchLightMapOffset).xz;
+    float2 torchMapPos = (positionWS + _PointLightMapOffset).xz;
     
-    torchMapPos = float2(torchMapPos.x * _TorchLightMapRotation.x - torchMapPos.y * _TorchLightMapRotation.y,
-                         torchMapPos.x * _TorchLightMapRotation.y + torchMapPos.y * _TorchLightMapRotation.x);
+    torchMapPos = float2(torchMapPos.x * _PointLightMapRotation.x - torchMapPos.y * _PointLightMapRotation.y,
+                         torchMapPos.x * _PointLightMapRotation.y + torchMapPos.y * _PointLightMapRotation.x);
     
-    float2 torchMapUV = saturate(torchMapPos / _TorchLightMapWorldSize);
-    float torchMapColor = SAMPLE_TEXTURE2D(_TorchLightMapTexture, sampler_TorchLightMapTexture, torchMapUV);
+    float2 torchMapUV = saturate(torchMapPos / _PointLightMapWorldSize);
+    float torchMapColor = SAMPLE_TEXTURE2D(_PointLightMapTexture, sampler_PointLightMapTexture, torchMapUV);
 
     float torchViewDot = 0.8 + 0.2 * saturate(dot(input.normalWS, input.viewDirWS));
     float maxHeight = 2 * pow(torchMapColor, 0.2);

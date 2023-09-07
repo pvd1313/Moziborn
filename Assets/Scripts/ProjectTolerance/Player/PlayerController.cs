@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ProjectTolerance.Buildings;
 using ProjectTolerance.Cinematics;
 using ProjectTolerance.Layers;
-using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.PointLight;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -16,7 +16,7 @@ namespace ProjectTolerance.Player
         private readonly PlayerInputController _input;
         private readonly MainCameraController _mainCamera;
         private readonly BuildingController _buildingController;
-        private readonly TorchLightController _torchLightController;
+        private readonly PointLightManager _pointLightManager;
 
         private PlayerView _playerView;
         private int _torchLightId;
@@ -31,13 +31,13 @@ namespace ProjectTolerance.Player
                                  PlayerInputController input, 
                                  MainCameraController mainCamera,
                                  BuildingController buildingController,
-                                 TorchLightController torchLightController)
+                                 PointLightManager pointLightManager)
         {
             _config = config;
             _input = input;
             _mainCamera = mainCamera;
             _buildingController = buildingController;
-            _torchLightController = torchLightController;
+            _pointLightManager = pointLightManager;
         }
 
         public IEnumerator Initialize()
@@ -46,14 +46,14 @@ namespace ProjectTolerance.Player
 
             _tempLights = new List<int>();
 
-            _torchLightId = _torchLightController.CreatePointLight(new TorchLightSetup
+            _torchLightId = _pointLightManager.CreatePointLight(new PointLightSetup
             {
-                layerIndex = LayerIndex.TorchLight,
+                layerIndex = LayerIndex.PointLight,
                 range = _config.flashlightRange,
                 spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
             });
 
-            _warFogLightId = _torchLightController.CreateWarFogLight(new TorchLightSetup
+            _warFogLightId = _pointLightManager.CreateWarFogLight(new PointLightSetup
             {
                 layerIndex = LayerIndex.WarFogLight,
                 range = _config.viewRange,
@@ -105,14 +105,14 @@ namespace ProjectTolerance.Player
 
             if (_input.state.isDropFlareKeyPressed)
             {
-                int lightId = _torchLightController.CreatePointLight(new TorchLightSetup
+                int lightId = _pointLightManager.CreatePointLight(new PointLightSetup
                 {
-                    layerIndex = LayerIndex.TorchLight,
+                    layerIndex = LayerIndex.PointLight,
                     range = _config.flashlightRange,
                     spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
                 });
 
-                _torchLightController.SetLightTransform(lightId, _playerMeshPosition, playerDirectionWorld);
+                _pointLightManager.SetLightTransform(lightId, _playerMeshPosition, playerDirectionWorld);
 
                 _tempLights.Add(lightId);
             }
@@ -121,7 +121,7 @@ namespace ProjectTolerance.Player
             {
                 foreach (int lightId in _tempLights)
                 {
-                    _torchLightController.RemoveLight(lightId);
+                    _pointLightManager.RemoveLight(lightId);
                 }
                 
                 _tempLights.Clear();
@@ -131,9 +131,9 @@ namespace ProjectTolerance.Player
 
             _mainCamera.AnimateMovePosition(_playerView.body.position);
 
-            _torchLightController.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
+            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
 
-            _torchLightController.SetLightTransform(_warFogLightId, _playerMeshPosition, playerDirectionWorld);
+            _pointLightManager.SetLightTransform(_warFogLightId, _playerMeshPosition, playerDirectionWorld);
             
             _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
         }

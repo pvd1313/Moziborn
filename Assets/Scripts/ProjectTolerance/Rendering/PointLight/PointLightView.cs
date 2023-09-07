@@ -1,9 +1,9 @@
 using ProjectTolerance.Layers;
 using UnityEngine;
 
-namespace ProjectTolerance.Rendering.TorchLight
+namespace ProjectTolerance.Rendering.PointLight
 {
-    public class TorchLightView : MonoBehaviour
+    public class PointLightView : MonoBehaviour
     {
         private struct TorchRaycastHit
         {
@@ -37,7 +37,7 @@ namespace ProjectTolerance.Rendering.TorchLight
         private Color32[] _meshColors;
         private int[] _meshTriangles;
 
-        public void Initialize(TorchLightSetup lightSetup)
+        public void Initialize(PointLightSetup lightSetup)
         {
             _meshRenderer.sharedMaterial = lightSetup.material;
             gameObject.layer = lightSetup.layerIndex;
@@ -50,7 +50,7 @@ namespace ProjectTolerance.Rendering.TorchLight
 
             _mesh = new Mesh
             {
-                name = "TorchLight",
+                name = "PointLight",
             };
 
             _meshVertices = new Vector3[_maxSampleCount + 1];

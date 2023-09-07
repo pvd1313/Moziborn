@@ -9,11 +9,11 @@ float3 _AmbientLightMapOffset;
 TEXTURE2D(_AmbientLightMapTexture);
 SAMPLER(sampler_AmbientLightMapTexture);
 
-float3 _TorchLightMapOffset;
-float2 _TorchLightMapWorldSize;
-float2 _TorchLightMapRotation;
-TEXTURE2D(_TorchLightMapTexture);
-SAMPLER(sampler_TorchLightMapTexture);
+float3 _PointLightMapOffset;
+float2 _PointLightMapWorldSize;
+float2 _PointLightMapRotation;
+TEXTURE2D(_PointLightMapTexture);
+SAMPLER(sampler_PointLightMapTexture);
 
 float _VerticalCutAlpha;
 float4 _VerticalCutRange;

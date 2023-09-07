@@ -34,13 +34,14 @@ MonoBehaviour:
     orthographicSize: 5
     viewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
     smoothTime: 0.2
-  _torchLightConfig:
+  _pointLightManagerConfig:
+    pointLightShader: {fileID: 4800000, guid: b15064f9a5bd4e15add6291ddfdadd22, type: 3}
+    warFogLightShader: {fileID: 4800000, guid: df1401d05a3b4b3a9455d392d2e3e668, type: 3}
+    _pointLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
+  _pointLightRenderConfig:
     postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
-    torchLightShader: {fileID: 4800000, guid: b15064f9a5bd4e15add6291ddfdadd22, type: 3}
-    warFogSpriteShader: {fileID: 4800000, guid: df1401d05a3b4b3a9455d392d2e3e668, type: 3}
-    torchLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
-    renderTextureResolution: 256
-    postMatrix: 0200000001000000
+    textureResolution: 256
+    postMatrix: 0400000001000000
   _weatherConfig:
     weatherViewPrefab: {fileID: 4944705672053266457, guid: 11d5d5391511179498121b81ada3e77b, type: 3}
   _warFogConfig:

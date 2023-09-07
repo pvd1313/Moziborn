@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace ProjectTolerance.Rendering.ScreenSpace
 {
-    public struct ScreenSpaceRenderConfig
+    public struct ScreenSpaceRenderSetup
     {
         public string renderName;
-        public Shader blurShader;
-        public IReadOnlyList<int> blurMatrix;
+        public Shader postShader;
+        public IReadOnlyList<int> postMatrix;
         public int textureResolution;
         public RenderTextureFormat textureFormat;
         public FilterMode textureFilterMode;

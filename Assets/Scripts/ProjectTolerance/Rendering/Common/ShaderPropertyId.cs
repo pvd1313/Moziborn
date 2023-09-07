@@ -23,9 +23,9 @@ namespace ProjectTolerance.Rendering
 
         public static readonly int WarFogMapTexture = Shader.PropertyToID("_WarFogMapTexture");
 
-        public static readonly int TorchLightMapTexture = Shader.PropertyToID("_TorchLightMapTexture");
-        public static readonly int TorchLightMapWorldSize = Shader.PropertyToID("_TorchLightMapWorldSize");
-        public static readonly int TorchLightMapRotation = Shader.PropertyToID("_TorchLightMapRotation");
-        public static readonly int TorchLightMapOffset = Shader.PropertyToID("_TorchLightMapOffset");
+        public static readonly int PointLightMapTexture = Shader.PropertyToID("_PointLightMapTexture");
+        public static readonly int PointLightMapWorldSize = Shader.PropertyToID("_PointLightMapWorldSize");
+        public static readonly int PointLightMapRotation = Shader.PropertyToID("_PointLightMapRotation");
+        public static readonly int PointLightMapOffset = Shader.PropertyToID("_PointLightMapOffset");
     }
 }

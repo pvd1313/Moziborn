@@ -4,7 +4,7 @@ using ProjectTolerance.Coroutines;
 using ProjectTolerance.Debugging;
 using ProjectTolerance.Player;
 using ProjectTolerance.Rendering.AmbientLight;
-using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.PointLight;
 using ProjectTolerance.Rendering.WarFog;
 using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
@@ -18,25 +18,37 @@ namespace ProjectTolerance.GameCycle
         [SerializeField] private AmbientLightConfig _ambientLightConfig;
         [SerializeField] private PlayerConfig _playerConfig;
         [SerializeField] private CameraConfig _cameraConfig;
-        [SerializeField] private TorchLightConfig _torchLightConfig;
+        [SerializeField] private PointLightManagerConfig _pointLightManagerConfig;
+        [SerializeField] private PointLightRenderConfig _pointLightRenderConfig;
         [SerializeField] private WeatherConfig _weatherConfig;
         [SerializeField] private WarFogConfig _warFogConfig;
 
         public override void InstallBindings()
         {
-            Container.BindInterfacesAndSelfTo<GameCycle>().AsSingle();
-            Container.BindInterfacesAndSelfTo<CoroutineController>().AsSingle();
-            Container.BindInterfacesAndSelfTo<GizmosController>().AsSingle();
+            Bind<GameCycle>();
+            Bind<CoroutineController>();
+            Bind<GizmosController>();
 
-            Container.BindInterfacesAndSelfTo<BuildingController>().AsSingle().WithArguments(_buildingConfig);
-            Container.BindInterfacesAndSelfTo<AmbientLightController>().AsSingle().WithArguments(_ambientLightConfig);
-            Container.BindInterfacesAndSelfTo<MainCameraController>().AsSingle().WithArguments(_cameraConfig);
-            Container.BindInterfacesAndSelfTo<TorchLightController>().AsSingle().WithArguments(_torchLightConfig);
-            Container.BindInterfacesAndSelfTo<WeatherController>().AsSingle().WithArguments(_weatherConfig);
-            Container.BindInterfacesAndSelfTo<WarFogRender>().AsSingle().WithArguments(_warFogConfig);
+            Bind<BuildingController>(_buildingConfig);
+            Bind<AmbientLightController>(_ambientLightConfig);
+            Bind<MainCameraController>(_cameraConfig);
+            Bind<PointLightManager>(_pointLightManagerConfig);
+            Bind<PointLightRender>(_pointLightRenderConfig);
+            Bind<WeatherController>(_weatherConfig);
+            Bind<WarFogRender>(_warFogConfig);
 
-            Container.BindInterfacesAndSelfTo<PlayerController>().AsSingle().WithArguments(_playerConfig);
-            Container.BindInterfacesAndSelfTo<PlayerInputController>().AsSingle();
+            Bind<PlayerController>(_playerConfig);
+            Bind<PlayerInputController>();
+        }
+
+        private void Bind<T>()
+        {
+            Container.BindInterfacesAndSelfTo<T>().AsSingle();
+        }
+
+        private void Bind<T>(object config)
+        {
+            Container.BindInterfacesAndSelfTo<T>().AsSingle().WithArguments(config);
         }
     }
 }

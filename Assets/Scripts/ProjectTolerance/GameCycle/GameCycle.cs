@@ -5,7 +5,7 @@ using ProjectTolerance.Coroutines;
 using ProjectTolerance.Debugging;
 using ProjectTolerance.Player;
 using ProjectTolerance.Rendering.AmbientLight;
-using ProjectTolerance.Rendering.TorchLight;
+using ProjectTolerance.Rendering.PointLight;
 using ProjectTolerance.Rendering.WarFog;
 using ProjectTolerance.Rendering.Weather;
 using UnityEngine;
@@ -36,7 +36,8 @@ namespace ProjectTolerance.GameCycle
             yield return _container.TryResolve<GizmosController>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
-            yield return _container.TryResolve<TorchLightController>()?.Initialize();
+            yield return _container.TryResolve<PointLightManager>()?.Initialize();
+            yield return _container.TryResolve<PointLightRender>()?.Initialize();
             yield return _container.TryResolve<AmbientLightController>()?.Initialize();
             yield return _container.TryResolve<PlayerController>()?.Initialize();
             yield return _container.TryResolve<WeatherController>()?.Initialize();
@@ -57,7 +58,7 @@ namespace ProjectTolerance.GameCycle
             _container.TryResolve<PlayerInputController>()?.Update();
             _container.TryResolve<PlayerController>()?.Update();
             _container.TryResolve<MainCameraController>()?.Update();
-            _container.TryResolve<TorchLightController>()?.Update();
+            _container.TryResolve<PointLightManager>()?.Update();
             _container.TryResolve<AmbientLightController>()?.Update();
             _container.TryResolve<BuildingController>()?.Update();
         }

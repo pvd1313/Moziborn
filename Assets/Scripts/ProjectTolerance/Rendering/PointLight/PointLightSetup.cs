@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace ProjectTolerance.Rendering.TorchLight
+namespace ProjectTolerance.Rendering.PointLight
 {
-    public struct TorchLightSetup
+    public struct PointLightSetup
     {
         public float rotationRad;
         public Vector3 position;
