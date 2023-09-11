@@ -15,7 +15,6 @@ namespace ProjectTolerance.Rendering.PointLight
         private Dictionary<int, PointLightView> _lightViews;
         private int _nextId;
         private Material _torchSpriteMaterial;
-        private Material _warFogSpriteMaterial;
 
         public PointLightManager (PointLightManagerConfig managerConfig)
         {
@@ -29,26 +28,13 @@ namespace ProjectTolerance.Rendering.PointLight
             _root = new GameObject("PointLightManager").transform;
 
             _torchSpriteMaterial = new Material(_managerConfig.pointLightShader);
-            _warFogSpriteMaterial = new Material(_managerConfig.warFogLightShader);
 
             yield break;
         }
 
-        public int CreatePointLight(PointLightSetup lightSetup)
+        public int CreateLight(PointLightSetup lightSetup)
         {
             lightSetup.material = _torchSpriteMaterial;
-            
-            PointLightView lightView = Object.Instantiate(_managerConfig._pointLightViewPrefab, _root);
-            lightView.Initialize(lightSetup);
-            
-            _lightViews[_nextId] = lightView;
-
-            return _nextId++;
-        }
-
-        public int CreateWarFogLight(PointLightSetup lightSetup)
-        {
-            lightSetup.material = _warFogSpriteMaterial;
             
             PointLightView lightView = Object.Instantiate(_managerConfig._pointLightViewPrefab, _root);
             lightView.Initialize(lightSetup);

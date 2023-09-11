@@ -7,7 +7,6 @@ namespace ProjectTolerance.Rendering.PointLight
     public class PointLightManagerConfig
     {
         public Shader pointLightShader;
-        public Shader warFogLightShader;
         public PointLightView _pointLightViewPrefab;
     }
 }

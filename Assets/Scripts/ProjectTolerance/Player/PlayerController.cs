@@ -48,18 +48,11 @@ namespace ProjectTolerance.Player
 
             _tempLights = new List<int>();
 
-            _torchLightId = _pointLightManager.CreatePointLight(new PointLightSetup
+            _torchLightId = _pointLightManager.CreateLight(new PointLightSetup
             {
                 layerIndex = LayerIndex.PointLight,
                 range = _config.flashlightRange,
                 spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
-            });
-
-            _warFogLightId = _pointLightManager.CreateWarFogLight(new PointLightSetup
-            {
-                layerIndex = LayerIndex.WarFogLight,
-                range = _config.viewRange,
-                spreadAngleRad = 360 * Mathf.Deg2Rad
             });
 
             yield break;
@@ -107,7 +100,7 @@ namespace ProjectTolerance.Player
 
             if (_input.state.isDropFlareKeyPressed)
             {
-                int lightId = _pointLightManager.CreatePointLight(new PointLightSetup
+                int lightId = _pointLightManager.CreateLight(new PointLightSetup
                 {
                     layerIndex = LayerIndex.PointLight,
                     range = _config.flashlightRange,

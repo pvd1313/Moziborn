@@ -40,11 +40,12 @@ MonoBehaviour:
     _pointLightViewPrefab: {fileID: 30323960490114601, guid: 9b27b7b92175b3846a7dab523902ec11, type: 3}
   _pointLightRenderConfig:
     postShader: {fileID: 4800000, guid: 44c50b6a6a404f19b739ae08c476db84, type: 3}
-    textureResolution: 256
-    postMatrix: 0200000001000000
+    textureResolution: 1024
+    postMatrix: 01000000
   _weatherConfig:
     weatherViewPrefab: {fileID: 4944705672053266457, guid: 11d5d5391511179498121b81ada3e77b, type: 3}
   _warFogRenderConfig:
-    postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
-    textureResolution: 256
-    postMatrix: 0200000001000000
+    ambientShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
+    linearFall: 0.07
+    bilinearFall: 1
+    blur: 0
