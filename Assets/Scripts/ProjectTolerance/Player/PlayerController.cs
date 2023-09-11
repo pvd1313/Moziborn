@@ -12,6 +12,8 @@ namespace ProjectTolerance.Player
 {
     public class PlayerController
     {
+        public Vector3 rigidbodyPosition => _playerView.body.position;
+        
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly MainCameraController _mainCamera;

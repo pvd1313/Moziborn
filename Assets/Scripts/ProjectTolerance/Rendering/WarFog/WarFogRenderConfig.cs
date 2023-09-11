@@ -7,8 +7,9 @@ namespace ProjectTolerance.Rendering.WarFog
     [Serializable]
     public class WarFogRenderConfig
     {
-        public Shader postShader;
-        public int textureResolution;
-        public List<int> postMatrix;
+        public Shader ambientShader;
+        public float linearFall;
+        public float bilinearFall;
+        public float blur;
     }
 }

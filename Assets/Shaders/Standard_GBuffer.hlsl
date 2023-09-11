@@ -15,9 +15,6 @@ float2 _PointLightMapRotation;
 TEXTURE2D(_PointLightMapTexture);
 SAMPLER(sampler_PointLightMapTexture);
 
-float3 _WarFogMapOffset;
-float2 _WarFogMapWorldSize;
-float2 _WarFogMapRotation;
 TEXTURE2D(_WarFogMapTexture);
 SAMPLER(sampler_WarFogMapTexture);
 
@@ -233,14 +230,7 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     emission = emission * ambientMapColor + brdfData.albedo * pointLightMapColor;
     
     // War fog
-    float2 warFogMapPos = (positionWS + _WarFogMapOffset).xz;
-
-    warFogMapPos = float2(warFogMapPos.x * _WarFogMapRotation.x - warFogMapPos.y * _WarFogMapRotation.y,
-                         warFogMapPos.x * _WarFogMapRotation.y + warFogMapPos.y * _WarFogMapRotation.x);
-
-    float2 warFogMapUV = saturate(warFogMapPos / _PointLightMapWorldSize);
-    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, warFogMapUV);
-    
+    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
     brdfData.albedo *= warFogColor;
     emission *= warFogColor;
     
