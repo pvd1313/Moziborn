@@ -1,10 +1,8 @@
-using System;
 using UnityEngine;
 
 namespace Moziborn.Buildings
 {
-    [Serializable]
-    public class BuildingConfig
+    public class BuildingConfig : ScriptableObject
     {
         public LevelView levelViewPrefab;
         public float transitionDuration;

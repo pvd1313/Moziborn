@@ -1,9 +1,8 @@
-using System;
+using UnityEngine;
 
 namespace Moziborn.Player
 {
-    [Serializable]
-    public class PlayerConfig
+    public class PlayerConfig : ScriptableObject
     {
         public PlayerView playerViewPrefab;
         public float positionSmoothTime;

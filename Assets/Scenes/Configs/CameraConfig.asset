@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32636ecc32d549f8b596ad23ffa268d2, type: 3}
+  m_Name: CameraConfig
+  m_EditorClassIdentifier: 
+  rotationAngleDegrees: {x: 60, y: 45, z: 0}
+  orthographicSize: 5
+  viewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
+  smoothTime: 0.2

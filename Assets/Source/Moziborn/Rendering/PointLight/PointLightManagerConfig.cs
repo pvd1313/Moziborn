@@ -1,12 +1,10 @@
-using System;
 using UnityEngine;
 
 namespace Moziborn.Rendering.PointLight
 {
-    [Serializable]
-    public class PointLightManagerConfig
+    public class PointLightManagerConfig : ScriptableObject
     {
         public Shader pointLightShader;
-        public PointLightView _pointLightViewPrefab;
+        public PointLightView pointLightViewPrefab;
     }
 }

@@ -1,10 +1,8 @@
-using System;
 using UnityEngine;
 
 namespace Moziborn.Cinematics
 {
-    [Serializable]
-    public class CameraConfig
+    public class CameraConfig : ScriptableObject
     {
         public Vector3 rotationAngleDegrees;
         public float orthographicSize;

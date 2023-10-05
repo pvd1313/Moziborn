@@ -1,10 +1,8 @@
-using System;
 using UnityEngine;
 
 namespace Moziborn.Rendering.AmbientLight
 {
-    [Serializable]
-    public class AmbientLightConfig
+    public class AmbientLightConfig : ScriptableObject
     {
         public Shader ambientLightShader;
         public float linearFall;

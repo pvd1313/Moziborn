@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Moziborn.Rendering.PointLight
 {
-    [Serializable]
-    public class PointLightRenderConfig
+    public class PointLightRenderConfig : ScriptableObject
     {
         public Shader postShader;
         public int textureResolution;

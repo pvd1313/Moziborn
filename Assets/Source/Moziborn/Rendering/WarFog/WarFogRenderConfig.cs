@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Moziborn.Rendering.WarFog
 {
-    [Serializable]
-    public class WarFogRenderConfig
+    public class WarFogRenderConfig : ScriptableObject
     {
         public Shader ambientShader;
         public float linearFall;

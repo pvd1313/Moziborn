@@ -36,7 +36,7 @@ namespace Moziborn.Rendering.PointLight
         {
             lightSetup.material = _torchSpriteMaterial;
             
-            PointLightView lightView = Object.Instantiate(_managerConfig._pointLightViewPrefab, _root);
+            PointLightView lightView = Object.Instantiate(_managerConfig.pointLightViewPrefab, _root);
             lightView.Initialize(lightSetup);
             
             _lightViews[_nextId] = lightView;

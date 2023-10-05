@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Moziborn.Buildings;
 using Moziborn.Cinematics;
 using Moziborn.Coroutines;
@@ -14,41 +16,37 @@ namespace Moziborn.GameCycle
 {
     public class GameInstaller : ScriptableObjectInstaller
     {
-        [SerializeField] private BuildingConfig _buildingConfig;
-        [SerializeField] private AmbientLightConfig _ambientLightConfig;
-        [SerializeField] private PlayerConfig _playerConfig;
-        [SerializeField] private CameraConfig _cameraConfig;
-        [SerializeField] private PointLightManagerConfig _pointLightManagerConfig;
-        [SerializeField] private PointLightRenderConfig _pointLightRenderConfig;
-        [SerializeField] private WeatherConfig _weatherConfig;
-        [SerializeField] private WarFogRenderConfig _warFogRenderConfig;
+        [SerializeField] private List<ScriptableObject> _configs;
 
         public override void InstallBindings()
         {
-            Bind<GameCycle>();
-            Bind<CoroutineController>();
-            Bind<GizmosController>();
+            Type[] controllers = 
+            {
+                typeof(GameCycle),
+                typeof(CoroutineController),
+                typeof(GizmosController),
+                
+                typeof(BuildingController),
+                typeof(AmbientLightController),
+                typeof(MainCameraController),
+                typeof(PointLightManager),
+                typeof(PointLightRender),
+                typeof(WeatherController),
+                typeof(WarFogRender),
+                
+                typeof(PlayerController),
+                typeof(PlayerInputController)
+            };
+            
+            foreach (ScriptableObject config in _configs)
+            {
+                Container.BindInterfacesAndSelfTo(config.GetType()).FromInstance(config).AsSingle();
+            }
 
-            Bind<BuildingController>(_buildingConfig);
-            Bind<AmbientLightController>(_ambientLightConfig);
-            Bind<MainCameraController>(_cameraConfig);
-            Bind<PointLightManager>(_pointLightManagerConfig);
-            Bind<PointLightRender>(_pointLightRenderConfig);
-            Bind<WeatherController>(_weatherConfig);
-            Bind<WarFogRender>(_warFogRenderConfig);
-
-            Bind<PlayerController>(_playerConfig);
-            Bind<PlayerInputController>();
-        }
-
-        private void Bind<T>()
-        {
-            Container.BindInterfacesAndSelfTo<T>().AsSingle();
-        }
-
-        private void Bind<T>(object config)
-        {
-            Container.BindInterfacesAndSelfTo<T>().AsSingle().WithArguments(config);
+            foreach (Type controller in controllers)
+            {
+                Container.BindInterfacesAndSelfTo(controller).AsSingle();
+            }
         }
     }
 }

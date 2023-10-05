@@ -1,9 +1,8 @@
-using System;
+using UnityEngine;
 
 namespace Moziborn.Rendering.Weather
 {
-    [Serializable]
-    public class WeatherConfig
+    public class WeatherConfig : ScriptableObject
     {
         public WeatherView weatherViewPrefab;
     }
