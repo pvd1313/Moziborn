@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: WarFogRenderConfig
   m_EditorClassIdentifier: 
   ambientShader: {fileID: 4800000, guid: 914d35c99a13d1e49859beb5d092aa9d, type: 3}
+  postMergeShader: {fileID: 4800000, guid: 44c50b6a6a404f19b739ae08c476db84, type: 3}
+  postFadeShader: {fileID: 4800000, guid: 507832ed5be646e9a5061698845f3ee4, type: 3}
   linearFall: 0.07
   bilinearFall: 1
   blur: 0

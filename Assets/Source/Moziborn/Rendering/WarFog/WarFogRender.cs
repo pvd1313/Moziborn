@@ -8,15 +8,20 @@ namespace Moziborn.Rendering.WarFog
 {
     public class WarFogRender
     {
+        private const float SampleRate = 1 / 60f;
+        
         private readonly WarFogRenderConfig _config;
         private readonly AmbientLightController _ambientLight;
         private readonly PlayerController _player;
 
         private Texture2D _sunTexture;
         private RenderTexture _stateTextureSpread;
-        private RenderTexture _stateTextureSpreadAndBlur;
+        private RenderTexture _stateTextureSpreadAndPost;
         private Vector2Int _playerPrevPosition;
         private Material _ambientMaterial;
+        private Material _postMergeMaterial;
+        private Material _postFadeMaterial;
+        private float _sampleTime;
 
         public WarFogRender (WarFogRenderConfig config, 
                              AmbientLightController ambientLight, 
@@ -44,16 +49,25 @@ namespace Moziborn.Rendering.WarFog
 
             _sunTexture.Apply();
 
-            _stateTextureSpread = new RenderTexture(wallTexture.width, wallTexture.height, 0, wallTexture.graphicsFormat)
+            _stateTextureSpread = new RenderTexture(wallTexture.width, wallTexture.height, 0, RenderTextureFormat.R16)
             {
                 name = "WarFogStateTextureRaw",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
 
-            _ambientMaterial = new Material(_config.ambientShader);
+            _stateTextureSpreadAndPost = new RenderTexture(wallTexture.width * 2, wallTexture.height * 2, 0, RenderTextureFormat.R16)
+            {
+                name = "WarFogStateTexturePost",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Point
+            };
 
-            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureSpread);
+            _ambientMaterial = new Material(_config.ambientShader);
+            _postMergeMaterial = new Material(_config.postMergeShader);
+            _postFadeMaterial = new Material(_config.postFadeShader);
+
+            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureSpreadAndPost);
             
             yield break;
         }
@@ -75,6 +89,14 @@ namespace Moziborn.Rendering.WarFog
 
                 _playerPrevPosition = playerPosition;
             }
+
+            _sampleTime += Time.deltaTime;
+            if (_sampleTime < SampleRate)
+            {
+                return;
+            }
+
+            _sampleTime -= SampleRate;
             
             RenderTexture tempTexture = RenderTexture.GetTemporary(
                 textureBounds.size.x, 
@@ -91,8 +113,30 @@ namespace Moziborn.Rendering.WarFog
 
             Graphics.Blit(null, tempTexture, _ambientMaterial);
             Graphics.Blit(tempTexture, _stateTextureSpread);
-
             RenderTexture.ReleaseTemporary(tempTexture);
+            
+            RenderTexture mergedTexture = RenderTexture.GetTemporary(
+                textureBounds.size.x * 2, 
+                textureBounds.size.y * 2, 
+                0, 
+                RenderTextureFormat.R16);
+            
+            Graphics.Blit(_stateTextureSpread, mergedTexture, _postMergeMaterial);
+
+            RenderTexture fadedTexture = RenderTexture.GetTemporary(
+                textureBounds.size.x * 2,
+                textureBounds.size.y * 2,
+                0,
+                RenderTextureFormat.R16);
+            
+            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.StateTexture, _stateTextureSpreadAndPost);
+            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.SunTexture, mergedTexture);
+            
+            Graphics.Blit(null, fadedTexture, _postFadeMaterial);
+            Graphics.Blit(fadedTexture, _stateTextureSpreadAndPost);
+            
+            RenderTexture.ReleaseTemporary(mergedTexture);
+            RenderTexture.ReleaseTemporary(fadedTexture);
         }
     }
 }

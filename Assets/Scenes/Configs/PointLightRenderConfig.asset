@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0e796d989434ba6aead1bbf1dd0321b, type: 3}
   m_Name: PointLightRenderConfig
   m_EditorClassIdentifier: 
-  postShader: {fileID: 4800000, guid: 44c50b6a6a404f19b739ae08c476db84, type: 3}
+  postShader: {fileID: 4800000, guid: 6aebf96a1c5ef3643a1b8142acbba6c4, type: 3}
   textureResolution: 1024
   postMatrix: 01000000

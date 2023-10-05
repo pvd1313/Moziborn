@@ -13,6 +13,12 @@ namespace Moziborn.Rendering
             public static readonly int BilinearFall = Shader.PropertyToID("_BilinearFall");
             public static readonly int LinearFall = Shader.PropertyToID("_LinearFall");
         }
+
+        public class WarFogFadePost
+        {
+            public static readonly int StateTexture = Shader.PropertyToID("_StateTexture");
+            public static readonly int SunTexture = Shader.PropertyToID("_SunTexture");
+        }
         
         public static readonly int VerticalCutAlpha = Shader.PropertyToID("_VerticalCutAlpha");
         public static readonly int VerticalCutRange = Shader.PropertyToID("_VerticalCutRange");
@@ -27,8 +33,5 @@ namespace Moziborn.Rendering
         public static readonly int PointLightMapOffset = Shader.PropertyToID("_PointLightMapOffset");
         
         public static readonly int WarFogMapTexture = Shader.PropertyToID("_WarFogMapTexture");
-        public static readonly int WarFogMapWorldSize = Shader.PropertyToID("_WarFogMapWorldSize");
-        public static readonly int WarFogMapRotation = Shader.PropertyToID("_WarFogMapRotation");
-        public static readonly int WarFogMapOffset = Shader.PropertyToID("_WarFogMapOffset");
     }
 }

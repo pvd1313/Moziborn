@@ -1,8 +1,9 @@
-Shader "Moziborn/WarFogPost"
+Shader "Moziborn/WarFogPostFade"
 {
 	Properties
 	{
-		_MainTex ("Main Texture", 2D) = "white" { }		
+		_SunTexture ("Main Texture", 2D) = "white" { }	
+		_StateTexture("State Texture", 2D) = "white" { }	
 	}
 	SubShader
 	{
@@ -39,20 +40,15 @@ Shader "Moziborn/WarFogPost"
 				return output;
 			}
 			
-			sampler2D _MainTex;
-			float4 _MainTex_TexelSize;
-			float _PixelOffset;
+			sampler2D _SunTexture;
+			sampler2D _StateTexture;
 
 			float4 Fragment (FragmentInput input) : SV_Target
 			{
-				float2 pixel = _MainTex_TexelSize.xy * _PixelOffset;
-
-				float4 color0 = tex2D(_MainTex, input.uv + float2(pixel.x, 0));
-                float4 color1 = tex2D(_MainTex, input.uv - float2(pixel.x, 0));
-                float4 color2 = tex2D(_MainTex, input.uv + float2(0, pixel.y));
-                float4 color3 = tex2D(_MainTex, input.uv - float2(0, pixel.y));
+				float4 targetColor = pow(tex2D(_SunTexture, input.uv), 0.1);
+                float4 curColor = tex2D(_StateTexture, input.uv);
 				
-				return (color0 + color1 + color2 + color3) * 0.25;
+				return curColor + clamp(targetColor - curColor, -0.08, 0.08);
 			}
 			
 			ENDCG
