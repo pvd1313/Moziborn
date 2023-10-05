@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/AmbientLight"
+Shader "Moziborn/AmbientLight"
 {
     Properties
     {

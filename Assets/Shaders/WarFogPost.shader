@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/WarFogPost"
+Shader "Moziborn/WarFogPost"
 {
 	Properties
 	{

@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/PointLight"
+Shader "Moziborn/PointLight"
 {
 	Properties
 	{

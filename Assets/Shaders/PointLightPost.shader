@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/PointLightPost"
+Shader "Moziborn/PointLightPost"
 {
 	SubShader
 	{

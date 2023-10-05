@@ -1,4 +1,4 @@
-Shader "ProjectTolerance/Standard"
+Shader "Moziborn/Standard"
 {
     Properties
     {
