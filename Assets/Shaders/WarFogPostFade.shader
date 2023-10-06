@@ -3,7 +3,8 @@ Shader "Moziborn/WarFogPostFade"
 	Properties
 	{
 		_SunTexture ("Main Texture", 2D) = "white" { }	
-		_StateTexture("State Texture", 2D) = "white" { }	
+		_StateTexture("State Texture", 2D) = "white" { }
+		_FadeDelta("Fade Delta", float) = 0.08	
 	}
 	SubShader
 	{
@@ -42,13 +43,14 @@ Shader "Moziborn/WarFogPostFade"
 			
 			sampler2D _SunTexture;
 			sampler2D _StateTexture;
+			float _FadeDelta;
 
 			float4 Fragment (FragmentInput input) : SV_Target
 			{
 				float4 targetColor = pow(tex2D(_SunTexture, input.uv), 0.1);
                 float4 curColor = tex2D(_StateTexture, input.uv);
 				
-				return curColor + clamp(targetColor - curColor, -0.08, 0.08);
+				return curColor + clamp(targetColor - curColor, _FadeDelta * -1, _FadeDelta);
 			}
 			
 			ENDCG

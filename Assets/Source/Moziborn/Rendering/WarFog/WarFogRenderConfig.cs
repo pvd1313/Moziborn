@@ -7,8 +7,10 @@ namespace Moziborn.Rendering.WarFog
         public Shader ambientShader;
         public Shader postMergeShader;
         public Shader postFadeShader;
-        public float linearFall;
-        public float bilinearFall;
-        public float blur;
+        public float sampleRate;
+        public float ambientLinearFall;
+        public float ambientBilinearFall;
+        public float ambientBlur;
+        public float fadeDelta;
     }
 }

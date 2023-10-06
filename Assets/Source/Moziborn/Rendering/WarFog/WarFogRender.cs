@@ -8,8 +8,6 @@ namespace Moziborn.Rendering.WarFog
 {
     public class WarFogRender
     {
-        private const float SampleRate = 1 / 60f;
-        
         private readonly WarFogRenderConfig _config;
         private readonly AmbientLightController _ambientLight;
         private readonly PlayerController _player;
@@ -91,13 +89,19 @@ namespace Moziborn.Rendering.WarFog
             }
 
             _sampleTime += Time.deltaTime;
-            if (_sampleTime < SampleRate)
-            {
-                return;
-            }
 
-            _sampleTime -= SampleRate;
-            
+            float sampleRate = 1 / _config.sampleRate;
+
+            while (_sampleTime >= sampleRate)
+            {
+                SampleTexture(textureBounds);
+                
+                _sampleTime -= sampleRate;
+            }
+        }
+
+        private void SampleTexture(BoundsInt textureBounds)
+        {
             RenderTexture tempTexture = RenderTexture.GetTemporary(
                 textureBounds.size.x, 
                 textureBounds.size.y, 
@@ -107,9 +111,9 @@ namespace Moziborn.Rendering.WarFog
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _ambientLight.wallTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTextureSpread);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.blur);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.linearFall);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.bilinearFall);
+            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.ambientBlur);
+            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.ambientLinearFall);
+            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.ambientBilinearFall);
 
             Graphics.Blit(null, tempTexture, _ambientMaterial);
             Graphics.Blit(tempTexture, _stateTextureSpread);
@@ -131,6 +135,7 @@ namespace Moziborn.Rendering.WarFog
             
             _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.StateTexture, _stateTextureSpreadAndPost);
             _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.SunTexture, mergedTexture);
+            _postFadeMaterial.SetFloat(ShaderPropertyId.WarFogFadePost.FadeDelta, _config.fadeDelta);
             
             Graphics.Blit(null, fadedTexture, _postFadeMaterial);
             Graphics.Blit(fadedTexture, _stateTextureSpreadAndPost);

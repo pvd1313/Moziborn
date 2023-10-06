@@ -18,6 +18,7 @@ namespace Moziborn.Rendering
         {
             public static readonly int StateTexture = Shader.PropertyToID("_StateTexture");
             public static readonly int SunTexture = Shader.PropertyToID("_SunTexture");
+            public static readonly int FadeDelta = Shader.PropertyToID("_FadeDelta");
         }
         
         public static readonly int VerticalCutAlpha = Shader.PropertyToID("_VerticalCutAlpha");
