@@ -3,24 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-
-float2 _AmbientLightMapWorldSize;
-float3 _AmbientLightMapOffset;
-TEXTURE2D(_AmbientLightMapTexture);
-SAMPLER(sampler_AmbientLightMapTexture);
-
-float3 _PointLightMapOffset;
-float2 _PointLightMapWorldSize;
-float2 _PointLightMapRotation;
-TEXTURE2D(_PointLightMapTexture);
-SAMPLER(sampler_PointLightMapTexture);
-
-TEXTURE2D(_WarFogMapTexture);
-SAMPLER(sampler_WarFogMapTexture);
-
-float _VerticalCutAlpha;
-float4 _VerticalCutRange;
-
+#include "Common.hlsl"
 
 // TODO: Currently we support viewDirTS caclulated in vertex shader and in fragments shader.
 // As both solutions have their advantages and disadvantages (etc. shader target 2.0 has only 8 interpolators).
@@ -124,13 +107,6 @@ Varyings LitGBufferPassVertex(Attributes input)
     UNITY_TRANSFER_INSTANCE_ID(input, output);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
-    // Scale Z based on camera angle
-    float3 objectCenterWS = TransformObjectToWorld(float3(0, 0, 0));
-    float3 vertexWS = TransformObjectToWorld(input.positionOS.xyz);
-    float3 delta = vertexWS - objectCenterWS;
-    float3 resultOS = TransformWorldToObject(objectCenterWS + delta);
-    input.positionOS = float4(resultOS.x, resultOS.y, resultOS.z, input.positionOS.w);
-
     VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
     
     VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -224,8 +200,10 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     pointLightMapColor *= pointLightHeight01 * pointLightViewDot;
 
     // Cut walls
-    float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
-    clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
+    if (input.positionWS.y >= _VerticalCutRange.x)
+    {
+        DitherClip(input.positionCS, _VerticalCutAlpha);
+    }
 
     emission = emission * ambientMapColor + brdfData.albedo * pointLightMapColor;
     

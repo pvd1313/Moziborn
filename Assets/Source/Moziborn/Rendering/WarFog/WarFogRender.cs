@@ -13,8 +13,8 @@ namespace Moziborn.Rendering.WarFog
         private readonly PlayerController _player;
 
         private Texture2D _sunTexture;
-        private RenderTexture _stateTextureSpread;
-        private RenderTexture _stateTextureSpreadAndPost;
+        private RenderTexture _stateTexture;
+        private RenderTexture _stateTextureWithPost;
         private Vector2Int _playerPrevPosition;
         private Material _ambientMaterial;
         private Material _postMergeMaterial;
@@ -47,14 +47,14 @@ namespace Moziborn.Rendering.WarFog
 
             _sunTexture.Apply();
 
-            _stateTextureSpread = new RenderTexture(wallTexture.width, wallTexture.height, 0, RenderTextureFormat.R16)
+            _stateTexture = new RenderTexture(wallTexture.width, wallTexture.height, 0, RenderTextureFormat.R16)
             {
                 name = "WarFogStateTextureRaw",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
 
-            _stateTextureSpreadAndPost = new RenderTexture(wallTexture.width * 2, wallTexture.height * 2, 0, RenderTextureFormat.R16)
+            _stateTextureWithPost = new RenderTexture(wallTexture.width * 2, wallTexture.height * 2, 0, RenderTextureFormat.R16)
             {
                 name = "WarFogStateTexturePost",
                 wrapMode = TextureWrapMode.Clamp,
@@ -65,7 +65,7 @@ namespace Moziborn.Rendering.WarFog
             _postMergeMaterial = new Material(_config.postMergeShader);
             _postFadeMaterial = new Material(_config.postFadeShader);
 
-            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureSpreadAndPost);
+            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureWithPost);
             
             yield break;
         }
@@ -110,13 +110,13 @@ namespace Moziborn.Rendering.WarFog
             
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _ambientLight.wallTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTextureSpread);
+            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.ambientBlur);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.ambientLinearFall);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.ambientBilinearFall);
 
             Graphics.Blit(null, tempTexture, _ambientMaterial);
-            Graphics.Blit(tempTexture, _stateTextureSpread);
+            Graphics.Blit(tempTexture, _stateTexture);
             RenderTexture.ReleaseTemporary(tempTexture);
             
             RenderTexture mergedTexture = RenderTexture.GetTemporary(
@@ -125,7 +125,7 @@ namespace Moziborn.Rendering.WarFog
                 0, 
                 RenderTextureFormat.R16);
             
-            Graphics.Blit(_stateTextureSpread, mergedTexture, _postMergeMaterial);
+            Graphics.Blit(_stateTexture, mergedTexture, _postMergeMaterial);
 
             RenderTexture fadedTexture = RenderTexture.GetTemporary(
                 textureBounds.size.x * 2,
@@ -133,12 +133,12 @@ namespace Moziborn.Rendering.WarFog
                 0,
                 RenderTextureFormat.R16);
             
-            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.StateTexture, _stateTextureSpreadAndPost);
+            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.StateTexture, _stateTextureWithPost);
             _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.SunTexture, mergedTexture);
             _postFadeMaterial.SetFloat(ShaderPropertyId.WarFogFadePost.FadeDelta, _config.fadeDelta);
             
             Graphics.Blit(null, fadedTexture, _postFadeMaterial);
-            Graphics.Blit(fadedTexture, _stateTextureSpreadAndPost);
+            Graphics.Blit(fadedTexture, _stateTextureWithPost);
             
             RenderTexture.ReleaseTemporary(mergedTexture);
             RenderTexture.ReleaseTemporary(fadedTexture);

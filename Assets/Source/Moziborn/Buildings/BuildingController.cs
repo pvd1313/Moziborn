@@ -80,8 +80,6 @@ namespace Moziborn.Buildings
 
         public void OnPlayerBoundsUpdate(Bounds playerBounds, Vector3 aimDirection)
         {
-            const float WallHeight = 3.2f;
-            
             Vector3 cameraDir = _mainCamera.lookDirection;
 
             Vector3 playerBottomCenter = playerBounds.center;
@@ -96,8 +94,9 @@ namespace Moziborn.Buildings
             Ray playerBottomRay1 = new (playerBottom1, -cameraDir);
             Ray playerBottomRay2 = new (playerBottom2, -cameraDir);
             Ray playerBottomRay3 = new (playerBottom3, -cameraDir);
-            
-            Vector3 aimRayOffset = Vector3.Cross(aimDirection, Vector3.up) * Mathf.Cos(_mainCamera.rotationDeg.x * Mathf.Deg2Rad) * WallHeight;
+
+            Vector3 aimRayOffset = Vector3.Cross(aimDirection, Vector3.up) *
+                                   (Mathf.Cos(_mainCamera.rotationDeg.x * Mathf.Deg2Rad) * _config.verticalCutRange.y);
             Ray aimRay0 = new (playerBottomCenter + aimRayOffset, aimDirection);
             Ray aimRay1 = new (playerBottomCenter - aimRayOffset, aimDirection);
 

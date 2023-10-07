@@ -3,21 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-
-float2 _AmbientLightMapWorldSize;
-float3 _AmbientLightMapOffset;
-TEXTURE2D(_AmbientLightMapTexture);
-SAMPLER(sampler_AmbientLightMapTexture);
-
-float3 _PointLightMapOffset;
-float2 _PointLightMapWorldSize;
-float2 _PointLightMapRotation;
-TEXTURE2D(_PointLightMapTexture);
-SAMPLER(sampler_PointLightMapTexture);
-
-float _VerticalCutAlpha;
-float4 _VerticalCutRange;
-
+#include "Common.hlsl"
 
 // TODO: Currently we support viewDirTS caclulated in vertex shader and in fragments shader.
 // As both solutions have their advantages and disadvantages (etc. shader target 2.0 has only 8 interpolators).
@@ -194,11 +180,13 @@ FragmentOutput UnlitPassFragment(Varyings input)
     InitializeBRDFData(surfaceData.albedo, surfaceData.metallic, surfaceData.specular, surfaceData.smoothness, surfaceData.alpha, brdfData);
 
     // Cut walls
-    float verticalCutDelta = _VerticalCutRange.y - _VerticalCutRange.x;
-    clip(-input.positionWS.y + _VerticalCutRange.x + verticalCutDelta * _VerticalCutAlpha + 0.00001);
+    if (input.positionWS.y >= _VerticalCutRange.x)
+    {
+        DitherClip(input.positionCS, _VerticalCutAlpha);
+    }
     
     // Backfaces are always black
-    brdfData.albedo *= 0;
+    brdfData.albedo = 0;
     
     return BRDFDataToGbuffer(brdfData, inputData, surfaceData.smoothness, surfaceData.emission);
 }

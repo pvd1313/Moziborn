@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelViewPrefab: {fileID: 7652998681681001500, guid: b2b845a086910b842a69af898233d86f, type: 3}
   transitionDuration: 0.3
-  verticalCutRange: {x: 1, y: 3.3}
+  verticalCutRange: {x: 0.5, y: 3.3}
