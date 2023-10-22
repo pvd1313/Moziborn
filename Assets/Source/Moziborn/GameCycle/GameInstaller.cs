@@ -27,7 +27,7 @@ namespace Moziborn.GameCycle
                 typeof(GizmosController),
                 
                 typeof(BuildingController),
-                typeof(AmbientLightController),
+                typeof(AmbientLightRender),
                 typeof(MainCameraController),
                 typeof(PointLightManager),
                 typeof(PointLightRender),

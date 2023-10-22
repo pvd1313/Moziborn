@@ -38,7 +38,7 @@ namespace Moziborn.GameCycle
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PointLightManager>()?.Initialize();
             yield return _container.TryResolve<PointLightRender>()?.Initialize();
-            yield return _container.TryResolve<AmbientLightController>()?.Initialize();
+            yield return _container.TryResolve<AmbientLightRender>()?.Initialize();
             yield return _container.TryResolve<PlayerController>()?.Initialize();
             yield return _container.TryResolve<WeatherController>()?.Initialize();
             yield return _container.TryResolve<WarFogRender>()?.Initialize();
@@ -59,7 +59,7 @@ namespace Moziborn.GameCycle
             _container.TryResolve<PlayerController>()?.Update();
             _container.TryResolve<MainCameraController>()?.Update();
             _container.TryResolve<PointLightManager>()?.Update();
-            _container.TryResolve<AmbientLightController>()?.Update();
+            _container.TryResolve<AmbientLightRender>()?.Update();
             _container.TryResolve<WarFogRender>()?.Update();
             _container.TryResolve<BuildingController>()?.Update();
         }

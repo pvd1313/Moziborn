@@ -1,6 +1,6 @@
 namespace Moziborn.Buildings
 {
-    public enum EBuildingPartType
+    public enum BuildingPartType
     {
         None = 0,
         Wall = 1,

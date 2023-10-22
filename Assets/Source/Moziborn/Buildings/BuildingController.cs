@@ -6,9 +6,11 @@ using Moziborn.Rendering;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+using Object = UnityEngine.Object;
+
 namespace Moziborn.Buildings
 {
-    public class BuildingController : IGizmosDrawer
+    public class BuildingController : IGizmosDrawer, ILevelLayout
     {
         private class BuildingTransition
         {
@@ -21,7 +23,9 @@ namespace Moziborn.Buildings
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
         
-        public BoundsInt levelBounds { get; private set; }
+        public BoundsInt bounds { get; private set; }
+        
+        public int currentBuildingIndex { get; private set; }
 
         private readonly BuildingConfig _config;
         private readonly MainCameraController _mainCamera;
@@ -48,9 +52,9 @@ namespace Moziborn.Buildings
             BoundsInt bounds = _floor0Frame.cellBounds;
             bounds = JoinBounds(bounds, _floor0Interactive.cellBounds);
             bounds = JoinBounds(bounds, _floor1Frame.cellBounds);
-            levelBounds = bounds;
+            this.bounds = bounds;
 
-            // Wait for tilemap GameObjects be spawned.
+            // Wait for tilemap GameObjects to be spawned.
             yield return null;
             
             _buildings = new List<BuildingData>();
@@ -78,7 +82,7 @@ namespace Moziborn.Buildings
             }
         }
 
-        public void OnPlayerBoundsUpdate(Bounds playerBounds, Vector3 aimDirection)
+        public void UpdateViewerState(Bounds playerBounds, Vector3 aimDirection)
         {
             Vector3 cameraDir = _mainCamera.lookDirection;
 
@@ -106,16 +110,16 @@ namespace Moziborn.Buildings
                 Debug.DrawRay(aimRay1.origin, aimRay1.direction * _mainCamera.orthographicSize, Color.cyan);
             }
 
-            bool playerInsideBuilding = false;
-
-            for (int i = 0; i < _buildings.Count && !playerInsideBuilding; i++)
+            currentBuildingIndex = -1;
+            
+            for (int i = 0; i < _buildings.Count && currentBuildingIndex == -1; i++)
             {
                 foreach (BoundsInt room in buildings[i].rooms)
                 {
                     Bounds roomBounds = RoomBoundsToFloat(room);
                     if (roomBounds.Contains(playerBottomCenter))
                     {
-                        playerInsideBuilding = true;
+                        currentBuildingIndex = i;
                         break;
                     }
                 }
@@ -138,7 +142,7 @@ namespace Moziborn.Buildings
                         break;
                     }
 
-                    if (!playerInsideBuilding)
+                    if (currentBuildingIndex == -1)
                     {
                         if (roomBounds.IntersectRay(aimRay0) ||
                             roomBounds.IntersectRay(aimRay1))
@@ -186,7 +190,7 @@ namespace Moziborn.Buildings
                 }
             }
         }
-        
+
         private static BoundsInt JoinBounds(BoundsInt a, BoundsInt b)
         {
             int xMin = Mathf.Min(a.min.x, b.min.x);

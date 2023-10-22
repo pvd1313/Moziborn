@@ -130,7 +130,7 @@ namespace Moziborn.Player
 
             _pointLightManager.SetLightTransform(_warFogLightId, _playerMeshPosition, playerDirectionWorld);
             
-            _buildingController.OnPlayerBoundsUpdate(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
+            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
         }
 
         private Vector3 InputToWorldDirection(Vector2 inputDirection)

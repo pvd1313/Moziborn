@@ -4,19 +4,17 @@ using UnityEngine;
 
 namespace Moziborn.Rendering.AmbientLight
 {
-    public class AmbientLightController
+    public class AmbientLightRender
     {
-        public Texture2D wallTexture { get; private set; }
-        public BoundsInt textureBounds { get; private set; }
-        
         private readonly AmbientLightConfig _config;
         private readonly BuildingController _buildingController;
         
+        private Texture2D _wallTexture;
         private Texture2D _sunTexture;
         private Material _ambientLightMaterial;
         private RenderTexture _stateTexture;
 
-        public AmbientLightController(AmbientLightConfig config, BuildingController buildingController)
+        public AmbientLightRender(AmbientLightConfig config, BuildingController buildingController)
         {
             _config = config;
             _buildingController = buildingController;
@@ -24,82 +22,63 @@ namespace Moziborn.Rendering.AmbientLight
 
         public IEnumerator Initialize()
         {
-            BoundsInt bounds = _buildingController.levelBounds;
+            BoundsInt levelBounds = _buildingController.bounds;
 
-            _sunTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
+            _sunTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
             {
                 name = "AmbientLight_Sun",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            wallTexture = new Texture2D(bounds.size.x, bounds.size.y, TextureFormat.R16, false, true)
+            _wallTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
             {
                 name = "AmbientLight_Wall",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _stateTexture = new RenderTexture(bounds.size.x, bounds.size.y, 0, RenderTextureFormat.R16)
+            _stateTexture = new RenderTexture(levelBounds.size.x, levelBounds.size.y, 0, RenderTextureFormat.R16)
             {
                 name = "AmbientLight_State",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Bilinear,
             };
-            textureBounds = bounds;
             
             _ambientLightMaterial = new Material(_config.ambientLightShader);
-            _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, wallTexture);
+            _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _wallTexture);
             _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
             _ambientLightMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
             
             Shader.SetGlobalVector(
                 ShaderPropertyId.AmbientLightMapOffset, 
-                new Vector4(textureBounds.position.x, 0, textureBounds.position.y) * -1);
+                new Vector4(levelBounds.position.x, 0, levelBounds.position.y) * -1);
             
             Shader.SetGlobalVector(
                 ShaderPropertyId.AmbientLightMapWorldSize, 
-                new Vector4(textureBounds.size.x, textureBounds.size.y));
+                new Vector4(levelBounds.size.x, levelBounds.size.y));
             
             Shader.SetGlobalTexture(ShaderPropertyId.AmbientLightMapTexture, _stateTexture);
-
-            foreach (BuildingData building in _buildingController.buildings)
-                foreach (BoundsInt room in building.rooms)
-                    foreach (Vector3Int pos in room.allPositionsWithin)
-                    {
-                        Vector3Int localPoint = pos - bounds.position;
-                        _sunTexture.SetPixel(localPoint.x, localPoint.y, Color.black);
-                    }
-
-            for (int x = 0; x < textureBounds.size.x; x++)
-                for (int y = 0; y < textureBounds.size.y; y++)
-                    wallTexture.SetPixel(x, y, Color.black);
-
-            foreach (BuildingData building in _buildingController.buildings)
-                foreach (Vector2Int wallPos in building.walls)
-                {
-                    Vector2Int localPoint = wallPos - new Vector2Int(bounds.position.x, bounds.position.y);
-                    wallTexture.SetPixel(localPoint.x, localPoint.y, Color.white);
-                }
             
-            wallTexture.Apply();
+            _sunTexture.Fill(Color.white);
+            _sunTexture.FillRooms(_buildingController, Color.black);
             _sunTexture.Apply();
+            
+            _wallTexture.Fill(Color.black);
+            _wallTexture.DrawWalls(_buildingController, Color.white);
+            _wallTexture.Apply();
 
             yield break;
         }
 
         public void Update()
         {
-            foreach (BuildingData building in _buildingController.buildings)
-                foreach (DoorData door in building.doors)
-                {
-                    Vector2Int pos = door.position - new Vector2Int(textureBounds.position.x, textureBounds.position.y);
-                    wallTexture.SetPixel(pos.x, pos.y, Color.white * door.view.doorState);
-                }
-
-            wallTexture.Apply();
+            BoundsInt levelBounds = _buildingController.bounds;
+            
+            _wallTexture.DrawDoors(_buildingController);
+            _wallTexture.Apply();
         
             RenderTexture tempTexture = RenderTexture.GetTemporary(
-                textureBounds.size.x, 
-                textureBounds.size.y, 
+                levelBounds.size.x, 
+                levelBounds.size.y, 
                 0, 
                 RenderTextureFormat.R16);
 
@@ -117,11 +96,11 @@ namespace Moziborn.Rendering.AmbientLight
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-            Bounds bounds = TileToWorldBounds(textureBounds);
+            Bounds bounds = TileToWorldBounds(_buildingController.bounds);
             Gizmos.DrawWireCube(bounds.center, bounds.size);
         }
 
-        private Bounds TileToWorldBounds(BoundsInt bounds)
+        private static Bounds TileToWorldBounds(BoundsInt bounds)
         {
             Vector3 center = new (bounds.center.x, 0, bounds.center.y);
             Vector3 size = new (bounds.size.x, 0, bounds.size.y);

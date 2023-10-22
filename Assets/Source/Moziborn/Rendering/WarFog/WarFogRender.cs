@@ -1,18 +1,18 @@
 using System.Collections;
+using Moziborn.Buildings;
 using Moziborn.Player;
-using Moziborn.Rendering.AmbientLight;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 
 namespace Moziborn.Rendering.WarFog
 {
     public class WarFogRender
     {
         private readonly WarFogRenderConfig _config;
-        private readonly AmbientLightController _ambientLight;
+        private readonly BuildingController _buildingController;
         private readonly PlayerController _player;
 
         private Texture2D _sunTexture;
+        private Texture2D _wallTexture;
         private RenderTexture _stateTexture;
         private RenderTexture _stateTextureWithPost;
         private Vector2Int _playerPrevPosition;
@@ -22,44 +22,49 @@ namespace Moziborn.Rendering.WarFog
         private float _sampleTime;
 
         public WarFogRender (WarFogRenderConfig config, 
-                             AmbientLightController ambientLight, 
+                             BuildingController buildingController, 
                              PlayerController player)
         {
             _config = config;
-            _ambientLight = ambientLight;
+            _buildingController = buildingController;
             _player = player;
         }
         
         public IEnumerator Initialize()
         {
-            Texture2D wallTexture = _ambientLight.wallTexture;
-
-            _sunTexture = new Texture2D(wallTexture.width, wallTexture.height, wallTexture.graphicsFormat, TextureCreationFlags.None)
+            BoundsInt levelBounds = _buildingController.bounds;
+            
+            _sunTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
             {
                 name = "WarFog_Sun",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            
-            for (int i = 0; i < _sunTexture.width; i++)
-            for (int j = 0; j < _sunTexture.height; j++)
-                _sunTexture.SetPixel(i, j, Color.black);
-
-            _sunTexture.Apply();
-
-            _stateTexture = new RenderTexture(wallTexture.width, wallTexture.height, 0, RenderTextureFormat.R16)
+            _wallTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
+            {
+                name = "WarFog_Wall",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Point
+            };
+            _stateTexture = new RenderTexture(levelBounds.size.x, levelBounds.size.y, 0, RenderTextureFormat.R16)
             {
                 name = "WarFogStateTextureRaw",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-
-            _stateTextureWithPost = new RenderTexture(wallTexture.width * 2, wallTexture.height * 2, 0, RenderTextureFormat.R16)
+            _stateTextureWithPost = new RenderTexture(levelBounds.size.x * 2, levelBounds.size.y* 2, 0, RenderTextureFormat.R16)
             {
                 name = "WarFogStateTexturePost",
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
+
+            _wallTexture.Fill(Color.black);
+            _wallTexture.DrawWalls(_buildingController, Color.white);
+            _wallTexture.Apply();
+
+            _sunTexture.Fill(Color.black);
+            _sunTexture.Apply();
 
             _ambientMaterial = new Material(_config.ambientShader);
             _postMergeMaterial = new Material(_config.postMergeShader);
@@ -72,11 +77,14 @@ namespace Moziborn.Rendering.WarFog
 
         public void Update()
         {
-            BoundsInt textureBounds = _ambientLight.textureBounds;
+            BoundsInt levelBounds = _buildingController.bounds;
 
-            Vector3 offset = _player.rigidbodyPosition - new Vector3(textureBounds.position.x, 0, textureBounds.position.y);
-            float u = Mathf.Clamp01(offset.x / _ambientLight.textureBounds.size.x);
-            float v = Mathf.Clamp01(offset.z / _ambientLight.textureBounds.size.y);
+            _wallTexture.DrawDoors(_buildingController);
+            _wallTexture.Apply();
+
+            Vector3 offset = _player.rigidbodyPosition - new Vector3(levelBounds.position.x, 0, levelBounds.position.y);
+            float u = Mathf.Clamp01(offset.x / levelBounds.size.x);
+            float v = Mathf.Clamp01(offset.z / levelBounds.size.y);
             Vector2Int playerPosition = new (Mathf.FloorToInt(u * _sunTexture.width), Mathf.FloorToInt(v * _sunTexture.height));
             
             if (playerPosition != _playerPrevPosition)
@@ -94,7 +102,7 @@ namespace Moziborn.Rendering.WarFog
 
             while (_sampleTime >= sampleRate)
             {
-                SampleTexture(textureBounds);
+                SampleTexture(levelBounds);
                 
                 _sampleTime -= sampleRate;
             }
@@ -108,7 +116,7 @@ namespace Moziborn.Rendering.WarFog
                 0, 
                 RenderTextureFormat.R16);
             
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _ambientLight.wallTexture);
+            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _wallTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
             _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
             _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.ambientBlur);

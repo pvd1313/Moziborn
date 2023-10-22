@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -28,9 +27,9 @@ namespace Moziborn.Buildings
             while (occupiedCells.Count > 0)
             {
                 VisitAdjustedCells(occupiedCells.First(), occupiedCells, adjustedCells);
-                GetBuildingParts(floor0Frame, adjustedCells, EBuildingPartType.DoorFrame, doorFrames);
-                GetBuildingParts(floor0Frame, adjustedCells, EBuildingPartType.Wall, walls);
-                GetBuildingParts(floor0Interactive, adjustedCells, EBuildingPartType.Door, doors);
+                GetBuildingParts(floor0Frame, adjustedCells, BuildingPartType.DoorFrame, doorFrames);
+                GetBuildingParts(floor0Frame, adjustedCells, BuildingPartType.Wall, walls);
+                GetBuildingParts(floor0Interactive, adjustedCells, BuildingPartType.Door, doors);
                 GetRoomBounds(adjustedCells, rooms);
 
                 renderers.Clear();
@@ -77,7 +76,7 @@ namespace Moziborn.Buildings
                 }
 
                 BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
-                if (partData.partType is EBuildingPartType.Roof or EBuildingPartType.Wall or EBuildingPartType.DoorFrame)
+                if (partData.partType is BuildingPartType.Roof or BuildingPartType.Wall or BuildingPartType.DoorFrame)
                 {
                     meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
                     return true;
@@ -89,7 +88,7 @@ namespace Moziborn.Buildings
 
         private static void GetBuildingParts(Tilemap tilemap, 
                                              HashSet<Vector2Int> cells, 
-                                             EBuildingPartType partType,
+                                             BuildingPartType partType,
                                              List<Vector2Int> resultParts)
         {
             resultParts.Clear();

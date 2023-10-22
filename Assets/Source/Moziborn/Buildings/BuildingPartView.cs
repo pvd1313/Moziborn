@@ -4,8 +4,8 @@ namespace Moziborn.Buildings
 {
     public class BuildingPartView : MonoBehaviour
     {
-        public EBuildingPartType partType => _partType;
+        public BuildingPartType partType => _partType;
         
-        [SerializeField] private EBuildingPartType _partType;
+        [SerializeField] private BuildingPartType _partType;
     }
 }
