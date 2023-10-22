@@ -8,6 +8,7 @@ namespace Moziborn.Buildings
         public Vector2Int[] doorFrames;
         public Vector2Int[] walls;
         public DoorData[] doors;
-        public MeshRenderer[] viewBlockingParts;
+
+        public BuildingPartView[] allPartViews;
     }
 }

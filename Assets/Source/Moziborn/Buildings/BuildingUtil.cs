@@ -18,7 +18,7 @@ namespace Moziborn.Buildings
             GetTilemapOccupiedCells(floor1Frame, occupiedCells);
 
             HashSet<Vector2Int> adjustedCells = new ();
-            List<MeshRenderer> renderers = new ();
+            List<BuildingPartView> allParts = new ();
             List<BoundsInt> rooms = new ();
             List<Vector2Int> doorFrames = new ();
             List<Vector2Int> walls = new ();
@@ -32,21 +32,21 @@ namespace Moziborn.Buildings
                 GetBuildingParts(floor0Interactive, adjustedCells, BuildingPartType.Door, doors);
                 GetRoomBounds(adjustedCells, rooms);
 
-                renderers.Clear();
+                allParts.Clear();
                 
                 foreach (BoundsInt room in rooms)
                 {
                     for (int x = room.min.x; x <= room.max.x; x++)
                     for (int y = room.min.y; y <= room.max.y; y++)
                     {
-                        if (TryGetRendererAtPosition(floor0Frame, x, y, out MeshRenderer meshRenderer))
+                        if (TryGetPart(floor0Frame, x, y, out BuildingPartView partView))
                         {
-                            renderers.Add(meshRenderer);
+                            allParts.Add(partView);
                         }
                         
-                        if (TryGetRendererAtPosition(floor1Frame, x, y, out meshRenderer))
+                        if (TryGetPart(floor1Frame, x, y, out partView))
                         {
-                            renderers.Add(meshRenderer);
+                            allParts.Add(partView);
                         }
                     }
                 }
@@ -54,7 +54,7 @@ namespace Moziborn.Buildings
                 resultBuildings.Add(new BuildingData
                 {
                     rooms = rooms.ToArray(),
-                    viewBlockingParts = renderers.ToArray(),
+                    allPartViews = allParts.ToArray(),
                     doorFrames = doorFrames.ToArray(),
                     walls = walls.ToArray(),
                     doors = doors.Select(pos => new DoorData
@@ -65,24 +65,19 @@ namespace Moziborn.Buildings
                 });
             }
 
-            bool TryGetRendererAtPosition(Tilemap tilemap, int x, int y, out MeshRenderer meshRenderer)
+            bool TryGetPart(Tilemap tilemap, int x, int y, out BuildingPartView partView)
             {
-                meshRenderer = null;
-
+                partView = null;
+                
                 GameObject gameObject = tilemap.GetInstantiatedObject(new Vector3Int(x, y, 0));
                 if (gameObject == null)
                 {
                     return false;
                 }
 
-                BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
-                if (partData.partType is BuildingPartType.Roof or BuildingPartType.Wall or BuildingPartType.DoorFrame)
-                {
-                    meshRenderer = gameObject.GetComponentInChildren<MeshRenderer>();
-                    return true;
-                }
+                partView = gameObject.GetComponentInChildren<BuildingPartView>();
 
-                return false;
+                return partView != null;
             }
         }
 

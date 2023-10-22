@@ -16,7 +16,6 @@ namespace Moziborn.Buildings
         {
             public float targetAlpha;
             public float alpha;
-            public MaterialPropertyBlock materialProperty;
         }
 
         private static readonly bool DrawGizmos = true;
@@ -35,6 +34,8 @@ namespace Moziborn.Buildings
         private Tilemap _floor1Frame;
         private List<BuildingData> _buildings;
         private BuildingTransition[] _transitions;
+        private MaterialPropertyBlock _materialPropertyBlock;
+        private MaterialPropertyBlock _roofMaterialProperty;
 
         public BuildingController (BuildingConfig config, MainCameraController mainCamera)
         {
@@ -44,6 +45,8 @@ namespace Moziborn.Buildings
         
         public IEnumerator Initialize()
         {
+            _materialPropertyBlock = new MaterialPropertyBlock();
+            
             LevelView levelPrefab = Object.Instantiate(_config.levelViewPrefab);
             _floor0Frame = levelPrefab.floor0Frame;
             _floor0Interactive = levelPrefab.floor0Interactive;
@@ -60,26 +63,40 @@ namespace Moziborn.Buildings
             _buildings = new List<BuildingData>();
             BuildingUtil.DetectBuildings(_floor0Frame, _floor0Interactive, _floor1Frame, _buildings);
 
+            MaterialPropertyBlock roofPropertyBlock = new ();
+            roofPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 1);
+
+            foreach (BuildingData building in buildings)
+            foreach (BoundsInt room in building.rooms)
+            foreach (Vector3Int pos in room.allPositionsWithin)
+            {
+                GameObject gameObject = _floor1Frame.GetInstantiatedObject(pos);
+                if (gameObject != null)
+                {
+                    BuildingPartView partView = gameObject.GetComponent<BuildingPartView>();
+                    
+                    if (partView.partType == BuildingPartType.Roof)
+                    {
+                        MeshRenderer meshRenderer = partView.GetComponent<MeshRenderer>();
+                        if (meshRenderer != null)
+                        {
+                            meshRenderer.SetPropertyBlock(roofPropertyBlock);
+                        }
+                    }
+                }
+            }
+
             _transitions = new BuildingTransition[_buildings.Count];
             for (int i = 0; i < _transitions.Length; i++)
             {
-                MaterialPropertyBlock propertyBlock = new ();
-                
-                propertyBlock.SetFloat(ShaderPropertyId.VerticalCutAlpha, 1);
-                propertyBlock.SetVector(ShaderPropertyId.VerticalCutRange, _config.verticalCutRange);
-                
                 _transitions[i] = new BuildingTransition
                 {
                     targetAlpha = 1,
-                    alpha = 1,
-                    materialProperty = propertyBlock
+                    alpha = 1
                 };
-
-                foreach (MeshRenderer renderer in _buildings[i].viewBlockingParts)
-                {
-                    renderer.SetPropertyBlock(propertyBlock);
-                }
             }
+
+            Update(true);
         }
 
         public void UpdateViewerState(Bounds playerBounds, Vector3 aimDirection)
@@ -169,23 +186,42 @@ namespace Moziborn.Buildings
             }
         }
 
-        public void Update()
+        public void Update(bool force)
         {
-            for (int i = 0; i < _buildings.Count; i++)
-            {
-                BuildingTransition transition = _transitions[i];
+            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.VerticalCutAlpha, 1);
+            _materialPropertyBlock.SetVector(ShaderPropertyID.Standard.VerticalCutRange, _config.verticalCutRange);
 
-                if (transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)
+            float transitionSpeed = Time.deltaTime / _config.transitionDuration;
+            
+            for (int buildingID = 0; buildingID < _buildings.Count; buildingID++)
+            {
+                BuildingTransition transition = _transitions[buildingID];
+
+                if (force || transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)
                 {
-                    transition.alpha = Mathf.MoveTowards(transition.alpha,
-                        transition.targetAlpha,
-                        Time.deltaTime / _config.transitionDuration);
+                    transition.alpha = Mathf.MoveTowards(transition.alpha, transition.targetAlpha, transitionSpeed);
                     
-                    transition.materialProperty.SetFloat(ShaderPropertyId.VerticalCutAlpha, transition.alpha);
-        
-                    foreach (MeshRenderer part in _buildings[i].viewBlockingParts)
+                    _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.VerticalCutAlpha, transition.alpha);
+
+                    foreach (BuildingPartView partView in _buildings[buildingID].allPartViews)
                     {
-                        part.SetPropertyBlock(transition.materialProperty);
+                        if (partView.partType == BuildingPartType.Wall ||
+                            partView.partType == BuildingPartType.DoorFrame)
+                        {
+                            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 0);
+                            for (int i = 0; i < partView.meshRenders.Count; i++)
+                            {
+                                partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
+                            }
+                        }
+                        else if (partView.partType == BuildingPartType.Roof)
+                        {
+                            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 1);
+                            for (int i = 0; i < partView.meshRenders.Count; i++)
+                            {
+                                partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
+                            }
+                        }
                     }
                 }
             }

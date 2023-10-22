@@ -12,14 +12,11 @@ namespace Moziborn.Rendering.WarFog
         private readonly PlayerController _player;
 
         private Texture2D _sunTexture;
-        private Texture2D _wallTexture;
-        private RenderTexture _stateTexture;
-        private RenderTexture _stateTextureWithPost;
-        private Vector2Int _playerPrevPosition;
-        private Material _ambientMaterial;
-        private Material _postMergeMaterial;
-        private Material _postFadeMaterial;
+        private Vector2Int _playerPosition;
         private float _sampleTime;
+
+        private WarFogSampler _groundSampler;
+        private WarFogSampler _roofSampler;
 
         public WarFogRender (WarFogRenderConfig config, 
                              BuildingController buildingController, 
@@ -32,6 +29,9 @@ namespace Moziborn.Rendering.WarFog
         
         public IEnumerator Initialize()
         {
+            _groundSampler = new WarFogSampler("Ground", _buildingController, _config);
+            _roofSampler = new WarFogSampler("Roof", _buildingController, _config);
+               
             BoundsInt levelBounds = _buildingController.bounds;
             
             _sunTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
@@ -40,116 +40,60 @@ namespace Moziborn.Rendering.WarFog
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
-            _wallTexture = new Texture2D(levelBounds.size.x, levelBounds.size.y, TextureFormat.R16, false, true)
-            {
-                name = "WarFog_Wall",
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Point
-            };
-            _stateTexture = new RenderTexture(levelBounds.size.x, levelBounds.size.y, 0, RenderTextureFormat.R16)
-            {
-                name = "WarFogStateTextureRaw",
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Point
-            };
-            _stateTextureWithPost = new RenderTexture(levelBounds.size.x * 2, levelBounds.size.y* 2, 0, RenderTextureFormat.R16)
-            {
-                name = "WarFogStateTexturePost",
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Point
-            };
-
-            _wallTexture.Fill(Color.black);
-            _wallTexture.DrawWalls(_buildingController, Color.white);
-            _wallTexture.Apply();
-
             _sunTexture.Fill(Color.black);
             _sunTexture.Apply();
 
-            _ambientMaterial = new Material(_config.ambientShader);
-            _postMergeMaterial = new Material(_config.postMergeShader);
-            _postFadeMaterial = new Material(_config.postFadeShader);
-
-            Shader.SetGlobalTexture(ShaderPropertyId.WarFogMapTexture, _stateTextureWithPost);
+            Shader.SetGlobalTexture(ShaderPropertyID.Global.WarFogMapGroundTexture, _groundSampler.stateTextureWithPost);
+            Shader.SetGlobalTexture(ShaderPropertyID.Global.WarFogMapRoofTexture, _roofSampler.stateTextureWithPost);
             
             yield break;
         }
 
         public void Update()
         {
+            _sampleTime += Time.deltaTime;
+            
+            float sampleRate = 1 / _config.sampleRate;
+            
+            if (_sampleTime < sampleRate)
+            {
+                return;
+            }
+            
             BoundsInt levelBounds = _buildingController.bounds;
 
-            _wallTexture.DrawDoors(_buildingController);
-            _wallTexture.Apply();
+            _groundSampler._wallTexture.DrawDoors(_buildingController);
+            _groundSampler._wallTexture.Apply();
+            
+            _roofSampler._wallTexture.Fill(Color.black);
+            if (_buildingController.currentBuildingIndex != -1)
+            {
+                _roofSampler._wallTexture.DrawWalls(_buildingController, _buildingController.currentBuildingIndex, Color.white);
+                _roofSampler._wallTexture.DrawDoors(_buildingController, _buildingController.currentBuildingIndex);
+            }
+            _roofSampler._wallTexture.Apply();
 
             Vector3 offset = _player.rigidbodyPosition - new Vector3(levelBounds.position.x, 0, levelBounds.position.y);
             float u = Mathf.Clamp01(offset.x / levelBounds.size.x);
             float v = Mathf.Clamp01(offset.z / levelBounds.size.y);
-            Vector2Int playerPosition = new (Mathf.FloorToInt(u * _sunTexture.width), Mathf.FloorToInt(v * _sunTexture.height));
+            Vector2Int playerPosNew = new (Mathf.FloorToInt(u * _sunTexture.width), Mathf.FloorToInt(v * _sunTexture.height));
             
-            if (playerPosition != _playerPrevPosition)
+            if (_playerPosition != playerPosNew)
             {
-                _sunTexture.SetPixel(_playerPrevPosition.x, _playerPrevPosition.y, Color.black);
-                _sunTexture.SetPixel(playerPosition.x, playerPosition.y, Color.white);
+                _sunTexture.SetPixel(_playerPosition.x, _playerPosition.y, Color.black);
+                _sunTexture.SetPixel(playerPosNew.x, playerPosNew.y, Color.white);
                 _sunTexture.Apply();
 
-                _playerPrevPosition = playerPosition;
+                _playerPosition = playerPosNew;
             }
-
-            _sampleTime += Time.deltaTime;
-
-            float sampleRate = 1 / _config.sampleRate;
 
             while (_sampleTime >= sampleRate)
             {
-                SampleTexture(levelBounds);
+                _groundSampler.Sample(_sunTexture);
+                _roofSampler.Sample(_sunTexture);
                 
                 _sampleTime -= sampleRate;
             }
-        }
-
-        private void SampleTexture(BoundsInt textureBounds)
-        {
-            RenderTexture tempTexture = RenderTexture.GetTemporary(
-                textureBounds.size.x, 
-                textureBounds.size.y, 
-                0, 
-                RenderTextureFormat.R16);
-            
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.WallTexture, _wallTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.SunTexture, _sunTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyId.Ambient.StateTexture, _stateTexture);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.Blur, _config.ambientBlur);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.LinearFall, _config.ambientLinearFall);
-            _ambientMaterial.SetFloat(ShaderPropertyId.Ambient.BilinearFall, _config.ambientBilinearFall);
-
-            Graphics.Blit(null, tempTexture, _ambientMaterial);
-            Graphics.Blit(tempTexture, _stateTexture);
-            RenderTexture.ReleaseTemporary(tempTexture);
-            
-            RenderTexture mergedTexture = RenderTexture.GetTemporary(
-                textureBounds.size.x * 2, 
-                textureBounds.size.y * 2, 
-                0, 
-                RenderTextureFormat.R16);
-            
-            Graphics.Blit(_stateTexture, mergedTexture, _postMergeMaterial);
-
-            RenderTexture fadedTexture = RenderTexture.GetTemporary(
-                textureBounds.size.x * 2,
-                textureBounds.size.y * 2,
-                0,
-                RenderTextureFormat.R16);
-            
-            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.StateTexture, _stateTextureWithPost);
-            _postFadeMaterial.SetTexture(ShaderPropertyId.WarFogFadePost.SunTexture, mergedTexture);
-            _postFadeMaterial.SetFloat(ShaderPropertyId.WarFogFadePost.FadeDelta, _config.fadeDelta);
-            
-            Graphics.Blit(null, fadedTexture, _postFadeMaterial);
-            Graphics.Blit(fadedTexture, _stateTextureWithPost);
-            
-            RenderTexture.ReleaseTemporary(mergedTexture);
-            RenderTexture.ReleaseTemporary(fadedTexture);
         }
     }
 }

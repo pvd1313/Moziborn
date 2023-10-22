@@ -32,9 +32,17 @@ namespace Moziborn.Rendering
 
         public static void DrawWalls(this Texture2D texture, ILevelLayout levelLayout, Color color)
         {
+            for (int i = 0; i < levelLayout.buildings.Count; i++)
+            {
+                DrawWalls(texture, levelLayout, i, color);
+            }
+        }
+
+        public static void DrawWalls(this Texture2D texture, ILevelLayout levelLayout, int buildingIndex, Color color)
+        {
             BoundsInt levelBounds = levelLayout.bounds;
+            BuildingData building = levelLayout.buildings[buildingIndex];
             
-            foreach (BuildingData building in levelLayout.buildings)
             foreach (Vector2Int wallPos in building.walls)
             {
                 Vector2Int localPoint = wallPos - new Vector2Int(levelBounds.position.x, levelBounds.position.y);
@@ -44,9 +52,16 @@ namespace Moziborn.Rendering
 
         public static void DrawDoors(this Texture2D texture, ILevelLayout levelLayout)
         {
+            for (int i = 0; i < levelLayout.buildings.Count; i++)
+            {
+                DrawDoors(texture, levelLayout, i);
+            }
+        }
+
+        public static void DrawDoors(this Texture2D texture, ILevelLayout levelLayout, int buildingIndex)
+        {
             BoundsInt levelBounds = levelLayout.bounds;
-            
-            foreach (BuildingData building in levelLayout.buildings)
+            BuildingData building = levelLayout.buildings[buildingIndex];
             foreach (DoorData door in building.doors)
             {
                 Vector2Int pos = door.position - new Vector2Int(levelBounds.position.x, levelBounds.position.y);

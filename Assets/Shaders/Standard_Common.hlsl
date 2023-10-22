@@ -1,7 +1,10 @@
 ﻿#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 
-TEXTURE2D(_WarFogMapTexture);
-SAMPLER(sampler_WarFogMapTexture);
+TEXTURE2D(_WarFogMapGroundTexture);
+SAMPLER(sampler_WarFogMapGroundTexture);
+TEXTURE2D(_WarFogMapRoofTexture);
+SAMPLER(sampler_WarFogMapRoofTexture);
+float _WarFogGroundRoofBlending;
 
 float2 _AmbientLightMapWorldSize;
 float3 _AmbientLightMapOffset;

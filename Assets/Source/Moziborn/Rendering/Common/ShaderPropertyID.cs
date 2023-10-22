@@ -1,0 +1,46 @@
+using UnityEngine;
+
+namespace Moziborn.Rendering
+{
+    public static class ShaderPropertyID
+    {
+        public static class Ambient
+        {
+            public static readonly int StateTexture = Shader.PropertyToID("_StateTexture");
+            public static readonly int SunTexture = Shader.PropertyToID("_SunTexture");
+            public static readonly int WallTexture = Shader.PropertyToID("_WallTexture");
+            public static readonly int Blur = Shader.PropertyToID("_Blur");
+            public static readonly int BilinearFall = Shader.PropertyToID("_BilinearFall");
+            public static readonly int LinearFall = Shader.PropertyToID("_LinearFall");
+        }
+
+        public class WarFogFadePost
+        {
+            public static readonly int StateTexture = Shader.PropertyToID("_StateTexture");
+            public static readonly int SunTexture = Shader.PropertyToID("_SunTexture");
+            public static readonly int FadeDelta = Shader.PropertyToID("_FadeDelta");
+        }
+
+        public class Standard
+        {
+            public static readonly int VerticalCutAlpha = Shader.PropertyToID("_VerticalCutAlpha");
+            public static readonly int VerticalCutRange = Shader.PropertyToID("_VerticalCutRange");
+            public static readonly int WarFogGroundRoofBlending = Shader.PropertyToID("_WarFogGroundRoofBlending");
+        }
+        
+        public class Global
+        {
+            public static readonly int AmbientLightMapTexture = Shader.PropertyToID("_AmbientLightMapTexture");
+            public static readonly int AmbientLightMapWorldSize = Shader.PropertyToID("_AmbientLightMapWorldSize");
+            public static readonly int AmbientLightMapOffset = Shader.PropertyToID("_AmbientLightMapOffset");
+            
+            public static readonly int WarFogMapGroundTexture = Shader.PropertyToID("_WarFogMapGroundTexture");
+            public static readonly int WarFogMapRoofTexture = Shader.PropertyToID("_WarFogMapRoofTexture");
+
+            public static readonly int PointLightMapTexture = Shader.PropertyToID("_PointLightMapTexture");
+            public static readonly int PointLightMapWorldSize = Shader.PropertyToID("_PointLightMapWorldSize");
+            public static readonly int PointLightMapRotation = Shader.PropertyToID("_PointLightMapRotation");
+            public static readonly int PointLightMapOffset = Shader.PropertyToID("_PointLightMapOffset");
+        }
+    }
+}

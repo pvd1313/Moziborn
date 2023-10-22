@@ -61,7 +61,7 @@ namespace Moziborn.GameCycle
             _container.TryResolve<PointLightManager>()?.Update();
             _container.TryResolve<AmbientLightRender>()?.Update();
             _container.TryResolve<WarFogRender>()?.Update();
-            _container.TryResolve<BuildingController>()?.Update();
+            _container.TryResolve<BuildingController>()?.Update(false);
         }
     }
 }

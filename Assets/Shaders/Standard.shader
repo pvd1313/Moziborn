@@ -4,6 +4,7 @@ Shader "Moziborn/Standard"
     {
         _VerticalCutAlpha("VerticalCutAlpha", Range(0, 1)) = 1
         _VerticalCutRange("VerticalCutRange", Vector) = (0, 0, 0, 0)
+        _WarFogGroundRoofBlending("WarFogGroundRoofBlending", float) = 0
         
         // Specular vs Metallic workflow
         [HideInInspector] _WorkflowMode("WorkflowMode", Float) = 1.0

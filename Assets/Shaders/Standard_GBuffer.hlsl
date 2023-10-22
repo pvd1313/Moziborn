@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
-#include "Common.hlsl"
+#include "Standard_Common.hlsl"
 
 // TODO: Currently we support viewDirTS caclulated in vertex shader and in fragments shader.
 // As both solutions have their advantages and disadvantages (etc. shader target 2.0 has only 8 interpolators).
@@ -208,7 +208,9 @@ FragmentOutput LitGBufferPassFragment(Varyings input)
     emission = emission * ambientMapColor + brdfData.albedo * pointLightMapColor;
     
     // War fog
-    float warFogColor = SAMPLE_TEXTURE2D(_WarFogMapTexture, sampler_WarFogMapTexture, ambientMapUV);
+    float warFogGroundColor = SAMPLE_TEXTURE2D(_WarFogMapGroundTexture, sampler_WarFogMapGroundTexture, ambientMapUV);
+    float warFogRoofColor = SAMPLE_TEXTURE2D(_WarFogMapRoofTexture, sampler_WarFogMapRoofTexture, ambientMapUV);
+    float warFogColor = lerp(warFogGroundColor, warFogRoofColor, _WarFogGroundRoofBlending);
     brdfData.albedo *= warFogColor;
     emission *= warFogColor;
     
