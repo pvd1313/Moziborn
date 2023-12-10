@@ -20,6 +20,10 @@ namespace Moziborn.Rendering.PointLight
         private const float SameSurfaceNormalDot = 0.0001f;
         private const float BatchSampleDistanceCheckMultiplier = 2f;
         private const float HitPenetrationDistance = 0.02f;
+
+        private static readonly int MaxRayDistanceID = Shader.PropertyToID("_MaxRayDistance");
+        private static readonly int SpreadAngleRadID = Shader.PropertyToID("_SpreadAngleRad");
+        private static readonly int HeadAngleRadID = Shader.PropertyToID("_HeadAngleRad");
         
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _meshRenderer;
@@ -34,9 +38,9 @@ namespace Moziborn.Rendering.PointLight
         
         private Mesh _mesh;
         private Vector3[] _meshVertices;
-        //private Vector2[] _meshUVs;
         private Color32[] _meshColors;
         private int[] _meshTriangles;
+        private MaterialPropertyBlock _propertyBlock;
 
         public void Initialize(PointLightSetup lightSetup)
         {
@@ -55,7 +59,6 @@ namespace Moziborn.Rendering.PointLight
             };
 
             _meshVertices = new Vector3[_maxSampleCount + 1];
-            //_meshUVs = new Vector2[_maxSampleCount + 1];
             _meshTriangles = new int[(_maxSampleCount - 1) * 3];
             _meshColors = new Color32[_maxSampleCount + 1];
 
@@ -75,16 +78,15 @@ namespace Moziborn.Rendering.PointLight
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * lightSetup.range);
             _mesh.SetVertices(_meshVertices);
             _mesh.SetColors(_meshColors);
-            //_mesh.SetUVs(0, _meshUVs);
             _mesh.SetTriangles(_meshTriangles, 0);
             _mesh.UploadMeshData(false);
             
             _meshFilter.mesh = _mesh;
 
-            MaterialPropertyBlock propertyBlock = new ();
-            propertyBlock.SetFloat("_MaxRayDistance", lightSetup.range);
-            propertyBlock.SetFloat("_SpreadAngleRad", lightSetup.spreadAngleRad);
-            _meshRenderer.SetPropertyBlock(propertyBlock);
+            _propertyBlock = new MaterialPropertyBlock();
+            _propertyBlock.SetFloat(MaxRayDistanceID, lightSetup.range);
+            _propertyBlock.SetFloat(SpreadAngleRadID, lightSetup.spreadAngleRad);
+            _meshRenderer.SetPropertyBlock(_propertyBlock);
 
             _torchCenter = lightSetup.position + Vector3.up * 0.1f;
             _torchRotationRad = lightSetup.rotationRad;
@@ -101,11 +103,13 @@ namespace Moziborn.Rendering.PointLight
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
+            _propertyBlock.SetFloat(HeadAngleRadID, torchRotationRad);
+            _meshRenderer.SetPropertyBlock(_propertyBlock);
+
             Vector3 a = DirectionFromAngle(0) * _torchRange;
             Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchRange;
             float maxOptimizedBatchSampleDistance = (b - a).magnitude * BatchSampleDistanceCheckMultiplier;
 
-            //_torchTransform.forward = DirectionFromAngle(torchRotationRad);
             _torchTransform.position = _torchCenter;
 
             _meshVertices[0] = Vector3.zero;

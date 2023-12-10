@@ -40,12 +40,11 @@ Shader "Moziborn/PointLight"
 				float4 vertexSS : SV_POSITION;
 			};
 
-			#define HIT_PENETRATION_DISTANCE 0.00
-
 			float _SpreadAngleRad;
 			float _MaxRayDistance;
 			float _Intensity;
 			float _StartOffset;
+			float _HeadAngleRad;
 			
 			FragmentInput Vertex (VertexInput input)
 			{
@@ -59,12 +58,17 @@ Shader "Moziborn/PointLight"
 			
 			float Fragment (FragmentInput input) : SV_Target
 			{
-				//float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
-				//float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
-				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
+				float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z) - _HeadAngleRad);
+				if (angle > UNITY_PI)
+				{
+					angle = UNITY_TWO_PI - angle;
+				}
+				
+				float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
+				float distance = 1 - length(input.vertexOS.xz) / _MaxRayDistance;
 				float offset = saturate(saturate(length(input.vertexOS.xz) - _StartOffset) / 0.01);
 				
-				return /*spread * */pow(distance, 2) * _Intensity * offset;
+				return spread * pow(distance, 2) * _Intensity * offset;
 			}
 			
 			ENDCG
