@@ -51,25 +51,20 @@ Shader "Moziborn/PointLight"
 			{
 				FragmentInput output;
 				
-				float hitDistance01 = input.uv.x;
-				float3 vertexOS = input.vertexOS * hitDistance01 * _MaxRayDistance;
-				vertexOS += input.vertexOS * HIT_PENETRATION_DISTANCE;
-
-				output.vertexOS = vertexOS;
-				output.vertexSS = UnityObjectToClipPos(vertexOS);
-				output.uv = input.vertexOS.xz * 0.5 * hitDistance01 + float2(0.5, 0.5);
+				output.vertexOS = input.vertexOS;
+				output.vertexSS = UnityObjectToClipPos(input.vertexOS);
 
 				return output;
 			}
 			
 			float Fragment (FragmentInput input) : SV_Target
 			{
-				float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
-				float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
+				//float angle = abs(atan2(input.vertexOS.x, input.vertexOS.z));
+				//float spread = pow(1 - pow(angle / _SpreadAngleRad * 2, 1.5), 2);
 				float distance = 1 - length(input.vertexOS.xz) / (_MaxRayDistance + HIT_PENETRATION_DISTANCE);
 				float offset = saturate(saturate(length(input.vertexOS.xz) - _StartOffset) / 0.01);
 				
-				return spread * pow(distance, 2) * _Intensity * offset;
+				return /*spread * */pow(distance, 2) * _Intensity * offset;
 			}
 			
 			ENDCG

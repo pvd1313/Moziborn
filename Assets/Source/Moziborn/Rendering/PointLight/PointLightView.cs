@@ -33,7 +33,7 @@ namespace Moziborn.Rendering.PointLight
         
         private Mesh _mesh;
         private Vector3[] _meshVertices;
-        private Vector2[] _meshUVs;
+        //private Vector2[] _meshUVs;
         private Color32[] _meshColors;
         private int[] _meshTriangles;
 
@@ -54,7 +54,7 @@ namespace Moziborn.Rendering.PointLight
             };
 
             _meshVertices = new Vector3[_maxSampleCount + 1];
-            _meshUVs = new Vector2[_maxSampleCount + 1];
+            //_meshUVs = new Vector2[_maxSampleCount + 1];
             _meshTriangles = new int[(_maxSampleCount - 1) * 3];
             _meshColors = new Color32[_maxSampleCount + 1];
 
@@ -74,7 +74,7 @@ namespace Moziborn.Rendering.PointLight
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * lightSetup.range);
             _mesh.SetVertices(_meshVertices);
             _mesh.SetColors(_meshColors);
-            _mesh.SetUVs(0, _meshUVs);
+            //_mesh.SetUVs(0, _meshUVs);
             _mesh.SetTriangles(_meshTriangles, 0);
             _mesh.UploadMeshData(false);
             
@@ -97,6 +97,8 @@ namespace Moziborn.Rendering.PointLight
 
         public void RebuildMesh()
         {
+            const float HitPenetrationDistance = 0.02f;
+            
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
@@ -104,16 +106,16 @@ namespace Moziborn.Rendering.PointLight
             Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchRange;
             float maxOptimizedBatchSampleDistance = (b - a).magnitude * BatchSampleDistanceCheckMultiplier;
 
-            _torchTransform.forward = DirectionFromAngle(torchRotationRad);
+            //_torchTransform.forward = DirectionFromAngle(torchRotationRad);
             _torchTransform.position = _torchCenter;
 
-            _meshUVs[0] = Vector2.zero;
+            _meshVertices[0] = Vector3.zero;
             
             Vector3 direction = DirectionFromAngle(startAngleRad);
             TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchRange);
-            _meshUVs[1] = new Vector2(prevHit.rayTraveledDistance / _torchRange, 0);
+            _meshVertices[1] = prevHit.rayEndPoint - prevHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
 
-            if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * prevHit.rayTraveledDistance, Color.red);
+            if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[1], Color.red);
 
             for (int prevHitIndex = 0; prevHitIndex < _maxSampleCount - 1;)
             {
@@ -123,9 +125,9 @@ namespace Moziborn.Rendering.PointLight
 
                 direction = DirectionFromAngle(angleRad);
                 TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchRange);
-                _meshUVs[curHitIndex + 1] = new Vector2(curHit.rayTraveledDistance / _torchRange, 0);
+                _meshVertices[curHitIndex + 1] = curHit.rayEndPoint - curHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
 
-                if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curHit.rayTraveledDistance, Color.red);
+                if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[curHitIndex + 1], Color.red);
 
                 float sampleDistance = (prevHit.rayEndPoint - curHit.rayEndPoint).magnitude;
 
@@ -142,14 +144,16 @@ namespace Moziborn.Rendering.PointLight
                             direction = DirectionFromAngle(angleRad);
                             Ray ray = new (_torchCenter, direction);
                             surface.Raycast(ray, out float distance);
-                            _meshUVs[prevHitIndex + i + 2] = new Vector2(distance / _torchRange, 0);
+                            _meshVertices[prevHitIndex + i + 2] = ray.GetPoint(distance) - surface.normal * HitPenetrationDistance - _torchCenter;
                         }
                     }
                     else
                     {
                         for (int i = 0; i < batchSize - 1; i++)
                         {
-                            _meshUVs[prevHitIndex + i + 2] = new Vector2(1, 0);
+                            angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
+                            direction = DirectionFromAngle(angleRad);
+                            _meshVertices[prevHitIndex + i + 2] = _torchCenter + direction * _torchRange - _torchCenter;
                         }
                     }
                 }
@@ -160,18 +164,51 @@ namespace Moziborn.Rendering.PointLight
                         angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
                         direction = DirectionFromAngle(angleRad);
                         TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchRange);
-                        _meshUVs[prevHitIndex + i + 2] = new Vector2(curBatchHit.rayTraveledDistance / _torchRange, 0);
+                        _meshVertices[prevHitIndex + i + 2] = curBatchHit.rayEndPoint - curBatchHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
 
-                        if (DrawGizmos) Debug.DrawRay(_torchCenter, direction * curBatchHit.rayTraveledDistance, Color.cyan);
+                        if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[prevHitIndex + i + 2], Color.cyan);
                     }
                 }
 
                 prevHitIndex = curHitIndex;
                 prevHit = curHit;
             }
+
+            for (int i = 1; i < _meshVertices.Length - 1; i++)
+            {
+                Vector3 direction0 = _meshVertices[i];
+                Vector3 direction1 = _meshVertices[i + 1];
+                
+                int j = 1;
+                while (Vector3.Cross(direction0, direction1).y < 0 && 
+                       (j < i) && 
+                       (j + i + 1 < _meshVertices.Length))
+                {
+                    direction0 = _meshVertices[i - j];
+                    direction1 = _meshVertices[i + j + 1];
+                    
+                    j++;
+                }
             
-            _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
-            _mesh.SetUVs(0, _meshUVs);
+                if (j <= 1)
+                {
+                    continue;
+                }
+                
+                j--;
+                    
+                Vector3 middlePosition = _meshVertices[i - j];
+                    
+                for (int t = i - j; t <= i + 1 + j; t++)
+                {
+                    _meshVertices[t] = middlePosition;
+                }
+                
+                i += j;
+            }
+        
+            _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * _torchRange);
+            _mesh.SetVertices(_meshVertices);
             _mesh.UploadMeshData(false);
         }
 
