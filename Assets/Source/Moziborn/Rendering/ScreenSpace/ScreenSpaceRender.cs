@@ -39,7 +39,7 @@ namespace Moziborn.Rendering.ScreenSpace
             float screenRatio = Screen.width / (float) Screen.height;
             Vector2Int requiredTextureSize = default;
             
-            if (screenRatio > 0)
+            if (screenRatio >= 1)
             {
                 requiredTextureSize.x = Mathf.CeilToInt(_setup.textureResolution * screenRatio);
                 requiredTextureSize.y = _setup.textureResolution;
@@ -67,7 +67,7 @@ namespace Moziborn.Rendering.ScreenSpace
                     filterMode = _setup.textureFilterMode
                 };
                 
-                _renderCamera.orthographicSize = Mathf.Min(viewSize.x, viewSize.y);
+                _renderCamera.orthographicSize = viewSize.y;
                 _renderCamera.targetTexture = _renderTexture;
                 _renderCamera.aspect = viewSize.x / viewSize.y;
             }
