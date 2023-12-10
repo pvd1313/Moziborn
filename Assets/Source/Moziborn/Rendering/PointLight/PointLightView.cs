@@ -20,10 +20,6 @@ namespace Moziborn.Rendering.PointLight
         private const float SameSurfaceNormalDot = 0.0001f;
         private const float BatchSampleDistanceCheckMultiplier = 2f;
         private const float HitPenetrationDistance = 0.02f;
-
-        private static readonly int MaxRayDistanceID = Shader.PropertyToID("_MaxRayDistance");
-        private static readonly int SpreadAngleRadID = Shader.PropertyToID("_SpreadAngleRad");
-        private static readonly int HeadAngleRadID = Shader.PropertyToID("_HeadAngleRad");
         
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _meshRenderer;
@@ -40,7 +36,7 @@ namespace Moziborn.Rendering.PointLight
         private Vector3[] _meshVertices;
         private Color32[] _meshColors;
         private int[] _meshTriangles;
-        private MaterialPropertyBlock _propertyBlock;
+        private PointLightShaderProperties _shaderProperties;
 
         public void Initialize(PointLightSetup lightSetup)
         {
@@ -83,10 +79,10 @@ namespace Moziborn.Rendering.PointLight
             
             _meshFilter.mesh = _mesh;
 
-            _propertyBlock = new MaterialPropertyBlock();
-            _propertyBlock.SetFloat(MaxRayDistanceID, lightSetup.range);
-            _propertyBlock.SetFloat(SpreadAngleRadID, lightSetup.spreadAngleRad);
-            _meshRenderer.SetPropertyBlock(_propertyBlock);
+            _shaderProperties = new PointLightShaderProperties(new MaterialPropertyBlock());
+            _shaderProperties.maxRayDistance = lightSetup.range;
+            _shaderProperties.spreadAngleRad = lightSetup.spreadAngleRad;
+            _shaderProperties.Apply(_meshRenderer);
 
             _torchCenter = lightSetup.position + Vector3.up * 0.1f;
             _torchRotationRad = lightSetup.rotationRad;
@@ -103,8 +99,8 @@ namespace Moziborn.Rendering.PointLight
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
-            _propertyBlock.SetFloat(HeadAngleRadID, torchRotationRad);
-            _meshRenderer.SetPropertyBlock(_propertyBlock);
+            _shaderProperties.headAngleRad = torchRotationRad;
+            _shaderProperties.Apply(_meshRenderer);
 
             Vector3 a = DirectionFromAngle(0) * _torchRange;
             Vector3 b = DirectionFromAngle(_sampleDeltaAngleRad * BatchSize) * _torchRange;

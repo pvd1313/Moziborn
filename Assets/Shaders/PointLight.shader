@@ -5,8 +5,8 @@ Shader "Moziborn/PointLight"
 		_SpreadAngleRad("Spread angle", float) = 90
 		_MaxRayDistance("Ray distance", float) = 5
 		_StartOffset("Start offset", float) = 0.3
-		
 		_Intensity("Intensity", float) = 1
+		_HeadAngleRad("Head angle radians", float) = 0
 	}
 	SubShader
 	{
