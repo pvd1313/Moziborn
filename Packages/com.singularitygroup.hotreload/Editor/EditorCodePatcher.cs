@@ -364,7 +364,7 @@ namespace SingularityGroup.HotReload.Editor {
             // debug files
             ".mdb",
             ".pdb",
-            ".shader",
+            // ".shader",
         };
 
         public static string[] compileFiles = new[] {
