@@ -19,6 +19,7 @@ namespace Moziborn.Rendering.PointLight
         private const float MaxSamplesPerRad = 300;
         private const float SameSurfaceNormalDot = 0.0001f;
         private const float BatchSampleDistanceCheckMultiplier = 2f;
+        private const float HitPenetrationDistance = 0.02f;
         
         [SerializeField] private MeshFilter _meshFilter;
         [SerializeField] private MeshRenderer _meshRenderer;
@@ -97,8 +98,6 @@ namespace Moziborn.Rendering.PointLight
 
         public void RebuildMesh()
         {
-            const float HitPenetrationDistance = 0.02f;
-            
             float torchRotationRad = Mathf.CeilToInt(_torchRotationRad / _sampleDeltaAngleRad) * _sampleDeltaAngleRad;
             float startAngleRad = -0.5f * _spreadAngleRad + torchRotationRad;
 
@@ -113,9 +112,9 @@ namespace Moziborn.Rendering.PointLight
             
             Vector3 direction = DirectionFromAngle(startAngleRad);
             TorchRaycastHit prevHit = Raycast(_torchCenter, direction, _torchRange);
-            _meshVertices[1] = prevHit.rayEndPoint - prevHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
+            _meshVertices[1] = TransformHit(prevHit.rayEndPoint, direction, prevHit.surfaceNormal);
 
-            if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[1], Color.red);
+            if (DrawGizmos) DebugDrawVertex(1, Color.red);
 
             for (int prevHitIndex = 0; prevHitIndex < _maxSampleCount - 1;)
             {
@@ -125,9 +124,9 @@ namespace Moziborn.Rendering.PointLight
 
                 direction = DirectionFromAngle(angleRad);
                 TorchRaycastHit curHit = Raycast(_torchCenter, direction, _torchRange);
-                _meshVertices[curHitIndex + 1] = curHit.rayEndPoint - curHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
+                _meshVertices[curHitIndex + 1] = TransformHit(curHit.rayEndPoint, direction, curHit.surfaceNormal);
 
-                if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[curHitIndex + 1], Color.red);
+                if (DrawGizmos) DebugDrawVertex(curHitIndex + 1, Color.red);
 
                 float sampleDistance = (prevHit.rayEndPoint - curHit.rayEndPoint).magnitude;
 
@@ -144,7 +143,7 @@ namespace Moziborn.Rendering.PointLight
                             direction = DirectionFromAngle(angleRad);
                             Ray ray = new (_torchCenter, direction);
                             surface.Raycast(ray, out float distance);
-                            _meshVertices[prevHitIndex + i + 2] = ray.GetPoint(distance) - surface.normal * HitPenetrationDistance - _torchCenter;
+                            _meshVertices[prevHitIndex + i + 2] = TransformHit(ray.GetPoint(distance), direction, surface.normal);
                         }
                     }
                     else
@@ -153,7 +152,7 @@ namespace Moziborn.Rendering.PointLight
                         {
                             angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
                             direction = DirectionFromAngle(angleRad);
-                            _meshVertices[prevHitIndex + i + 2] = _torchCenter + direction * _torchRange - _torchCenter;
+                            _meshVertices[prevHitIndex + i + 2] = direction * _torchRange;
                         }
                     }
                 }
@@ -164,52 +163,31 @@ namespace Moziborn.Rendering.PointLight
                         angleRad = startAngleRad + _sampleDeltaAngleRad * (prevHitIndex + i + 1);
                         direction = DirectionFromAngle(angleRad);
                         TorchRaycastHit curBatchHit = Raycast(_torchCenter, direction, _torchRange);
-                        _meshVertices[prevHitIndex + i + 2] = curBatchHit.rayEndPoint - curBatchHit.surfaceNormal * HitPenetrationDistance - _torchCenter;
+                        _meshVertices[prevHitIndex + i + 2] = TransformHit(curBatchHit.rayEndPoint, direction, curBatchHit.surfaceNormal);
 
-                        if (DrawGizmos) Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[prevHitIndex + i + 2], Color.cyan);
+                        if (DrawGizmos) DebugDrawVertex(prevHitIndex + i + 2, Color.cyan);
                     }
                 }
 
                 prevHitIndex = curHitIndex;
                 prevHit = curHit;
             }
-
-            for (int i = 1; i < _meshVertices.Length - 1; i++)
-            {
-                Vector3 direction0 = _meshVertices[i];
-                Vector3 direction1 = _meshVertices[i + 1];
-                
-                int j = 1;
-                while (Vector3.Cross(direction0, direction1).y < 0 && 
-                       (j < i) && 
-                       (j + i + 1 < _meshVertices.Length))
-                {
-                    direction0 = _meshVertices[i - j];
-                    direction1 = _meshVertices[i + j + 1];
-                    
-                    j++;
-                }
-            
-                if (j <= 1)
-                {
-                    continue;
-                }
-                
-                j--;
-                    
-                Vector3 middlePosition = _meshVertices[i - j];
-                    
-                for (int t = i - j; t <= i + 1 + j; t++)
-                {
-                    _meshVertices[t] = middlePosition;
-                }
-                
-                i += j;
-            }
         
             _mesh.bounds = new Bounds(Vector3.zero, Vector3.one * _torchRange);
             _mesh.SetVertices(_meshVertices);
             _mesh.UploadMeshData(false);
+        }
+
+        private Vector3 TransformHit(Vector3 hitPoint, Vector3 rayDirection, Vector3 surfaceNormal)
+        {
+            float impactAngleRad = (90 - Vector3.Angle(rayDirection, -surfaceNormal)) * Mathf.Deg2Rad;
+
+            return hitPoint - _torchCenter + rayDirection * (HitPenetrationDistance / Mathf.Sin(impactAngleRad));
+        }
+
+        private void DebugDrawVertex(int vertexIndex, Color color)
+        {
+            Debug.DrawLine(_torchCenter, _torchCenter + _meshVertices[vertexIndex], color);
         }
 
         private static bool IsSameSurface(TorchRaycastHit a, TorchRaycastHit b)
@@ -244,14 +222,14 @@ namespace Moziborn.Rendering.PointLight
                     surfaceNormal = hitInfo.normal,
                     colliderInstanceId = hitInfo.colliderInstanceID,
                     rayTraveledDistance = hitInfo.distance,
-                    rayEndPoint = hitInfo.point
+                    rayEndPoint = hitInfo.point,
                 };
             }
 
             return new TorchRaycastHit
             {
                 rayTraveledDistance = distance,
-                rayEndPoint = ray.origin + ray.direction * distance
+                rayEndPoint = ray.origin + ray.direction * distance,
             };
         }
 
