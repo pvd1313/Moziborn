@@ -33,7 +33,6 @@ namespace Moziborn.GameCycle
 
         private IEnumerator InitializationRoutine()
         {
-            yield return _container.TryResolve<GizmosController>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PointLightManager>()?.Initialize();
@@ -42,6 +41,7 @@ namespace Moziborn.GameCycle
             yield return _container.TryResolve<PlayerController>()?.Initialize();
             yield return _container.TryResolve<WeatherController>()?.Initialize();
             yield return _container.TryResolve<WarFogRender>()?.Initialize();
+            yield return _container.TryResolve<GizmosController>()?.Initialize();
             
             UpdatingBehaviour behaviour = new GameObject("GameCycle").AddComponent<UpdatingBehaviour>();
             behaviour.onUpdate += Update;
