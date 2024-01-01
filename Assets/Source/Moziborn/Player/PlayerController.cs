@@ -13,8 +13,6 @@ namespace Moziborn.Player
     public class PlayerController
     {
         public Vector3 rigidbodyPosition => _playerView.body.position;
-
-        private const float SurfaceFriction = 10f;
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
@@ -27,7 +25,6 @@ namespace Moziborn.Player
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
         private float _playerAngleVelocity;
-        private Vector3 _velocityChange;
 
         private List<int> _tempLights;
 
@@ -64,19 +61,14 @@ namespace Moziborn.Player
         {
             PlayerInputState input = _input.state;
 
-            Vector3 targetVelocity;
             if (input.mode == PlayerInputMode.Movement)
             {
-                targetVelocity = input.movementDirection * _config.playerSpeed;
+                _playerView.body.velocity = input.movementDirection * _config.playerSpeed;
             }
             else
             {
-                targetVelocity = Vector3.zero;
+                _playerView.body.velocity = Vector3.zero;
             }
-
-            Vector3 deltaVelocity = (targetVelocity - _playerView.body.velocity) * (Time.fixedDeltaTime * SurfaceFriction);
-
-            _playerView.body.AddForce(deltaVelocity, ForceMode.VelocityChange);
         }
 
         public void Update()
