@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Moziborn.Buildings;
+using Moziborn.Characters;
 using Moziborn.Cinematics;
 using Moziborn.Coroutines;
 using Moziborn.Debugging;
@@ -26,6 +27,7 @@ namespace Moziborn.GameCycle
                 typeof(CoroutineController),
                 typeof(GizmosController),
                 
+                typeof(CharacterFactory),
                 typeof(BuildingController),
                 typeof(AmbientLightRender),
                 typeof(MainCameraController),

@@ -1,10 +1,12 @@
+using Moziborn.Characters;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Moziborn.Player
 {
     public class PlayerConfig : ScriptableObject
     {
-        public PlayerView playerViewPrefab;
+        [FormerlySerializedAs("playerPrefab")] public CharacterMeshPrefab playerMeshPrefab;
         public float positionSmoothTime;
         public float rotationSmoothTime;
         public float flashlightAngleDeg;

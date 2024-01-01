@@ -1,26 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using Moziborn.Buildings;
+using Moziborn.Characters;
 using Moziborn.Cinematics;
 using Moziborn.Layers;
 using Moziborn.Rendering.PointLight;
 using UnityEngine;
 
-using Object = UnityEngine.Object;
-
 namespace Moziborn.Player
 {
     public class PlayerController
     {
-        public Vector3 rigidbodyPosition => _playerView.body.position;
+        public Vector3 rigidbodyPosition => _characterView.rigidbody.position;
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
         private readonly MainCameraController _mainCamera;
         private readonly BuildingController _buildingController;
         private readonly PointLightManager _pointLightManager;
+        private readonly CharacterFactory _characterFactory;
 
-        private PlayerView _playerView;
+        private CharacterView _characterView;
         private int _torchLightId;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
@@ -32,18 +32,20 @@ namespace Moziborn.Player
                                  PlayerInputController input, 
                                  MainCameraController mainCamera,
                                  BuildingController buildingController,
-                                 PointLightManager pointLightManager)
+                                 PointLightManager pointLightManager,
+                                 CharacterFactory characterFactory)
         {
             _config = config;
             _input = input;
             _mainCamera = mainCamera;
             _buildingController = buildingController;
             _pointLightManager = pointLightManager;
+            _characterFactory = characterFactory;
         }
 
         public IEnumerator Initialize()
         {
-            _playerView = Object.Instantiate(_config.playerViewPrefab);
+            _characterView = _characterFactory.CreateView(_config.playerMeshPrefab);
 
             _tempLights = new List<int>();
 
@@ -63,13 +65,13 @@ namespace Moziborn.Player
 
             if (input.mode == PlayerInputMode.Movement)
             {
-                _playerView.animator.SetFloat("WalkSpeed", _playerView.body.velocity.magnitude / _config.playerSpeed);
-                _playerView.body.velocity = input.movementDirection * _config.playerSpeed;
+                _characterView.animator.SetFloat("WalkSpeed", _characterView.rigidbody.velocity.magnitude / _config.playerSpeed);
+                _characterView.rigidbody.velocity = input.movementDirection * _config.playerSpeed;
             }
             else
             {
-                _playerView.body.velocity = Vector3.zero;
-                _playerView.animator.SetFloat("WalkSpeed", 0);
+                _characterView.rigidbody.velocity = Vector3.zero;
+                _characterView.animator.SetFloat("WalkSpeed", 0);
             }
         }
 
@@ -77,7 +79,7 @@ namespace Moziborn.Player
         {
             _playerMeshPosition = Vector3.SmoothDamp(
                 _playerMeshPosition,
-                _playerView.body.position,
+                _characterView.rigidbody.position,
                 ref _playerMeshVelocity,
                 _config.positionSmoothTime);
 
@@ -105,14 +107,14 @@ namespace Moziborn.Player
                 _tempLights.Clear();
             }
             
-            _playerView.meshTransform.position = _playerMeshPosition;
-            _playerView.meshTransform.forward = _input.state.aimDirection;
+            _characterView.meshRoot.position = _playerMeshPosition;
+            _characterView.meshRoot.forward = _input.state.aimDirection;
 
-            _mainCamera.AnimateMovePosition(_playerView.body.position);
+            _mainCamera.AnimateMovePosition(_characterView.rigidbody.position);
 
             _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirection);
             
-            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, _input.state.aimDirection);
+            _buildingController.UpdateViewerState(_characterView.viewBlockCollider.bounds, _input.state.aimDirection);
         }
     }
 }
