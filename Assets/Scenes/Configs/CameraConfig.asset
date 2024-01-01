@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: CameraConfig
   m_EditorClassIdentifier: 
   rotationAngleDegrees: {x: 60, y: 45, z: 0}
-  orthographicSize: 5
+  orthographicSize: 6
   viewPrefab: {fileID: 6805498356894114117, guid: 78490bec977f6f840a0557e59f3a5aba, type: 3}
   smoothTime: 0.2

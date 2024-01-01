@@ -63,18 +63,18 @@ namespace Moziborn.Player
 
             if (input.mode == PlayerInputMode.Movement)
             {
+                _playerView.animator.SetFloat("WalkSpeed", _playerView.body.velocity.magnitude / _config.playerSpeed);
                 _playerView.body.velocity = input.movementDirection * _config.playerSpeed;
             }
             else
             {
                 _playerView.body.velocity = Vector3.zero;
+                _playerView.animator.SetFloat("WalkSpeed", 0);
             }
         }
 
         public void Update()
         {
-            Vector3 playerAimDirection = _input.state.aimDirection;
-            
             _playerMeshPosition = Vector3.SmoothDamp(
                 _playerMeshPosition,
                 _playerView.body.position,
@@ -106,20 +106,13 @@ namespace Moziborn.Player
             }
             
             _playerView.meshTransform.position = _playerMeshPosition;
+            _playerView.meshTransform.forward = _input.state.aimDirection;
 
             _mainCamera.AnimateMovePosition(_playerView.body.position);
 
             _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirection);
             
-            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, playerAimDirection);
-        }
-
-        private Vector3 InputToWorldDirection(Vector2 inputDirection)
-        {
-            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
-            Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward);
-
-            return cameraForward * inputDirection.y + cameraRight * inputDirection.x;
+            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, _input.state.aimDirection);
         }
     }
 }
