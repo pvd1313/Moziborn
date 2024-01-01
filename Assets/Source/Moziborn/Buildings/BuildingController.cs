@@ -101,7 +101,7 @@ namespace Moziborn.Buildings
 
         public void UpdateViewerState(Bounds playerBounds, Vector3 aimDirection)
         {
-            Vector3 cameraDir = _mainCamera.lookDirection;
+            Vector3 cameraDir = _mainCamera.forward;
 
             Vector3 playerBottomCenter = playerBounds.center;
             playerBottomCenter.y = playerBounds.min.y + 0.01f;

@@ -2,7 +2,7 @@ namespace Moziborn.Player
 {
     public enum PlayerInputMode
     {
-        Unknown,
+        Invalid,
         Movement,
         Interact,
         Fire,

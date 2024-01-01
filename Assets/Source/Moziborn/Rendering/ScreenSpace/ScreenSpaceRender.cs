@@ -81,7 +81,7 @@ namespace Moziborn.Rendering.ScreenSpace
             _renderCamera.transform.rotation = Quaternion.Euler(90, _mainCamera.rotationDeg.y, 0);
             
             float mapRotationRad = _mainCamera.rotationDeg.y * Mathf.Deg2Rad;
-            Vector3 viewNorth = Vector3.ProjectOnPlane(_mainCamera.lookDirection, Vector3.up).normalized;
+            Vector3 viewNorth = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
             Vector3 viewEast = Vector3.Cross(Vector3.up, viewNorth);
             Vector3 bottomLeft = cameraPosition - viewNorth * viewSize.y - viewEast * viewSize.x;
 

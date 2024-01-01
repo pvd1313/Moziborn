@@ -30,39 +30,46 @@ namespace Moziborn.Player
                 return;
             }
 
-            int forward = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
-            int right = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
-
             inputState.isDropFlareKeyPressed = Input.GetKeyDown(KeyCode.E);
-
             inputState.isRemoveAllFlaresKeyPressed = Input.GetKeyDown(KeyCode.Q);
 
-            if (forward != 0 || right != 0)
+            if (Input.GetKey(KeyCode.LeftShift))
             {
+                inputState.mode = PlayerInputMode.Fire;
+            }
+            
+            int forwardThrust = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
+            int sideThrust = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
+            if (inputState.mode == PlayerInputMode.Invalid && (forwardThrust != 0 || sideThrust != 0))
+            {
+                Vector3 forward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
+                Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
+                inputState.movementDirection = (forward * forwardThrust + right * sideThrust).normalized;
                 inputState.mode = PlayerInputMode.Movement;
-                inputState.movementDirection = new Vector2(right, forward).normalized;
+            }
+            else
+            {
+                inputState.movementDirection = Vector3.zero;
             }
 
             Ray cameraCenterRay = _mainCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
             Ray mouseRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            Plane worldPlane = new Plane(Vector3.up, 0);
+            Plane worldPlane = new (Vector3.up, 0);
 
             if (worldPlane.Raycast(cameraCenterRay, out float cameraCenterRayLength) &&
                 worldPlane.Raycast(mouseRay, out float mouseRayLength))
             {
                 Vector3 cameraCenter = cameraCenterRay.origin + cameraCenterRay.direction * cameraCenterRayLength;
                 Vector3 mousePosition = mouseRay.origin + mouseRay.direction * mouseRayLength;
-                Vector3 viewDirection = (mousePosition - cameraCenter).normalized;
-                viewDirection = Quaternion.AngleAxis(_mainCamera.rotationDeg.y * -1, Vector3.up) * viewDirection;
-                inputState.aimDirection = new Vector2(viewDirection.x, viewDirection.z);
+                inputState.aimDirection = (mousePosition - cameraCenter).normalized;
 
                 Debug.DrawRay(mousePosition - Vector3.forward * 0.5f, Vector3.forward, Color.gray);
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
             }
 
-            if (inputState.mode == PlayerInputMode.Unknown)
+            if (inputState.mode == PlayerInputMode.Invalid)
             {
-                inputState.mode = Input.GetKey(KeyCode.LeftShift) ? PlayerInputMode.Fire : PlayerInputMode.Interact;
+                inputState.mode = PlayerInputMode.Interact;
             }
 
             state = inputState;

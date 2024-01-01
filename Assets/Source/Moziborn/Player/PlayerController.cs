@@ -22,7 +22,6 @@ namespace Moziborn.Player
 
         private PlayerView _playerView;
         private int _torchLightId;
-        private int _warFogLightId;
         private Vector3 _playerMeshPosition;
         private Vector3 _playerMeshVelocity;
         private float _playerAngleVelocity;
@@ -62,24 +61,9 @@ namespace Moziborn.Player
         {
             PlayerInputState input = _input.state;
 
-            Vector3 targetDirection = InputToWorldDirection(input.mode == PlayerInputMode.Movement ? input.movementDirection : input.aimDirection);
-
-            float currentAngle = _playerView.body.rotation.eulerAngles.y;
-            float targetAngle = Quaternion.LookRotation(targetDirection).eulerAngles.y;
-            float resultAngle = Mathf.SmoothDampAngle(
-                currentAngle, 
-                targetAngle, 
-                ref _playerAngleVelocity, 
-                _config.rotationSmoothTime, 
-                float.PositiveInfinity, 
-                Time.fixedDeltaTime);
-            
-            _playerView.body.rotation = Quaternion.AngleAxis(resultAngle, Vector3.up);
-
             if (input.mode == PlayerInputMode.Movement)
             {
-                float dot = Mathf.Max(0, Vector3.Dot(_playerView.body.rotation * Vector3.forward, targetDirection));
-                _playerView.body.velocity = targetDirection * _config.playerSpeed * dot;
+                _playerView.body.velocity = input.movementDirection * _config.playerSpeed;
             }
             else
             {
@@ -89,14 +73,13 @@ namespace Moziborn.Player
 
         public void Update()
         {
+            Vector3 playerAimDirection = _input.state.aimDirection;
+            
             _playerMeshPosition = Vector3.SmoothDamp(
                 _playerMeshPosition,
                 _playerView.body.position,
                 ref _playerMeshVelocity,
                 _config.positionSmoothTime);
-
-            Vector3 playerDirectionWorld = _playerView.body.rotation * Vector3.forward;
-            Vector3 aimDirectionWorld = InputToWorldDirection(_input.state.aimDirection);
 
             if (_input.state.isDropFlareKeyPressed)
             {
@@ -107,7 +90,7 @@ namespace Moziborn.Player
                     spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
                 });
 
-                _pointLightManager.SetLightTransform(lightId, _playerMeshPosition, playerDirectionWorld);
+                _pointLightManager.SetLightTransform(lightId, _playerMeshPosition, _input.state.aimDirection);
 
                 _tempLights.Add(lightId);
             }
@@ -126,16 +109,14 @@ namespace Moziborn.Player
 
             _mainCamera.AnimateMovePosition(_playerView.body.position);
 
-            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, playerDirectionWorld);
-
-            _pointLightManager.SetLightTransform(_warFogLightId, _playerMeshPosition, playerDirectionWorld);
+            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirection);
             
-            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, aimDirectionWorld);
+            _buildingController.UpdateViewerState(_playerView.viewBlockCollider.bounds, playerAimDirection);
         }
 
         private Vector3 InputToWorldDirection(Vector2 inputDirection)
         {
-            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.lookDirection, Vector3.up).normalized;
+            Vector3 cameraForward = Vector3.ProjectOnPlane(_mainCamera.forward, Vector3.up).normalized;
             Vector3 cameraRight = Vector3.Cross(Vector3.up, cameraForward);
 
             return cameraForward * inputDirection.y + cameraRight * inputDirection.x;

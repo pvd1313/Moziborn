@@ -6,7 +6,7 @@ namespace Moziborn.Cinematics
 {
     public class MainCameraController
     {
-        public Vector3 lookDirection => _cameraView.unityCamera.transform.forward;
+        public Vector3 forward => _cameraView.unityCamera.transform.forward;
         public Vector3 pivot => _cameraView.transform.position;
         public Vector3 rotationDeg => _cameraView.transform.rotation.eulerAngles;
         public float orthographicSize => _cameraView.unityCamera.orthographicSize;
