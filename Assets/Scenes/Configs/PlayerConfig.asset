@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerMeshPrefab: {fileID: 5240496836923149224, guid: 4a0e189033b814140b993f887fa0d1e5, type: 3}
   positionSmoothTime: 0.05
-  rotationSmoothTime: 0.2
+  rotationSmoothTime: 0.1
+  rotationSpeed: 270
   flashlightAngleDeg: 45
   flashlightRange: 5
   viewRange: 6
-  playerSpeed: 3
+  movementSpeed: 3

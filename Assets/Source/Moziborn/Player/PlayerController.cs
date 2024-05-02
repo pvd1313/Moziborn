@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Moziborn.Buildings;
@@ -65,8 +66,8 @@ namespace Moziborn.Player
 
             if (input.mode == PlayerInputMode.Movement)
             {
-                _characterView.animator.SetFloat("WalkSpeed", _characterView.rigidbody.velocity.magnitude / _config.playerSpeed);
-                _characterView.rigidbody.velocity = input.movementDirection * _config.playerSpeed;
+                _characterView.animator.SetFloat("WalkSpeed", _characterView.rigidbody.velocity.magnitude / _config.movementSpeed);
+                _characterView.rigidbody.velocity = input.movementDirection * _config.movementSpeed;
             }
             else
             {
@@ -108,11 +109,19 @@ namespace Moziborn.Player
             }
             
             _characterView.meshRoot.position = _playerMeshPosition;
-            _characterView.meshRoot.forward = _input.state.aimDirection;
+            
+            Quaternion aimRotation = Quaternion.LookRotation(_input.state.aimDirection);
+            float aimDeltaAngle = Quaternion.Angle(aimRotation, _characterView.meshRoot.rotation);
+            float aimDeltaTime = aimDeltaAngle / _config.rotationSpeed;
+            float speedMultiplier = Mathf.Clamp01(Mathf.Pow(aimDeltaTime / _config.rotationSmoothTime, 1f));
+            _characterView.meshRoot.rotation = Quaternion.RotateTowards(
+                    _characterView.meshRoot.rotation, 
+                    aimRotation,
+                    Time.deltaTime * _config.rotationSpeed * speedMultiplier);
 
             _mainCamera.AnimateMovePosition(_characterView.rigidbody.position);
 
-            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _input.state.aimDirection);
+            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _characterView.meshRoot.forward);
             
             _buildingController.UpdateViewerState(_characterView.viewBlockCollider.bounds, _input.state.aimDirection);
         }
