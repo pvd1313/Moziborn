@@ -10,12 +10,12 @@ namespace Moziborn.Player
         private readonly MainCameraController _mainCamera;
 
         private bool _inputIsFrozen;
-        
-        public PlayerInputController (MainCameraController mainCamera)
+
+        public PlayerInputController(MainCameraController mainCamera)
         {
             _mainCamera = mainCamera;
         }
-        
+
         public void Update()
         {
             PlayerInputState inputState = default;
@@ -37,7 +37,7 @@ namespace Moziborn.Player
             {
                 inputState.mode = PlayerInputMode.Fire;
             }
-            
+
             int forwardThrust = Input.GetKey(KeyCode.W) ? 1 : Input.GetKey(KeyCode.S) ? -1 : 0;
             int sideThrust = Input.GetKey(KeyCode.D) ? 1 : Input.GetKey(KeyCode.A) ? -1 : 0;
             if (inputState.mode == PlayerInputMode.Invalid && (forwardThrust != 0 || sideThrust != 0))
@@ -52,9 +52,10 @@ namespace Moziborn.Player
                 inputState.movementDirection = Vector3.zero;
             }
 
-            Ray cameraCenterRay = _mainCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
+            Ray cameraCenterRay =
+                _mainCamera.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0));
             Ray mouseRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            Plane worldPlane = new (Vector3.up, 0);
+            Plane worldPlane = new(Vector3.up, 0);
 
             if (worldPlane.Raycast(cameraCenterRay, out float cameraCenterRayLength) &&
                 worldPlane.Raycast(mouseRay, out float mouseRayLength))
@@ -67,20 +68,9 @@ namespace Moziborn.Player
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
             }
 
-            inputState.fireButtonState = InputButtonState.None;
-            if (Input.GetMouseButton(0))
-            {
-                inputState.fireButtonState |= InputButtonState.IsHeldDown;
-            }
-            if (Input.GetMouseButtonDown(0))
-            {
-                inputState.fireButtonState |= InputButtonState.PressedThisFrame;
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                inputState.fireButtonState |= InputButtonState.ReleasedThisFrame;
-            }
-
+            inputState.fireButtonState = GetMouseButtonState(0);
+            inputState.flashLightButtonState = GetKeyState(KeyCode.F);
+            
             if (inputState.mode == PlayerInputMode.Invalid)
             {
                 inputState.mode = PlayerInputMode.Interact;
@@ -88,5 +78,50 @@ namespace Moziborn.Player
 
             state = inputState;
         }
+
+        private InputButtonState GetMouseButtonState(int buttonId)
+        {
+            InputButtonState buttonState = InputButtonState.None;
+            
+            if (Input.GetMouseButton(buttonId))
+            {
+                buttonState |= InputButtonState.IsHeldDown;
+            }
+            
+            if (Input.GetMouseButtonDown(buttonId))
+            {
+                buttonState |= InputButtonState.PressedThisFrame;
+            }
+            
+            if (Input.GetMouseButtonUp(buttonId))
+            {
+                buttonState |= InputButtonState.ReleasedThisFrame;
+            }
+
+            return buttonState;
+        }
+
+        private InputButtonState GetKeyState(KeyCode keyCode)
+        {
+            InputButtonState buttonState = InputButtonState.None;
+
+            if (Input.GetKey(keyCode))
+            {
+                buttonState |= InputButtonState.IsHeldDown;
+            }
+
+            if (Input.GetKeyDown(keyCode))
+            {
+                buttonState |= InputButtonState.PressedThisFrame;
+            }
+
+            if (Input.GetKeyUp(keyCode))
+            {
+                buttonState |= InputButtonState.ReleasedThisFrame;
+            }
+
+            return buttonState;
+        }
+        
     }
 }

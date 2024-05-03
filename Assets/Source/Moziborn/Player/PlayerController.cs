@@ -34,6 +34,7 @@ namespace Moziborn.Player
         private float _aimLineTransparency01;
 
         private int _torchLightId;
+        private bool _torchLightActive;
 
         private List<int> _tempLights;
 
@@ -64,6 +65,9 @@ namespace Moziborn.Player
                 range = _config.flashlightRange,
                 spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
             });
+
+            _torchLightActive = false;
+            _pointLightManager.SetLightEnabled(_torchLightId, false);
 
             AimLinePrefab aimLineInstance = GameObject.Instantiate(_config.aimLineViewPrefab, _characterView.meshRoot);
             _gunAimLineView = new AimLineView(aimLineInstance);
@@ -156,6 +160,12 @@ namespace Moziborn.Player
                 }
                 
                 _tempLights.Clear();
+            }
+
+            if ((_input.state.flashLightButtonState.HasFlag(InputButtonState.PressedThisFrame)))
+            {
+                _torchLightActive = !_torchLightActive;
+                _pointLightManager.SetLightEnabled(_torchLightId, _torchLightActive);
             }
         }
 

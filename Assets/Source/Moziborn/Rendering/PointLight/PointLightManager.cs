@@ -66,6 +66,16 @@ namespace Moziborn.Rendering.PointLight
             lightView.UpdatePositionRotation(position, Mathf.Atan2(direction.x, direction.z));
         }
 
+        public void SetLightEnabled(int lightId, bool enabled)
+        {
+            if (!_lightViews.TryGetValue(lightId, out PointLightView lightView))
+            {
+                throw new InvalidOperationException($"Point light with id {lightId} was not found");
+            }
+
+            lightView.gameObject.SetActive(enabled);
+        }
+
         public void Update()
         {
             foreach ((int lightId, PointLightView lightView) in _lightViews)

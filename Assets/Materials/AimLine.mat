@@ -94,7 +94,7 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ColorBlend: 0
-    - _ColorDither: 0.6
+    - _ColorDither: 1
     - _ColorDither0: 0.9
     - _ColorMode: 3
     - _Cull: 2
@@ -135,8 +135,8 @@ Material:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
     - _Color: {r: 1, g: 0, b: 0, a: 1}
-    - _Color0: {r: 0, g: 0, b: 0, a: 0.5019608}
-    - _Color1: {r: 1, g: 0.7150437, b: 0.02352941, a: 0.76862746}
+    - _Color0: {r: 1, g: 0.7137255, b: 0.023529412, a: 0.76862746}
+    - _Color1: {r: 1, g: 0.42745093, b: 0.42745093, a: 0.76862746}
     - _ColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}

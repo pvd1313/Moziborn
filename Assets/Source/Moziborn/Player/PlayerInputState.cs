@@ -12,5 +12,6 @@ namespace Moziborn.Player
         public bool isRemoveAllFlaresKeyPressed;
 
         public InputButtonState fireButtonState;
+        public InputButtonState flashLightButtonState;
     }
 }
