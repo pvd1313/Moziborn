@@ -10,5 +10,7 @@ namespace Moziborn.Player
 
         public bool isDropFlareKeyPressed;
         public bool isRemoveAllFlaresKeyPressed;
+
+        public InputButtonState fireButtonState;
     }
 }

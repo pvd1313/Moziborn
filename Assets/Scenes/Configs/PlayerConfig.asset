@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: PlayerConfig
   m_EditorClassIdentifier: 
   playerMeshPrefab: {fileID: 5240496836923149224, guid: 4a0e189033b814140b993f887fa0d1e5, type: 3}
+  aimLineViewPrefab: {fileID: 7821094833102659223, guid: 864c3183ba6b0c345b53f3f4f61ea214, type: 3}
   positionSmoothTime: 0.05
   rotationSmoothTime: 0.1
+  movementSpeed: 3
   rotationSpeed: 270
   flashlightAngleDeg: 45
   flashlightRange: 5
-  viewRange: 6
-  movementSpeed: 3
+  gunChargeDelay: 0.5
+  aimLineFadeDelay: 0.2

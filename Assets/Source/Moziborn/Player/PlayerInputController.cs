@@ -67,6 +67,20 @@ namespace Moziborn.Player
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
             }
 
+            inputState.fireButtonState = InputButtonState.None;
+            if (Input.GetMouseButton(0))
+            {
+                inputState.fireButtonState |= InputButtonState.IsHeldDown;
+            }
+            if (Input.GetMouseButtonDown(0))
+            {
+                inputState.fireButtonState |= InputButtonState.PressedThisFrame;
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                inputState.fireButtonState |= InputButtonState.ReleasedThisFrame;
+            }
+
             if (inputState.mode == PlayerInputMode.Invalid)
             {
                 inputState.mode = PlayerInputMode.Interact;

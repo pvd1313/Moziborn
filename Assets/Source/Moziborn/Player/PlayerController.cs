@@ -1,12 +1,13 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
+using Moziborn.Effects;
 using Moziborn.Layers;
 using Moziborn.Rendering.PointLight;
 using UnityEngine;
+
 
 namespace Moziborn.Player
 {
@@ -22,10 +23,17 @@ namespace Moziborn.Player
         private readonly CharacterFactory _characterFactory;
 
         private CharacterView _characterView;
-        private int _torchLightId;
+        private AimLineView _gunAimLineView;
+        
         private Vector3 _playerMeshPosition;
+        private Quaternion _playerMeshRotation;
+        
         private Vector3 _playerMeshVelocity;
         private float _playerAngleVelocity;
+        private float _gunCharge01;
+        private float _aimLineTransparency01;
+
+        private int _torchLightId;
 
         private List<int> _tempLights;
 
@@ -57,6 +65,10 @@ namespace Moziborn.Player
                 spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
             });
 
+            AimLinePrefab aimLineInstance = GameObject.Instantiate(_config.aimLineViewPrefab, _characterView.meshRoot);
+            _gunAimLineView = new AimLineView(aimLineInstance);
+            _gunAimLineView.SetLength(32);
+
             yield break;
         }
 
@@ -66,7 +78,9 @@ namespace Moziborn.Player
 
             if (input.mode == PlayerInputMode.Movement)
             {
-                _characterView.animator.SetFloat("WalkSpeed", _characterView.rigidbody.velocity.magnitude / _config.movementSpeed);
+                _characterView.animator.SetFloat(
+                    "WalkSpeed", 
+                    _characterView.rigidbody.velocity.magnitude / _config.movementSpeed);
                 _characterView.rigidbody.velocity = input.movementDirection * _config.movementSpeed;
             }
             else
@@ -78,12 +92,45 @@ namespace Moziborn.Player
 
         public void Update()
         {
+            PositionRotationUpdate();
+            
+            FlashLightUpdate();
+            
+            GunUpdate();
+            
+            _mainCamera.AnimateMovePosition(_characterView.rigidbody.position);
+            
+            _buildingController.UpdateViewerState(_characterView.viewBlockCollider.bounds, _input.state.aimDirection);
+        }
+
+        private void PositionRotationUpdate()
+        {
             _playerMeshPosition = Vector3.SmoothDamp(
                 _playerMeshPosition,
                 _characterView.rigidbody.position,
                 ref _playerMeshVelocity,
                 _config.positionSmoothTime);
+            
+            Quaternion aimRotation = Quaternion.LookRotation(_input.state.aimDirection);
+            float aimDeltaAngle = Quaternion.Angle(aimRotation, _characterView.meshRoot.rotation);
+            float aimDeltaTime = aimDeltaAngle / _config.rotationSpeed;
+            float speedMultiplier = Mathf.Clamp01(Mathf.Pow(aimDeltaTime / _config.rotationSmoothTime, 1f));
+            _playerMeshRotation = Quaternion.RotateTowards(
+                _characterView.meshRoot.rotation, 
+                aimRotation,
+                Time.deltaTime * _config.rotationSpeed * speedMultiplier);
+            
+            _characterView.meshRoot.position = _playerMeshPosition;
+            _characterView.meshRoot.rotation = _playerMeshRotation;
+        }
 
+        private void FlashLightUpdate()
+        {
+            _pointLightManager.SetLightTransform(
+                _torchLightId, 
+                _playerMeshPosition, 
+                _playerMeshRotation * Vector3.forward);
+            
             if (_input.state.isDropFlareKeyPressed)
             {
                 int lightId = _pointLightManager.CreateLight(new PointLightSetup
@@ -93,7 +140,10 @@ namespace Moziborn.Player
                     spreadAngleRad = _config.flashlightAngleDeg * Mathf.Deg2Rad
                 });
 
-                _pointLightManager.SetLightTransform(lightId, _playerMeshPosition, _input.state.aimDirection);
+                _pointLightManager.SetLightTransform(
+                    lightId, 
+                    _playerMeshPosition, 
+                    _playerMeshRotation * Vector3.forward);
 
                 _tempLights.Add(lightId);
             }
@@ -107,23 +157,51 @@ namespace Moziborn.Player
                 
                 _tempLights.Clear();
             }
-            
-            _characterView.meshRoot.position = _playerMeshPosition;
-            
-            Quaternion aimRotation = Quaternion.LookRotation(_input.state.aimDirection);
-            float aimDeltaAngle = Quaternion.Angle(aimRotation, _characterView.meshRoot.rotation);
-            float aimDeltaTime = aimDeltaAngle / _config.rotationSpeed;
-            float speedMultiplier = Mathf.Clamp01(Mathf.Pow(aimDeltaTime / _config.rotationSmoothTime, 1f));
-            _characterView.meshRoot.rotation = Quaternion.RotateTowards(
-                    _characterView.meshRoot.rotation, 
-                    aimRotation,
-                    Time.deltaTime * _config.rotationSpeed * speedMultiplier);
+        }
 
-            _mainCamera.AnimateMovePosition(_characterView.rigidbody.position);
+        private void GunUpdate()
+        {
+            if (_input.state.mode == PlayerInputMode.Fire)
+            {
+                if (_input.state.fireButtonState == InputButtonState.IsHeldDown)
+                {
+                    _gunCharge01 += Mathf.Clamp01(Time.deltaTime / _config.gunChargeDelay);
+                }
+                else
+                {
+                    _gunCharge01 = 0;
+                }
 
-            _pointLightManager.SetLightTransform(_torchLightId, _playerMeshPosition, _characterView.meshRoot.forward);
-            
-            _buildingController.UpdateViewerState(_characterView.viewBlockCollider.bounds, _input.state.aimDirection);
+                const float aimLineDistanceMax = 32;
+                
+                Ray ray = new (_playerMeshPosition + Vector3.up, _playerMeshRotation * Vector3.forward);
+                
+                if (Physics.Raycast(ray, 
+                        out RaycastHit hit, 
+                        aimLineDistanceMax, 
+                        1 << LayerIndex.LightObstacle,
+                        QueryTriggerInteraction.Ignore))
+                {
+                    Debug.DrawRay(ray.origin, ray.direction * hit.distance, Color.green);
+                    _gunAimLineView.SetLength(hit.distance);
+                }
+                else
+                {
+                    Debug.DrawRay(ray.origin, ray.direction * aimLineDistanceMax, Color.green);
+                    _gunAimLineView.SetLength(aimLineDistanceMax);
+                }
+
+                _aimLineTransparency01 += Time.deltaTime / _config.aimLineFadeDelay;
+                _gunAimLineView.SetColorBlend(_gunCharge01);
+            }
+            else
+            {
+                _aimLineTransparency01 -= Time.deltaTime / _config.aimLineFadeDelay;
+                _gunCharge01 = 0;
+            }
+
+            _aimLineTransparency01 = Mathf.Clamp01(_aimLineTransparency01);
+            _gunAimLineView.SetTransparency(_aimLineTransparency01);
         }
     }
 }
