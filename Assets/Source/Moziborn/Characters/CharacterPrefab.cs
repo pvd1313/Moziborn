@@ -1,3 +1,4 @@
+using Moziborn.Animation;
 using UnityEngine;
 
 namespace Moziborn.Characters
@@ -8,6 +9,7 @@ namespace Moziborn.Characters
         public Collider viewBlockCollider;
         public Transform meshRoot;
         public Animator animator;
+        public AnimatorEventHandler animatorEventHandler;
         public CapsuleCollider physicsCollider;
     }
 }

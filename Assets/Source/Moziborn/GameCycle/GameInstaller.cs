@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Moziborn.Audio;
 using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
@@ -23,6 +24,8 @@ namespace Moziborn.GameCycle
         {
             Type[] controllers = 
             {
+                typeof(AudioController),
+                
                 typeof(GameCycle),
                 typeof(CoroutineController),
                 typeof(GizmosController),

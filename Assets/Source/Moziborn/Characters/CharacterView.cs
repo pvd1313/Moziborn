@@ -1,11 +1,18 @@
+using System;
+using Moziborn.Common;
 using UnityEngine;
 
 namespace Moziborn.Characters
 {
-    public class CharacterView
+    public class CharacterView : IPositionTransform
     {
-        private readonly CharacterPrefab _character;
-        private readonly CharacterMeshPrefab _mesh;
+        Vector3 IPositionTransform.position => _character.rigidbody.position;
+        
+        public event Action<string> animatorEvent
+        {
+            add => _character.animatorEventHandler.animatorEvent += value;
+            remove => _character.animatorEventHandler.animatorEvent -= value;
+        }
 
         public Vector3 rigidbodyVelocity
         {
@@ -17,6 +24,9 @@ namespace Moziborn.Characters
         public Vector3 meshPosition => _character.meshRoot.position;
         public Quaternion meshRotation => _character.meshRoot.rotation;
         public Bounds viewBlockColliderBounds => _character.viewBlockCollider.bounds;
+        
+        private readonly CharacterPrefab _character;
+        private readonly CharacterMeshPrefab _mesh;
 
         private Vector3 _meshPosition;
         private Vector3 _meshVelocity;
@@ -25,7 +35,7 @@ namespace Moziborn.Characters
         {
             _character = character;
             _mesh = mesh;
-
+            
             _mesh.transform.SetParent(_character.animator.transform);
             
             _character.physicsCollider.radius = _mesh.radius;

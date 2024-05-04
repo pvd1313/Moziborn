@@ -1,5 +1,5 @@
 using Moziborn.Characters;
-using Moziborn.Effects;
+using Moziborn.VisualEffects;
 using UnityEngine;
 
 namespace Moziborn.Player

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a1d51046d1f4b98891b18863908294e, type: 3}
+  m_Name: AudioConfig
+  m_EditorClassIdentifier: 
+  audioSourcePrefab: {fileID: 2066235882896954641, guid: 429ad84c7b3e76b45aed3d9bb65d5338, type: 3}
+  audioListenerPrefab: {fileID: 4972833376878504016, guid: fba8e1e1cb6b9cc4880b5b273732b0dd, type: 3}
+  mixers:
+  - id: 1
+    audioMixerGroup: {fileID: -1382954063949140263, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+  events:
+  - id: foot_step
+    audioClips:
+    - {fileID: 8300000, guid: df8cf13dada6d2b46836c76f8ca4ec0f, type: 3}
+    audioMixerId: 1
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 0.95
+    maxPitch: 1.05
+    volumeMin: 0.9
+    volumeMax: 1

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Moziborn.Effects
+namespace Moziborn.VisualEffects
 {
     public class AimLineView
     {

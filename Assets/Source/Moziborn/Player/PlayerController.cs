@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using Moziborn.Animation;
+using Moziborn.Audio;
 using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
-using Moziborn.Effects;
 using Moziborn.Layers;
 using Moziborn.Rendering.PointLight;
+using Moziborn.VisualEffects;
 using UnityEngine;
 
 
@@ -22,6 +23,7 @@ namespace Moziborn.Player
         private readonly BuildingController _buildingController;
         private readonly PointLightManager _pointLightManager;
         private readonly CharacterFactory _characterFactory;
+        private readonly AudioController _audioController;
 
         private CharacterView _characterView;
         private AimLineView _gunAimLineView;
@@ -39,7 +41,8 @@ namespace Moziborn.Player
                                  MainCameraController mainCamera,
                                  BuildingController buildingController,
                                  PointLightManager pointLightManager,
-                                 CharacterFactory characterFactory)
+                                 CharacterFactory characterFactory,
+                                 AudioController audioController)
         {
             _config = config;
             _input = input;
@@ -47,11 +50,13 @@ namespace Moziborn.Player
             _buildingController = buildingController;
             _pointLightManager = pointLightManager;
             _characterFactory = characterFactory;
+            _audioController = audioController;
         }
 
         public IEnumerator Initialize()
         {
             _characterView = _characterFactory.CreateView(CharacterMeshId.robot);
+            _characterView.animatorEvent += OnAnimatorEvent;
 
             _tempLights = new List<int>();
 
@@ -69,6 +74,8 @@ namespace Moziborn.Player
             _gunAimLineView = new AimLineView(aimLineInstance);
             _gunAimLineView.SetLength(32);
             _characterView.AttachTransformToMeshRoot(aimLineInstance.transform);
+
+            _audioController.SetListener(_characterView);
 
             yield break;
         }
@@ -108,6 +115,14 @@ namespace Moziborn.Player
             _mainCamera.AnimateMovePosition(_characterView.rigidbodyPosition);
             
             _buildingController.UpdateViewerState(_characterView.viewBlockColliderBounds, _input.state.aimDirection);
+        }
+
+        private void OnAnimatorEvent(string eventId)
+        {
+            if (eventId == AnimatorEventId.footStep)
+            {
+                _audioController.StartEvent(AudioEventId.footStep, _characterView);
+            }
         }
 
         private void FlashLightUpdate()
