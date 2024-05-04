@@ -1,11 +1,10 @@
+using Moziborn.Animation;
 using UnityEngine;
 
 namespace Moziborn.Buildings
 {
     public class DoorView : MonoBehaviour
     {
-        private static readonly int IsOpenId = Animator.StringToHash("IsOpen");
-
         /// <summary>
         /// 1 = closed, 0 = open.
         /// </summary>
@@ -28,7 +27,7 @@ namespace Moziborn.Buildings
         {
             doorState = Mathf.MoveTowards(doorState, _targetValue, Time.deltaTime / _switchDuration);
             
-            _animator.SetFloat(IsOpenId, doorState);
+            _animator.SetFloat(AnimatorPropertyId.isOpen, doorState);
 
             bool enableColliders = doorState > 0;
             if (enableColliders != _collidersEnabled)

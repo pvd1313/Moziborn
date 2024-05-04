@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Moziborn.Animation;
 using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
@@ -13,7 +14,7 @@ namespace Moziborn.Player
 {
     public class PlayerController
     {
-        public Vector3 rigidbodyPosition => _characterView.rigidbody.position;
+        public Vector3 rigidbodyPosition => _characterView.rigidbodyPosition;
         
         private readonly PlayerConfig _config;
         private readonly PlayerInputController _input;
@@ -25,11 +26,6 @@ namespace Moziborn.Player
         private CharacterView _characterView;
         private AimLineView _gunAimLineView;
         
-        private Vector3 _playerMeshPosition;
-        private Quaternion _playerMeshRotation;
-        
-        private Vector3 _playerMeshVelocity;
-        private float _playerAngleVelocity;
         private float _gunCharge01;
         private float _aimLineTransparency01;
 
@@ -55,7 +51,7 @@ namespace Moziborn.Player
 
         public IEnumerator Initialize()
         {
-            _characterView = _characterFactory.CreateView(_config.playerMeshPrefab);
+            _characterView = _characterFactory.CreateView(CharacterMeshId.robot);
 
             _tempLights = new List<int>();
 
@@ -69,9 +65,10 @@ namespace Moziborn.Player
             _torchLightActive = false;
             _pointLightManager.SetLightEnabled(_torchLightId, false);
 
-            AimLinePrefab aimLineInstance = GameObject.Instantiate(_config.aimLineViewPrefab, _characterView.meshRoot);
+            AimLinePrefab aimLineInstance = GameObject.Instantiate(_config.aimLineViewPrefab);
             _gunAimLineView = new AimLineView(aimLineInstance);
             _gunAimLineView.SetLength(32);
+            _characterView.AttachTransformToMeshRoot(aimLineInstance.transform);
 
             yield break;
         }
@@ -82,58 +79,43 @@ namespace Moziborn.Player
 
             if (input.mode == PlayerInputMode.Movement)
             {
-                _characterView.animator.SetFloat(
-                    "WalkSpeed", 
-                    _characterView.rigidbody.velocity.magnitude / _config.movementSpeed);
-                _characterView.rigidbody.velocity = input.movementDirection * _config.movementSpeed;
+                _characterView.AnimatorSetFloat(
+                    AnimatorPropertyId.walkSpeed, 
+                    _characterView.rigidbodyVelocity.magnitude / _config.movementSpeed);
+                
+                _characterView.rigidbodyVelocity = input.movementDirection * _config.movementSpeed;
             }
             else
             {
-                _characterView.rigidbody.velocity = Vector3.zero;
-                _characterView.animator.SetFloat("WalkSpeed", 0);
+                _characterView.rigidbodyVelocity = Vector3.zero;
+                _characterView.AnimatorSetFloat(AnimatorPropertyId.walkSpeed, 0);
             }
         }
 
         public void Update()
         {
-            PositionRotationUpdate();
+            _characterView.InterpolateMeshPosition(_config.positionSmoothTime);
+            
+            _characterView.RotateMeshTowards(
+                _input.state.aimDirection,
+                _config.rotationSpeed, 
+                _config.rotationSmoothTime);
             
             FlashLightUpdate();
             
             GunUpdate();
             
-            _mainCamera.AnimateMovePosition(_characterView.rigidbody.position);
+            _mainCamera.AnimateMovePosition(_characterView.rigidbodyPosition);
             
-            _buildingController.UpdateViewerState(_characterView.viewBlockCollider.bounds, _input.state.aimDirection);
-        }
-
-        private void PositionRotationUpdate()
-        {
-            _playerMeshPosition = Vector3.SmoothDamp(
-                _playerMeshPosition,
-                _characterView.rigidbody.position,
-                ref _playerMeshVelocity,
-                _config.positionSmoothTime);
-            
-            Quaternion aimRotation = Quaternion.LookRotation(_input.state.aimDirection);
-            float aimDeltaAngle = Quaternion.Angle(aimRotation, _characterView.meshRoot.rotation);
-            float aimDeltaTime = aimDeltaAngle / _config.rotationSpeed;
-            float speedMultiplier = Mathf.Clamp01(Mathf.Pow(aimDeltaTime / _config.rotationSmoothTime, 1f));
-            _playerMeshRotation = Quaternion.RotateTowards(
-                _characterView.meshRoot.rotation, 
-                aimRotation,
-                Time.deltaTime * _config.rotationSpeed * speedMultiplier);
-            
-            _characterView.meshRoot.position = _playerMeshPosition;
-            _characterView.meshRoot.rotation = _playerMeshRotation;
+            _buildingController.UpdateViewerState(_characterView.viewBlockColliderBounds, _input.state.aimDirection);
         }
 
         private void FlashLightUpdate()
         {
             _pointLightManager.SetLightTransform(
                 _torchLightId, 
-                _playerMeshPosition, 
-                _playerMeshRotation * Vector3.forward);
+                _characterView.meshPosition, 
+                _characterView.meshRotation * Vector3.forward);
             
             if (_input.state.isDropFlareKeyPressed)
             {
@@ -146,8 +128,8 @@ namespace Moziborn.Player
 
                 _pointLightManager.SetLightTransform(
                     lightId, 
-                    _playerMeshPosition, 
-                    _playerMeshRotation * Vector3.forward);
+                    _characterView.meshPosition, 
+                    _characterView.meshRotation * Vector3.forward);
 
                 _tempLights.Add(lightId);
             }
@@ -184,7 +166,9 @@ namespace Moziborn.Player
 
                 const float aimLineDistanceMax = 32;
                 
-                Ray ray = new (_playerMeshPosition + Vector3.up, _playerMeshRotation * Vector3.forward);
+                Ray ray = new (
+                    _characterView.meshPosition + Vector3.up, 
+                    _characterView.meshRotation * Vector3.forward);
                 
                 if (Physics.Raycast(ray, 
                         out RaycastHit hit, 

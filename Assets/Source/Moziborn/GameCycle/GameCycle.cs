@@ -1,5 +1,6 @@
 using System.Collections;
 using Moziborn.Buildings;
+using Moziborn.Characters;
 using Moziborn.Cinematics;
 using Moziborn.Coroutines;
 using Moziborn.Debugging;
@@ -33,6 +34,7 @@ namespace Moziborn.GameCycle
 
         private IEnumerator InitializationRoutine()
         {
+            yield return _container.TryResolve<CharacterFactory>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PointLightManager>()?.Initialize();

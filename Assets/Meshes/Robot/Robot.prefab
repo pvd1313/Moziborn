@@ -4187,7 +4187,7 @@ GameObject:
   - component: {fileID: 8620466607987383679}
   - component: {fileID: 5240496836923149224}
   m_Layer: 0
-  m_Name: Jammo
+  m_Name: Robot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4246,6 +4246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aedef6252f4664b975aaa176bd80c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: robot
   radius: 0.35
   height: 1.6
 --- !u!1 &6993375750085940624

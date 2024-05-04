@@ -202,5 +202,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47aedef6252f4664b975aaa176bd80c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  id: sharptooth
   radius: 0.4
   height: 0.9

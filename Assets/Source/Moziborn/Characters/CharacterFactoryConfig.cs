@@ -4,6 +4,7 @@ namespace Moziborn.Characters
 {
     public class CharacterFactoryConfig : ScriptableObject
     {
-        public CharacterView characterPrefab;
+        public CharacterPrefab characterPrefab;
+        public CharacterMeshPrefab[] characterMeshPrefabs;
     }
 }
