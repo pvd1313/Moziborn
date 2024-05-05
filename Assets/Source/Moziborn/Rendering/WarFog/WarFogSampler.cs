@@ -65,12 +65,12 @@ namespace Moziborn.Rendering.WarFog
                 0, 
                 RenderTextureFormat.R16);
             
-            _ambientMaterial.SetTexture(ShaderPropertyID.Ambient.WallTexture, _wallTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyID.Ambient.SunTexture, sunTexture);
-            _ambientMaterial.SetTexture(ShaderPropertyID.Ambient.StateTexture, _stateTexture);
-            _ambientMaterial.SetFloat(ShaderPropertyID.Ambient.Blur, _config.ambientBlur);
-            _ambientMaterial.SetFloat(ShaderPropertyID.Ambient.LinearFall, _config.ambientLinearFall);
-            _ambientMaterial.SetFloat(ShaderPropertyID.Ambient.BilinearFall, _config.ambientBilinearFall);
+            _ambientMaterial.SetTexture(ShaderProperty.Ambient.WallTexture, _wallTexture);
+            _ambientMaterial.SetTexture(ShaderProperty.Ambient.SunTexture, sunTexture);
+            _ambientMaterial.SetTexture(ShaderProperty.Ambient.StateTexture, _stateTexture);
+            _ambientMaterial.SetFloat(ShaderProperty.Ambient.Blur, _config.ambientBlur);
+            _ambientMaterial.SetFloat(ShaderProperty.Ambient.LinearFall, _config.ambientLinearFall);
+            _ambientMaterial.SetFloat(ShaderProperty.Ambient.BilinearFall, _config.ambientBilinearFall);
             
             Graphics.Blit(null, tempTexture, _ambientMaterial);
             Graphics.Blit(tempTexture, _stateTexture);
@@ -90,9 +90,9 @@ namespace Moziborn.Rendering.WarFog
                 0,
                 RenderTextureFormat.R16);
             
-            _postFadeMaterial.SetTexture(ShaderPropertyID.WarFogFadePost.StateTexture, stateTextureWithPost);
-            _postFadeMaterial.SetTexture(ShaderPropertyID.WarFogFadePost.SunTexture, mergedTexture);
-            _postFadeMaterial.SetFloat(ShaderPropertyID.WarFogFadePost.FadeDelta, _config.fadeDelta);
+            _postFadeMaterial.SetTexture(ShaderProperty.WarFogFadePost.StateTexture, stateTextureWithPost);
+            _postFadeMaterial.SetTexture(ShaderProperty.WarFogFadePost.SunTexture, mergedTexture);
+            _postFadeMaterial.SetFloat(ShaderProperty.WarFogFadePost.FadeDelta, _config.fadeDelta);
             
             Graphics.Blit(null, fadedTexture, _postFadeMaterial);
             Graphics.Blit(fadedTexture, stateTextureWithPost);

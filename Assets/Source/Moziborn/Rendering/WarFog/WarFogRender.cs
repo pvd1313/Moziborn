@@ -43,8 +43,8 @@ namespace Moziborn.Rendering.WarFog
             _sunTexture.Fill(Color.black);
             _sunTexture.Apply();
 
-            Shader.SetGlobalTexture(ShaderPropertyID.Global.WarFogMapGroundTexture, _groundSampler.stateTextureWithPost);
-            Shader.SetGlobalTexture(ShaderPropertyID.Global.WarFogMapRoofTexture, _roofSampler.stateTextureWithPost);
+            Shader.SetGlobalTexture(ShaderProperty.Global.WarFogMapGroundTexture, _groundSampler.stateTextureWithPost);
+            Shader.SetGlobalTexture(ShaderProperty.Global.WarFogMapRoofTexture, _roofSampler.stateTextureWithPost);
             
             yield break;
         }

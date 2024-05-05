@@ -1,3 +1,4 @@
+using Moziborn.Rendering;
 using UnityEngine;
 
 namespace Moziborn.VisualEffects
@@ -12,7 +13,7 @@ namespace Moziborn.VisualEffects
         {
             _instance = instance;
             _materialProperty = new MaterialPropertyBlock();
-            _colorDitherMax = instance.meshRenderer.sharedMaterial.GetFloat("_ColorDither");
+            _colorDitherMax = instance.meshRenderer.sharedMaterial.GetFloat(ShaderProperty.AimLine.ColorDither);
         }
 
         public void SetLength(float length)
@@ -22,13 +23,13 @@ namespace Moziborn.VisualEffects
 
         public void SetTransparency(float alpha01)
         {
-            _materialProperty.SetFloat("_ColorDither", alpha01 * _colorDitherMax);
+            _materialProperty.SetFloat(ShaderProperty.AimLine.ColorDither, alpha01 * _colorDitherMax);
             _instance.meshRenderer.SetPropertyBlock(_materialProperty);
         }
 
         public void SetColorBlend(float blend01)
         {
-            _materialProperty.SetFloat("_ColorBlend", blend01);
+            _materialProperty.SetFloat(ShaderProperty.AimLine.ColorBlend, blend01);
             _instance.meshRenderer.SetPropertyBlock(_materialProperty);
         }
     }

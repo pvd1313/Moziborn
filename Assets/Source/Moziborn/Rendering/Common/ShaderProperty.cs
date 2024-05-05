@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Moziborn.Rendering
 {
-    public static class ShaderPropertyID
+    public static class ShaderProperty
     {
         public static class Ambient
         {
@@ -26,6 +26,14 @@ namespace Moziborn.Rendering
             public static readonly int VerticalCutAlpha = Shader.PropertyToID("_VerticalCutAlpha");
             public static readonly int VerticalCutRange = Shader.PropertyToID("_VerticalCutRange");
             public static readonly int WarFogGroundRoofBlending = Shader.PropertyToID("_WarFogGroundRoofBlending");
+            public static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+            public static readonly string EmissionKeyword = "_EMISSION";
+        }
+
+        public class AimLine
+        {
+            public static readonly int ColorDither = Shader.PropertyToID("_ColorDither");
+            public static readonly int ColorBlend = Shader.PropertyToID("_ColorBlend");
         }
         
         public class Global

@@ -8,6 +8,8 @@ namespace Moziborn.Player
     {
         public CharacterMeshPrefab playerMeshPrefab;
         public AimLinePrefab aimLineViewPrefab;
+
+        public Color characterFlashlightGlowingColor;
         
         public float positionSmoothTime;
         public float rotationSmoothTime;

@@ -1,5 +1,6 @@
 using System;
 using Moziborn.Common;
+using Moziborn.Rendering;
 using UnityEngine;
 
 namespace Moziborn.Characters
@@ -27,12 +28,15 @@ namespace Moziborn.Characters
         
         private readonly CharacterPrefab _character;
         private readonly CharacterMeshPrefab _mesh;
+        private readonly MaterialPropertyBlock _materialProperty;
 
         private Vector3 _meshPosition;
         private Vector3 _meshVelocity;
 
         public CharacterView(CharacterPrefab character, CharacterMeshPrefab mesh)
         {
+            _materialProperty = new MaterialPropertyBlock();
+            
             _character = character;
             _mesh = mesh;
             
@@ -65,6 +69,18 @@ namespace Moziborn.Characters
                 _character.meshRoot.rotation, 
                 aimRotation,
                 Time.deltaTime * rotationSpeed * speedMultiplier);
+        }
+
+        public void SetEmissionColor(Color color)
+        {
+            _materialProperty.SetColor(ShaderProperty.Standard.EmissionColor, color);
+            
+            foreach (Renderer renderer in _mesh.renderers)
+            {
+                renderer.sharedMaterial.EnableKeyword(ShaderProperty.Standard.EmissionKeyword);
+                
+                renderer.SetPropertyBlock(_materialProperty);
+            }
         }
 
         public void AttachTransformToMeshRoot(Transform transform)

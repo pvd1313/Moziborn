@@ -132,7 +132,7 @@ namespace Moziborn.Player
                 _characterView.meshPosition, 
                 _characterView.meshRotation * Vector3.forward);
             
-            if (_input.state.isDropFlareKeyPressed)
+            if (_input.state.dropFlareButton.HasFlag(InputButtonState.PressedThisFrame))
             {
                 int lightId = _pointLightManager.CreateLight(new PointLightSetup
                 {
@@ -149,7 +149,7 @@ namespace Moziborn.Player
                 _tempLights.Add(lightId);
             }
 
-            if (_input.state.isRemoveAllFlaresKeyPressed)
+            if (_input.state.removeAllFlaresButton.HasFlag(InputButtonState.PressedThisFrame))
             {
                 foreach (int lightId in _tempLights)
                 {
@@ -159,10 +159,16 @@ namespace Moziborn.Player
                 _tempLights.Clear();
             }
 
-            if ((_input.state.flashLightButtonState.HasFlag(InputButtonState.PressedThisFrame)))
+            if ((_input.state.flashlightButton.HasFlag(InputButtonState.PressedThisFrame)))
             {
                 _torchLightActive = !_torchLightActive;
+                
                 _pointLightManager.SetLightEnabled(_torchLightId, _torchLightActive);
+                
+                _characterView.SetEmissionColor(
+                    _torchLightActive
+                    ? _config.characterFlashlightGlowingColor
+                    : Color.black);
             }
         }
 
@@ -170,7 +176,7 @@ namespace Moziborn.Player
         {
             if (_input.state.mode == PlayerInputMode.Fire)
             {
-                if (_input.state.fireButtonState == InputButtonState.IsHeldDown)
+                if (_input.state.fireButton == InputButtonState.IsHeldDown)
                 {
                     _gunCharge01 += Mathf.Clamp01(Time.deltaTime / _config.gunChargeDelay);
                 }

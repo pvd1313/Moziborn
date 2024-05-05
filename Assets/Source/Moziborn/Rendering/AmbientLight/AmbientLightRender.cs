@@ -44,19 +44,19 @@ namespace Moziborn.Rendering.AmbientLight
             };
             
             _ambientLightMaterial = new Material(_config.ambientLightShader);
-            _ambientLightMaterial.SetTexture(ShaderPropertyID.Ambient.WallTexture, _wallTexture);
-            _ambientLightMaterial.SetTexture(ShaderPropertyID.Ambient.SunTexture, _sunTexture);
-            _ambientLightMaterial.SetTexture(ShaderPropertyID.Ambient.StateTexture, _stateTexture);
+            _ambientLightMaterial.SetTexture(ShaderProperty.Ambient.WallTexture, _wallTexture);
+            _ambientLightMaterial.SetTexture(ShaderProperty.Ambient.SunTexture, _sunTexture);
+            _ambientLightMaterial.SetTexture(ShaderProperty.Ambient.StateTexture, _stateTexture);
             
             Shader.SetGlobalVector(
-                ShaderPropertyID.Global.AmbientLightMapOffset, 
+                ShaderProperty.Global.AmbientLightMapOffset, 
                 new Vector4(levelBounds.position.x, 0, levelBounds.position.y) * -1);
             
             Shader.SetGlobalVector(
-                ShaderPropertyID.Global.AmbientLightMapWorldSize, 
+                ShaderProperty.Global.AmbientLightMapWorldSize, 
                 new Vector4(levelBounds.size.x, levelBounds.size.y));
             
-            Shader.SetGlobalTexture(ShaderPropertyID.Global.AmbientLightMapTexture, _stateTexture);
+            Shader.SetGlobalTexture(ShaderProperty.Global.AmbientLightMapTexture, _stateTexture);
             
             _sunTexture.Fill(Color.white);
             _sunTexture.FillRooms(_buildingController, Color.black);
@@ -82,9 +82,9 @@ namespace Moziborn.Rendering.AmbientLight
                 0, 
                 RenderTextureFormat.R16);
 
-            _ambientLightMaterial.SetFloat(ShaderPropertyID.Ambient.Blur, _config.blur);
-            _ambientLightMaterial.SetFloat(ShaderPropertyID.Ambient.LinearFall, _config.linearFall);
-            _ambientLightMaterial.SetFloat(ShaderPropertyID.Ambient.BilinearFall, _config.bilinearFall);
+            _ambientLightMaterial.SetFloat(ShaderProperty.Ambient.Blur, _config.blur);
+            _ambientLightMaterial.SetFloat(ShaderProperty.Ambient.LinearFall, _config.linearFall);
+            _ambientLightMaterial.SetFloat(ShaderProperty.Ambient.BilinearFall, _config.bilinearFall);
         
             Graphics.Blit(_stateTexture, tempTexture, _ambientLightMaterial);
             

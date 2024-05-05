@@ -7,11 +7,10 @@ namespace Moziborn.Player
         public Vector3 aimDirection;
         public Vector3 movementDirection;
         public PlayerInputMode mode;
-
-        public bool isDropFlareKeyPressed;
-        public bool isRemoveAllFlaresKeyPressed;
-
-        public InputButtonState fireButtonState;
-        public InputButtonState flashLightButtonState;
+        
+        public InputButtonState removeAllFlaresButton;
+        public InputButtonState dropFlareButton;
+        public InputButtonState fireButton;
+        public InputButtonState flashlightButton;
     }
 }

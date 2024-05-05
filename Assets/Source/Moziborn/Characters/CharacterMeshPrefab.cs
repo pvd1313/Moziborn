@@ -7,5 +7,6 @@ namespace Moziborn.Characters
         public string id;
         public float radius;
         public float height;
+        public Renderer[] renderers;
     }
 }

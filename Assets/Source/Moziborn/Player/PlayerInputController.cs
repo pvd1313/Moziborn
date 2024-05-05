@@ -30,9 +30,6 @@ namespace Moziborn.Player
                 return;
             }
 
-            inputState.isDropFlareKeyPressed = Input.GetKeyDown(KeyCode.E);
-            inputState.isRemoveAllFlaresKeyPressed = Input.GetKeyDown(KeyCode.Q);
-
             if (Input.GetKey(KeyCode.LeftShift))
             {
                 inputState.mode = PlayerInputMode.Fire;
@@ -68,8 +65,10 @@ namespace Moziborn.Player
                 Debug.DrawRay(mousePosition - Vector3.right * 0.5f, Vector3.right, Color.gray);
             }
 
-            inputState.fireButtonState = GetMouseButtonState(0);
-            inputState.flashLightButtonState = GetKeyState(KeyCode.F);
+            inputState.fireButton = GetMouseButtonState(0);
+            inputState.flashlightButton = GetKeyState(KeyCode.F);
+            inputState.dropFlareButton = GetKeyState(KeyCode.E);
+            inputState.removeAllFlaresButton = GetKeyState(KeyCode.Q);
             
             if (inputState.mode == PlayerInputMode.Invalid)
             {

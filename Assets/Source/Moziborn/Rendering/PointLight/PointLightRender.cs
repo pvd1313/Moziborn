@@ -51,10 +51,10 @@ namespace Moziborn.Rendering.PointLight
         {
             _renderer.EndCameraRendering(camera);
 
-            Shader.SetGlobalTexture(ShaderPropertyID.Global.PointLightMapTexture, _renderer.lastRenderResult.texture);
-            Shader.SetGlobalVector(ShaderPropertyID.Global.PointLightMapRotation, _renderer.lastRenderResult.textureRotationSinCosWorldSpace);
-            Shader.SetGlobalVector(ShaderPropertyID.Global.PointLightMapOffset, _renderer.lastRenderResult.textureOffsetWorldSpace);
-            Shader.SetGlobalVector(ShaderPropertyID.Global.PointLightMapWorldSize, _renderer.lastRenderResult.textureSizeWorldSpace);
+            Shader.SetGlobalTexture(ShaderProperty.Global.PointLightMapTexture, _renderer.lastRenderResult.texture);
+            Shader.SetGlobalVector(ShaderProperty.Global.PointLightMapRotation, _renderer.lastRenderResult.textureRotationSinCosWorldSpace);
+            Shader.SetGlobalVector(ShaderProperty.Global.PointLightMapOffset, _renderer.lastRenderResult.textureOffsetWorldSpace);
+            Shader.SetGlobalVector(ShaderProperty.Global.PointLightMapWorldSize, _renderer.lastRenderResult.textureSizeWorldSpace);
         }
         
         public void Dispose()

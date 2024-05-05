@@ -64,7 +64,7 @@ namespace Moziborn.Buildings
             BuildingUtil.DetectBuildings(_floor0Frame, _floor0Interactive, _floor1Frame, _buildings);
 
             MaterialPropertyBlock roofPropertyBlock = new ();
-            roofPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 1);
+            roofPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 1);
 
             foreach (BuildingData building in buildings)
             foreach (BoundsInt room in building.rooms)
@@ -188,8 +188,8 @@ namespace Moziborn.Buildings
 
         public void Update(bool force)
         {
-            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.VerticalCutAlpha, 1);
-            _materialPropertyBlock.SetVector(ShaderPropertyID.Standard.VerticalCutRange, _config.verticalCutRange);
+            _materialPropertyBlock.SetFloat(ShaderProperty.Standard.VerticalCutAlpha, 1);
+            _materialPropertyBlock.SetVector(ShaderProperty.Standard.VerticalCutRange, _config.verticalCutRange);
 
             float transitionSpeed = Time.deltaTime / _config.transitionDuration;
             
@@ -201,14 +201,14 @@ namespace Moziborn.Buildings
                 {
                     transition.alpha = Mathf.MoveTowards(transition.alpha, transition.targetAlpha, transitionSpeed);
                     
-                    _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.VerticalCutAlpha, transition.alpha);
+                    _materialPropertyBlock.SetFloat(ShaderProperty.Standard.VerticalCutAlpha, transition.alpha);
 
                     foreach (BuildingPartView partView in _buildings[buildingID].allPartViews)
                     {
                         if (partView.partType == BuildingPartType.Wall ||
                             partView.partType == BuildingPartType.DoorFrame)
                         {
-                            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 0);
+                            _materialPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 0);
                             for (int i = 0; i < partView.meshRenders.Count; i++)
                             {
                                 partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
@@ -216,7 +216,7 @@ namespace Moziborn.Buildings
                         }
                         else if (partView.partType == BuildingPartType.Roof)
                         {
-                            _materialPropertyBlock.SetFloat(ShaderPropertyID.Standard.WarFogGroundRoofBlending, 1);
+                            _materialPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 1);
                             for (int i = 0; i < partView.meshRenders.Count; i++)
                             {
                                 partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
