@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Moziborn.Animation;
+using Moziborn.Audio;
 using Moziborn.Cinematics;
 using Moziborn.Debugging;
 using Moziborn.Rendering;
@@ -28,6 +30,7 @@ namespace Moziborn.Buildings
 
         private readonly BuildingConfig _config;
         private readonly MainCameraController _mainCamera;
+        private readonly AudioController _audioController;
 
         private Tilemap _floor0Frame;
         private Tilemap _floor0Interactive;
@@ -37,10 +40,13 @@ namespace Moziborn.Buildings
         private MaterialPropertyBlock _materialPropertyBlock;
         private MaterialPropertyBlock _roofMaterialProperty;
 
-        public BuildingController (BuildingConfig config, MainCameraController mainCamera)
+        public BuildingController (BuildingConfig config, 
+                                   MainCameraController mainCamera,
+                                   AudioController audioController)
         {
             _config = config;
             _mainCamera = mainCamera;
+            _audioController = audioController;
         }
         
         public IEnumerator Initialize()
@@ -86,6 +92,12 @@ namespace Moziborn.Buildings
                 }
             }
 
+            foreach (BuildingData building in buildings)
+            foreach (DoorData doorData in building.doors)
+            {
+                doorData.view.animatorEvent += OnDoorAnimatorEvent;
+            }
+
             _transitions = new BuildingTransition[_buildings.Count];
             for (int i = 0; i < _transitions.Length; i++)
             {
@@ -97,6 +109,19 @@ namespace Moziborn.Buildings
             }
 
             Update(true);
+        }
+
+        private void OnDoorAnimatorEvent(DoorView doorView, string eventId)
+        {
+            if (eventId == AnimatorEventId.doorBeginOpening)
+            {
+                _audioController.StartEvent(AudioEventId.doorOpen, doorView.position);
+            }
+
+            if (eventId == AnimatorEventId.doorBeginClosing)
+            {
+                _audioController.StartEvent(AudioEventId.doorClose, doorView.position);
+            }
         }
 
         public void UpdateViewerState(Bounds playerBounds, Vector3 aimDirection)
@@ -195,6 +220,11 @@ namespace Moziborn.Buildings
             
             for (int buildingID = 0; buildingID < _buildings.Count; buildingID++)
             {
+                foreach (DoorData door in buildings[buildingID].doors)
+                {
+                    door.view.Update();
+                }
+                
                 BuildingTransition transition = _transitions[buildingID];
 
                 if (force || transition.alpha > transition.targetAlpha || transition.alpha < transition.targetAlpha)

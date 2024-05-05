@@ -1,53 +1,79 @@
+using System;
 using Moziborn.Animation;
 using UnityEngine;
 
 namespace Moziborn.Buildings
 {
-    public class DoorView : MonoBehaviour
+    public class DoorView
     {
+        public Vector3 position => _instance.transform.position;
+        
         /// <summary>
         /// 1 = closed, 0 = open.
         /// </summary>
-        public float doorState { get ; private set; }
+        public float doorState { get; private set; }
 
-        [SerializeField] private float _switchDuration;
-        [SerializeField] private Animator _animator;
-        [SerializeField] private Collider[] _colliders;
-
-        private float _targetValue;
+        public event Action<DoorView, string> animatorEvent;
+        
+        private readonly DoorPrefab _instance;
         private bool _collidersEnabled;
+        private bool _isPlayingAnimation;
+        private float _targetState;
 
-        private void Awake()
+        public DoorView(DoorPrefab instance)
         {
-            _targetValue = 1;
+            _instance = instance;
             _collidersEnabled = true;
+            doorState = 1;
+            _instance.animator.SetFloat(AnimatorPropertyId.isOpen, 1);
         }
 
-        private void Update()
+        public void Update()
         {
-            doorState = Mathf.MoveTowards(doorState, _targetValue, Time.deltaTime / _switchDuration);
-            
-            _animator.SetFloat(AnimatorPropertyId.isOpen, doorState);
-
-            bool enableColliders = doorState > 0;
-            if (enableColliders != _collidersEnabled)
+            if (_isPlayingAnimation)
             {
-                _collidersEnabled = enableColliders;
-                foreach (Collider col in _colliders)
+                doorState = Mathf.MoveTowards(
+                    doorState, 
+                    _targetState, 
+                    Time.deltaTime / _instance.switchDuration);
+                
+                _instance.animator.SetFloat(AnimatorPropertyId.isOpen, doorState);
+                
+                bool enableColliders = doorState > 0;
+                if (enableColliders != _collidersEnabled)
                 {
-                    col.enabled = _collidersEnabled;
+                    _collidersEnabled = enableColliders;
+                    foreach (Collider collider in _instance.colliders)
+                    {
+                        collider.enabled = _collidersEnabled;
+                    }
+                }
+
+                if (doorState == _targetState)
+                {
+                    _isPlayingAnimation = false;
                 }
             }
-        }
+            else
+            {
+                _targetState = _instance.colliderTriggerHandler.CheckTriggerActive() ? 0 : 1;
+                if (_targetState == doorState)
+                {
+                    return;
+                }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            _targetValue = 0;
-        }
+                _isPlayingAnimation = true;
+                
+                if (doorState == 1 && _targetState == 0)
+                {
+                    animatorEvent?.Invoke(this, AnimatorEventId.doorBeginOpening);
+                }
 
-        private void OnTriggerExit(Collider other)
-        {
-            _targetValue = 1;
+                if (doorState == 0 && _targetState == 1)
+                {
+                    animatorEvent?.Invoke(this, AnimatorEventId.doorBeginClosing);
+                }
+            }
         }
     }
 }

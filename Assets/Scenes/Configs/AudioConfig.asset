@@ -14,18 +14,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioSourcePrefab: {fileID: 2066235882896954641, guid: 429ad84c7b3e76b45aed3d9bb65d5338, type: 3}
   audioListenerPrefab: {fileID: 4972833376878504016, guid: fba8e1e1cb6b9cc4880b5b273732b0dd, type: 3}
-  mixers:
-  - id: 1
-    audioMixerGroup: {fileID: -1382954063949140263, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
   events:
   - id: foot_step
     audioClips:
     - {fileID: 8300000, guid: df8cf13dada6d2b46836c76f8ca4ec0f, type: 3}
-    audioMixerId: 1
+    audioMixerGroup: {fileID: -1382954063949140263, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
     loop: 0
     minDistance: 1
     maxDistance: 5
     minPith: 0.95
     maxPitch: 1.05
     volumeMin: 0.9
+    volumeMax: 1
+  - id: door_open
+    audioClips:
+    - {fileID: 8300000, guid: ba826bee560bdb1409641662b82c6097, type: 3}
+    audioMixerGroup: {fileID: 1412131339897509238, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: door_close
+    audioClips:
+    - {fileID: 8300000, guid: f5580245f0d290142bb6a47ad3890e41, type: 3}
+    audioMixerGroup: {fileID: 1412131339897509238, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
     volumeMax: 1

@@ -9,7 +9,7 @@ namespace Moziborn.Audio
     {
         public string id;
         public AudioClip[] audioClips;
-        public AudioMixerId audioMixerId;
+        public AudioMixerGroup audioMixerGroup;
         public bool loop;
         public float minDistance;
         public float maxDistance;

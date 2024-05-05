@@ -27,7 +27,6 @@ namespace Moziborn.Audio
         private int _nextEventId;
         private AudioListenerPrefab _audioListener;
         private IPositionTransform _audioListenerTarget;
-        private Dictionary<AudioMixerId, AudioMixerConfig> _mixers;
 
         public AudioController(AudioConfig config)
         {
@@ -37,7 +36,6 @@ namespace Moziborn.Audio
         public IEnumerator Initialize()
         {
             _events = _config.events.ToDictionary(e => e.id);
-            _mixers = _config.mixers.ToDictionary(m => m.id);
             _freeAudioPlayers = new List<int>();
             _audioPlayers = new List<AudioPlayerData>();
             _activePlayersIndexMap = new Dictionary<int, int>();
@@ -78,7 +76,7 @@ namespace Moziborn.Audio
             player.audioSource.audioSource.volume = Random.Range(eventConfig.volumeMin, eventConfig.volumeMax);
             int randomClipIndex = Random.Range(0, eventConfig.audioClips.Length);
             player.audioSource.audioSource.clip = eventConfig.audioClips[randomClipIndex];
-            player.audioSource.audioSource.outputAudioMixerGroup = _mixers[eventConfig.audioMixerId].audioMixerGroup;
+            player.audioSource.audioSource.outputAudioMixerGroup = eventConfig.audioMixerGroup;
             player.audioSource.audioSource.Play();
 
             player.eventId = _nextEventId;

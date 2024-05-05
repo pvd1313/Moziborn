@@ -117,11 +117,11 @@ namespace Moziborn.Player
             _buildingController.UpdateViewerState(_characterView.viewBlockColliderBounds, _input.state.aimDirection);
         }
 
-        private void OnAnimatorEvent(string eventId)
+        private void OnAnimatorEvent(CharacterView characterView, string eventId)
         {
             if (eventId == AnimatorEventId.footStep)
             {
-                _audioController.StartEvent(AudioEventId.footStep, _characterView);
+                _audioController.StartEvent(AudioEventId.footStep, characterView);
             }
         }
 

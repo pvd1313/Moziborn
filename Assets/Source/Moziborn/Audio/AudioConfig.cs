@@ -7,7 +7,6 @@ namespace Moziborn.Audio
     {
         public AudioSourcePrefab audioSourcePrefab;
         public AudioListenerPrefab audioListenerPrefab;
-        public AudioMixerConfig[] mixers;
         public AudioEventConfig[] events;
     }
 }

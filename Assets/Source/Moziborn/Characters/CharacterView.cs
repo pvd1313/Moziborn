@@ -8,12 +8,8 @@ namespace Moziborn.Characters
     public class CharacterView : IPositionTransform
     {
         Vector3 IPositionTransform.position => _character.rigidbody.position;
-        
-        public event Action<string> animatorEvent
-        {
-            add => _character.animatorEventHandler.animatorEvent += value;
-            remove => _character.animatorEventHandler.animatorEvent -= value;
-        }
+
+        public event Action<CharacterView, string> animatorEvent;
 
         public Vector3 rigidbodyVelocity
         {
@@ -45,6 +41,13 @@ namespace Moziborn.Characters
             _character.physicsCollider.radius = _mesh.radius;
             _character.physicsCollider.height = _mesh.height;
             _character.physicsCollider.center = new Vector3(0, _mesh.height * 0.5f, 0);
+            
+            _character.animatorEventHandler.animatorEvent += OnAnimatorEvent;
+        }
+
+        private void OnAnimatorEvent(string eventId)
+        {
+            animatorEvent?.Invoke(this, eventId);
         }
 
         public void InterpolateMeshPosition(float smoothTime)

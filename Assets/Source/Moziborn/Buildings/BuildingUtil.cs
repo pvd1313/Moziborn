@@ -60,7 +60,9 @@ namespace Moziborn.Buildings
                     doors = doors.Select(pos => new DoorData
                     {
                         position = pos,
-                        view = floor0Interactive.GetInstantiatedObject(new Vector3Int(pos.x, pos.y, 0)).GetComponentInChildren<DoorView>()
+                        view = new DoorView(floor0Interactive
+                            .GetInstantiatedObject(new Vector3Int(pos.x, pos.y, 0))
+                            .GetComponentInChildren<DoorPrefab>())
                     }).ToArray()
                 });
             }
