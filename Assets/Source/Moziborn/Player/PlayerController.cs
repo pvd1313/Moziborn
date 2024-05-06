@@ -31,6 +31,10 @@ namespace Moziborn.Player
         private float _gunCharge01;
         private float _aimLineTransparency01;
 
+        private int _gunAimSound;
+        private int _gunChargeSound;
+        private int _gunChargedLoopSound;
+
         private int _torchLightId;
         private bool _torchLightActive;
 
@@ -74,6 +78,10 @@ namespace Moziborn.Player
             _gunAimLineView = new AimLineView(aimLineInstance);
             _gunAimLineView.SetLength(32);
             _characterView.AttachTransformToMeshRoot(aimLineInstance.transform);
+            
+            _gunAimSound = -1;
+            _gunChargeSound = -1;
+            _gunChargedLoopSound = -1;
 
             _audioController.SetListener(_characterView);
 
@@ -121,7 +129,7 @@ namespace Moziborn.Player
         {
             if (eventId == AnimatorEventId.footStep)
             {
-                _audioController.StartEvent(AudioEventId.footStep, characterView);
+                _audioController.StartEvent(AudioEventName.footStep, characterView);
             }
         }
 
@@ -174,11 +182,73 @@ namespace Moziborn.Player
 
         private void GunUpdate()
         {
+            // Gun charge audio
+            if (_input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.IsHeldDown })
+            {
+                if (_gunChargeSound == -1)
+                {
+                    _gunChargeSound = _audioController.StartEvent(AudioEventName.gunCharge, _characterView, _config.gunChargeDelay);
+                }
+            }
+            else
+            {
+                if (_gunChargeSound != -1)
+                {
+                    _audioController.StopEvent(_gunChargeSound);
+                    _gunChargeSound = -1;
+                }
+            }
+            
+            // Gun shot
+            if (_input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.ReleasedThisFrame })
+            {
+                if (_gunCharge01 == 1)
+                {
+                    _audioController.StartEvent(AudioEventName.gunShot, _characterView);
+                }
+            }
+            
+            // Gun charged loop audio
+            if (_gunCharge01 == 1)
+            {
+                if (_gunChargedLoopSound == -1)
+                {
+                    _gunChargedLoopSound = _audioController.StartEvent(AudioEventName.gunChargedLoop, _characterView);
+                }
+            }
+            else
+            {
+                if (_gunChargedLoopSound != -1)
+                {
+                    _audioController.StopEvent(_gunChargedLoopSound);
+                    _gunChargedLoopSound = -1;
+                }
+            }
+            
+            // Gun charge cancel (canceled aiming)
+            if (_gunCharge01 > 0 && _input.state.mode != PlayerInputMode.Fire)
+            {
+                _audioController.StartEvent(AudioEventName.gunChargeCancel, _characterView);
+            }
+            
+            // Gun charge cancel (bad timing)
+            if (_gunCharge01 > 0 &&
+                _gunCharge01 < 1 &&
+                _input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.ReleasedThisFrame })
+            {
+                _audioController.StartEvent(AudioEventName.gunChargeCancel, _characterView);
+            }
+            
             if (_input.state.mode == PlayerInputMode.Fire)
             {
-                if (_input.state.fireButton == InputButtonState.IsHeldDown)
+                if (_gunAimSound == -1)
                 {
-                    _gunCharge01 += Mathf.Clamp01(Time.deltaTime / _config.gunChargeDelay);
+                    _gunAimSound = _audioController.StartEvent(AudioEventName.gunAim, _characterView);
+                }
+                
+                if (_input.state.fireButton.HasFlag(InputButtonState.IsHeldDown))
+                {
+                    _gunCharge01 = Mathf.Clamp01(_gunCharge01 + Time.deltaTime / _config.gunChargeDelay);
                 }
                 else
                 {
@@ -213,6 +283,7 @@ namespace Moziborn.Player
             {
                 _aimLineTransparency01 -= Time.deltaTime / _config.aimLineFadeDelay;
                 _gunCharge01 = 0;
+                _gunAimSound = -1;
             }
 
             _aimLineTransparency01 = Mathf.Clamp01(_aimLineTransparency01);

@@ -48,3 +48,58 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+  - id: gun_charge
+    audioClips:
+    - {fileID: 8300000, guid: 7cadb2d1a43f20e4792004df30a067e1, type: 3}
+    audioMixerGroup: {fileID: -8872302941785959890, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: gun_shot
+    audioClips:
+    - {fileID: 8300000, guid: c149ec73ccbabf04d9cdd9cb93746299, type: 3}
+    audioMixerGroup: {fileID: -8282599279820659481, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 20
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: gun_aim
+    audioClips:
+    - {fileID: 8300000, guid: c411c3e3132619445aa245ad2cbe63e2, type: 3}
+    audioMixerGroup: {fileID: -8872302941785959890, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: gun_charged_loop
+    audioClips:
+    - {fileID: 8300000, guid: 97643672b5510e94fbb868fac59efd74, type: 3}
+    audioMixerGroup: {fileID: -8872302941785959890, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 1
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: gun_charge_cancel
+    audioClips:
+    - {fileID: 8300000, guid: 61e62a17bb7b5cf40a4ed192aa1562aa, type: 3}
+    audioMixerGroup: {fileID: -8872302941785959890, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1

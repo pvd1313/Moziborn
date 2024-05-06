@@ -115,12 +115,12 @@ namespace Moziborn.Buildings
         {
             if (eventId == AnimatorEventId.doorBeginOpening)
             {
-                _audioController.StartEvent(AudioEventId.doorOpen, doorView.position);
+                _audioController.StartEvent(AudioEventName.doorOpen, doorView.position);
             }
 
             if (eventId == AnimatorEventId.doorBeginClosing)
             {
-                _audioController.StartEvent(AudioEventId.doorClose, doorView.position);
+                _audioController.StartEvent(AudioEventName.doorClose, doorView.position);
             }
         }
 

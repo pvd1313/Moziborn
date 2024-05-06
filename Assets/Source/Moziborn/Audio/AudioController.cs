@@ -48,14 +48,58 @@ namespace Moziborn.Audio
         {
             _audioListenerTarget = transform;
         }
+
+        public int StartEvent(string eventName, IPositionTransform transform, float duration)
+        {
+            int eventId = StartEvent(eventName, transform.position, duration);
+            int eventListIndex = _activePlayersIndexMap[eventId];
+            AudioPlayerData player = _audioPlayers[eventListIndex];
+            player.transform = transform;
+            _audioPlayers[eventListIndex] = player;
+
+            return eventId;
+        }
+
+        public int StartEvent(string eventName, Vector3 position, float duration)
+        {
+            if (!_events.TryGetValue(eventName, out AudioEventConfig eventConfig))
+            {
+                throw new InvalidOperationException($"Unknown audio event '{eventName}'");
+            }
+            
+            int playerListIndex = GetOrCreateAudioPlayer();
+            
+            AudioPlayerData player = _audioPlayers[playerListIndex];
+            player.audioSource.transform.position = position;
+            player.audioSource.audioSource.minDistance = eventConfig.minDistance;
+            player.audioSource.audioSource.maxDistance = eventConfig.maxDistance;
+            player.audioSource.audioSource.loop = false;
+            player.audioSource.audioSource.volume = Random.Range(eventConfig.volumeMin, eventConfig.volumeMax);
+            int randomClipIndex = Random.Range(0, eventConfig.audioClips.Length);
+            player.audioSource.audioSource.clip = eventConfig.audioClips[randomClipIndex];
+            player.audioSource.audioSource.outputAudioMixerGroup = eventConfig.audioMixerGroup;
+            player.audioSource.audioSource.pitch = eventConfig.audioClips[randomClipIndex].length / duration;
+            player.audioSource.audioSource.Play();
+            
+            player.eventId = _nextEventId;
+            player.transform = null;
+            player.isPlaying = true;
+            _audioPlayers[playerListIndex] = player;
+            
+            _activePlayersIndexMap[_nextEventId] = playerListIndex;
+
+            return _nextEventId++;
+        }
         
-        public void StartEvent(string eventName, IPositionTransform transform)
+        public int StartEvent(string eventName, IPositionTransform transform)
         {
             int eventId = StartEvent(eventName, transform.position);
             int eventListIndex = _activePlayersIndexMap[eventId];
             AudioPlayerData player = _audioPlayers[eventListIndex];
             player.transform = transform;
             _audioPlayers[eventListIndex] = player;
+
+            return eventId;
         }
 
         public int StartEvent(string eventName, Vector3 position)
