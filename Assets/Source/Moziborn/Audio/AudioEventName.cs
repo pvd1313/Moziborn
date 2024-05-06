@@ -13,5 +13,8 @@ namespace Moziborn.Audio
         public static string gunChargedLoop => "gun_charged_loop";
         public static string gunChargeCancel => "gun_charge_cancel";
         public static string gunReloadLoop => "gun_reload_loop";
+
+        public static string flashlightOn = "flashlight_on";
+        public static string flashlightOff = "flashlight_off";
     }
 }

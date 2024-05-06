@@ -114,3 +114,25 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+  - id: flashlight_on
+    audioClips:
+    - {fileID: 8300000, guid: 16e1fe5f390b5cb4b9e7f820157e1f58, type: 3}
+    audioMixerGroup: {fileID: 7769191991321565386, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
+  - id: flashlight_off
+    audioClips:
+    - {fileID: 8300000, guid: 8044715c8df86d34b92829e2460fbea8, type: 3}
+    audioMixerGroup: {fileID: 7769191991321565386, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1

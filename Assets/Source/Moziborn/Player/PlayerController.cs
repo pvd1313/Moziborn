@@ -185,6 +185,15 @@ namespace Moziborn.Player
                     _torchLightActive
                     ? _config.characterFlashlightGlowingColor
                     : Color.black);
+
+                if (_torchLightActive)
+                {
+                    _audioController.StartEvent(AudioEventName.flashlightOn, _characterView);
+                }
+                else
+                {
+                    _audioController.StartEvent(AudioEventName.flashlightOff, _characterView);
+                }
             }
         }
 
