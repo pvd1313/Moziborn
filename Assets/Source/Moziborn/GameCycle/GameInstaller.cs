@@ -5,6 +5,7 @@ using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
 using Moziborn.Coroutines;
+using Moziborn.Damage;
 using Moziborn.Debugging;
 using Moziborn.Player;
 using Moziborn.Rendering.AmbientLight;
@@ -25,6 +26,7 @@ namespace Moziborn.GameCycle
             Type[] controllers = 
             {
                 typeof(AudioController),
+                typeof(BulletManager),
                 
                 typeof(GameCycle),
                 typeof(CoroutineController),

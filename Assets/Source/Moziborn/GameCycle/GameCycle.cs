@@ -4,6 +4,7 @@ using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
 using Moziborn.Coroutines;
+using Moziborn.Damage;
 using Moziborn.Debugging;
 using Moziborn.Player;
 using Moziborn.Rendering.AmbientLight;
@@ -35,6 +36,7 @@ namespace Moziborn.GameCycle
 
         private IEnumerator InitializationRoutine()
         {
+            yield return _container.TryResolve<BulletManager>()?.Initialize();
             yield return _container.TryResolve<AudioController>()?.Initialize();
             yield return _container.TryResolve<CharacterFactory>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
@@ -67,6 +69,7 @@ namespace Moziborn.GameCycle
             _container.TryResolve<WarFogRender>()?.Update();
             _container.TryResolve<BuildingController>()?.Update(false);
             _container.TryResolve<AudioController>()?.Update();
+            _container.TryResolve<BulletManager>()?.Update();
         }
     }
 }

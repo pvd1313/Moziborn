@@ -5,6 +5,7 @@ using Moziborn.Audio;
 using Moziborn.Buildings;
 using Moziborn.Characters;
 using Moziborn.Cinematics;
+using Moziborn.Damage;
 using Moziborn.Layers;
 using Moziborn.Rendering.PointLight;
 using Moziborn.VisualEffects;
@@ -24,6 +25,7 @@ namespace Moziborn.Player
         private readonly PointLightManager _pointLightManager;
         private readonly CharacterFactory _characterFactory;
         private readonly AudioController _audioController;
+        private readonly BulletManager _bulletManager;
 
         private CharacterView _characterView;
         private AimLineView _gunAimLineView;
@@ -48,7 +50,8 @@ namespace Moziborn.Player
                                  BuildingController buildingController,
                                  PointLightManager pointLightManager,
                                  CharacterFactory characterFactory,
-                                 AudioController audioController)
+                                 AudioController audioController,
+                                 BulletManager bulletManager)
         {
             _config = config;
             _input = input;
@@ -57,6 +60,7 @@ namespace Moziborn.Player
             _pointLightManager = pointLightManager;
             _characterFactory = characterFactory;
             _audioController = audioController;
+            _bulletManager = bulletManager;
         }
 
         public IEnumerator Initialize()
@@ -210,7 +214,13 @@ namespace Moziborn.Player
                 _input.state.mode != PlayerInputMode.Fire))
             {
                 
+                _bulletManager.SpawnBullet(
+                    BulletId.playerBullet, 
+                    _characterView.meshPosition + Vector3.up, 
+                    _characterView.meshRotation * Vector3.forward);
+                
                 _audioController.StartEvent(AudioEventName.gunShot, _characterView);
+                
                 _gunCharge01 = 0;
                 _gunReload01 = 0;
             }
