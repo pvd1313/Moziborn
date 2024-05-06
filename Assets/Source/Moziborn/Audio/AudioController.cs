@@ -27,6 +27,7 @@ namespace Moziborn.Audio
         private int _nextEventId;
         private AudioListenerPrefab _audioListener;
         private IPositionTransform _audioListenerTarget;
+        private Transform _root;
 
         public AudioController(AudioConfig config)
         {
@@ -39,7 +40,8 @@ namespace Moziborn.Audio
             _freeAudioPlayers = new List<int>();
             _audioPlayers = new List<AudioPlayerData>();
             _activePlayersIndexMap = new Dictionary<int, int>();
-            _audioListener = GameObject.Instantiate(_config.audioListenerPrefab);
+            _root = new GameObject("AudioController").transform;
+            _audioListener = GameObject.Instantiate(_config.audioListenerPrefab, _root);
 
             yield break;
         }
@@ -137,7 +139,7 @@ namespace Moziborn.Audio
         {
             if (_freeAudioPlayers.Count == 0)
             {
-                AudioSourcePrefab audioInstance = GameObject.Instantiate(_config.audioSourcePrefab);
+                AudioSourcePrefab audioInstance = GameObject.Instantiate(_config.audioSourcePrefab, _root);
                 
                 _audioPlayers.Add(new AudioPlayerData
                 {

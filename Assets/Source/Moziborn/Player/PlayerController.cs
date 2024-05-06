@@ -29,11 +29,13 @@ namespace Moziborn.Player
         private AimLineView _gunAimLineView;
         
         private float _gunCharge01;
+        private float _gunReload01;
         private float _aimLineTransparency01;
 
         private int _gunAimSound;
         private int _gunChargeSound;
         private int _gunChargedLoopSound;
+        private int _gunReloadSoundLoop;
 
         private int _torchLightId;
         private bool _torchLightActive;
@@ -78,10 +80,12 @@ namespace Moziborn.Player
             _gunAimLineView = new AimLineView(aimLineInstance);
             _gunAimLineView.SetLength(32);
             _characterView.AttachTransformToMeshRoot(aimLineInstance.transform);
-            
+
+            _gunReload01 = 1;
             _gunAimSound = -1;
             _gunChargeSound = -1;
             _gunChargedLoopSound = -1;
+            _gunReloadSoundLoop = -1;
 
             _audioController.SetListener(_characterView);
 
@@ -183,7 +187,8 @@ namespace Moziborn.Player
         private void GunUpdate()
         {
             // Gun charge audio
-            if (_input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.IsHeldDown })
+            if (_gunReload01 == 1 &&
+                _input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.IsHeldDown })
             {
                 if (_gunChargeSound == -1)
                 {
@@ -200,12 +205,14 @@ namespace Moziborn.Player
             }
             
             // Gun shot
-            if (_input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.ReleasedThisFrame })
+            if (_gunCharge01 == 1 &&
+                (_input.state.fireButton.HasFlag(InputButtonState.ReleasedThisFrame) ||
+                _input.state.mode != PlayerInputMode.Fire))
             {
-                if (_gunCharge01 == 1)
-                {
-                    _audioController.StartEvent(AudioEventName.gunShot, _characterView);
-                }
+                
+                _audioController.StartEvent(AudioEventName.gunShot, _characterView);
+                _gunCharge01 = 0;
+                _gunReload01 = 0;
             }
             
             // Gun charged loop audio
@@ -225,13 +232,32 @@ namespace Moziborn.Player
                 }
             }
             
-            // Gun charge cancel (canceled aiming)
+            // Gun reload
+            if (_gunReload01 < 1)
+            {
+                _gunReload01 = Mathf.Clamp01(_gunReload01 + Time.deltaTime / _config.gunReloadDelay);
+
+                if (_gunReloadSoundLoop == -1)
+                {
+                    _gunReloadSoundLoop = _audioController.StartEvent(AudioEventName.gunReloadLoop, _characterView);
+                }
+            }
+            else
+            {
+                if (_gunReloadSoundLoop != -1)
+                {
+                    _audioController.StopEvent(_gunReloadSoundLoop);
+                    _gunReloadSoundLoop = -1;
+                }
+            }
+            
+            // Gun cancel (canceled aiming)
             if (_gunCharge01 > 0 && _input.state.mode != PlayerInputMode.Fire)
             {
                 _audioController.StartEvent(AudioEventName.gunChargeCancel, _characterView);
             }
             
-            // Gun charge cancel (bad timing)
+            // Gun cancel (bad timing)
             if (_gunCharge01 > 0 &&
                 _gunCharge01 < 1 &&
                 _input.state is { mode: PlayerInputMode.Fire, fireButton: InputButtonState.ReleasedThisFrame })
@@ -246,7 +272,7 @@ namespace Moziborn.Player
                     _gunAimSound = _audioController.StartEvent(AudioEventName.gunAim, _characterView);
                 }
                 
-                if (_input.state.fireButton.HasFlag(InputButtonState.IsHeldDown))
+                if (_input.state.fireButton.HasFlag(InputButtonState.IsHeldDown) && _gunReload01 == 1)
                 {
                     _gunCharge01 = Mathf.Clamp01(_gunCharge01 + Time.deltaTime / _config.gunChargeDelay);
                 }

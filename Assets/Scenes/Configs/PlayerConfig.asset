@@ -22,4 +22,5 @@ MonoBehaviour:
   flashlightAngleDeg: 45
   flashlightRange: 5
   gunChargeDelay: 0.8
+  gunReloadDelay: 2
   aimLineFadeDelay: 0.2

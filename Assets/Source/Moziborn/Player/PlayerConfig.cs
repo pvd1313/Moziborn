@@ -21,6 +21,7 @@ namespace Moziborn.Player
         public float flashlightRange;
 
         public float gunChargeDelay;
+        public float gunReloadDelay;
         public float aimLineFadeDelay;
     }
 }

@@ -103,3 +103,14 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+  - id: gun_reload_loop
+    audioClips:
+    - {fileID: 8300000, guid: 1e9d0a92e10f0a443839face6531970f, type: 3}
+    audioMixerGroup: {fileID: -8872302941785959890, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 1
+    minDistance: 1
+    maxDistance: 5
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1
