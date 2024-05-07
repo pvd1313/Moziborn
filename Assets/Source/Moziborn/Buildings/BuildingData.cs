@@ -9,6 +9,6 @@ namespace Moziborn.Buildings
         public Vector2Int[] walls;
         public DoorData[] doors;
 
-        public BuildingPartView[] allPartViews;
+        public BuildingPartPrefab[] allParts;
     }
 }

@@ -8,6 +8,7 @@ namespace Moziborn.Buildings
         Bulb = 3,
         Roof = 4,
         Door = 5,
-        DoorFrame = 6
+        DoorFrame = 6,
+        EnemySpawnPoint = 7,
     }
 }

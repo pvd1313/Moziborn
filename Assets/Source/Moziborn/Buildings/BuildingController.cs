@@ -23,6 +23,8 @@ namespace Moziborn.Buildings
         private static readonly bool DrawGizmos = true;
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
+
+        private IReadOnlyList<Vector2Int> enemySpawnPoints => _enemySpawnPoints;
         
         public BoundsInt bounds { get; private set; }
         
@@ -36,6 +38,7 @@ namespace Moziborn.Buildings
         private Tilemap _floor0Interactive;
         private Tilemap _floor1Frame;
         private List<BuildingData> _buildings;
+        private Vector2Int[] _enemySpawnPoints;
         private BuildingTransition[] _transitions;
         private MaterialPropertyBlock _materialPropertyBlock;
         private MaterialPropertyBlock _roofMaterialProperty;
@@ -69,6 +72,16 @@ namespace Moziborn.Buildings
             _buildings = new List<BuildingData>();
             BuildingUtil.DetectBuildings(_floor0Frame, _floor0Interactive, _floor1Frame, _buildings);
 
+            _enemySpawnPoints = BuildingUtil.GetEnemySpawnPoints(_floor0Interactive);
+            foreach (Vector3Int spawnPoint in _enemySpawnPoints)
+            {
+                GameObject gameObject = _floor0Interactive.GetInstantiatedObject(spawnPoint);
+                if (gameObject != null)
+                {
+                    gameObject.SetActive(false);
+                }
+            }
+
             MaterialPropertyBlock roofPropertyBlock = new ();
             roofPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 1);
 
@@ -79,11 +92,11 @@ namespace Moziborn.Buildings
                 GameObject gameObject = _floor1Frame.GetInstantiatedObject(pos);
                 if (gameObject != null)
                 {
-                    BuildingPartView partView = gameObject.GetComponent<BuildingPartView>();
+                    BuildingPartPrefab partPrefab = gameObject.GetComponent<BuildingPartPrefab>();
                     
-                    if (partView.partType == BuildingPartType.Roof)
+                    if (partPrefab.partType == BuildingPartType.Roof)
                     {
-                        MeshRenderer meshRenderer = partView.GetComponent<MeshRenderer>();
+                        MeshRenderer meshRenderer = partPrefab.GetComponent<MeshRenderer>();
                         if (meshRenderer != null)
                         {
                             meshRenderer.SetPropertyBlock(roofPropertyBlock);
@@ -233,23 +246,23 @@ namespace Moziborn.Buildings
                     
                     _materialPropertyBlock.SetFloat(ShaderProperty.Standard.VerticalCutAlpha, transition.alpha);
 
-                    foreach (BuildingPartView partView in _buildings[buildingID].allPartViews)
+                    foreach (BuildingPartPrefab part in _buildings[buildingID].allParts)
                     {
-                        if (partView.partType == BuildingPartType.Wall ||
-                            partView.partType == BuildingPartType.DoorFrame)
+                        if (part.partType == BuildingPartType.Wall ||
+                            part.partType == BuildingPartType.DoorFrame)
                         {
                             _materialPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 0);
-                            for (int i = 0; i < partView.meshRenders.Count; i++)
+                            for (int i = 0; i < part.renderers.Length; i++)
                             {
-                                partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
+                                part.renderers[i].SetPropertyBlock(_materialPropertyBlock);
                             }
                         }
-                        else if (partView.partType == BuildingPartType.Roof)
+                        else if (part.partType == BuildingPartType.Roof)
                         {
                             _materialPropertyBlock.SetFloat(ShaderProperty.Standard.WarFogGroundRoofBlending, 1);
-                            for (int i = 0; i < partView.meshRenders.Count; i++)
+                            for (int i = 0; i < part.renderers.Length; i++)
                             {
-                                partView.meshRenders[i].SetPropertyBlock(_materialPropertyBlock);
+                                part.renderers[i].SetPropertyBlock(_materialPropertyBlock);
                             }
                         }
                     }

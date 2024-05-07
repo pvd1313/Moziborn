@@ -7,6 +7,18 @@ namespace Moziborn.Buildings
 {
     public static class BuildingUtil
     {
+        public static Vector2Int[] GetEnemySpawnPoints(Tilemap floor0Interactive)
+        {
+            HashSet<Vector2Int> occupiedCells = new ();
+            
+            GetTilemapOccupiedCells(floor0Interactive, occupiedCells);
+
+            List<Vector2Int> enemySpawnPoints = new ();
+            GetBuildingParts(floor0Interactive, occupiedCells, BuildingPartType.EnemySpawnPoint, enemySpawnPoints);
+
+            return enemySpawnPoints.ToArray();
+        }
+        
         public static void DetectBuildings(Tilemap floor0Frame, 
                                            Tilemap floor0Interactive, 
                                            Tilemap floor1Frame, 
@@ -15,14 +27,16 @@ namespace Moziborn.Buildings
             resultBuildings.Clear();
             
             HashSet<Vector2Int> occupiedCells = new ();
+            // Use roof tiles.
             GetTilemapOccupiedCells(floor1Frame, occupiedCells);
 
             HashSet<Vector2Int> adjustedCells = new ();
-            List<BuildingPartView> allParts = new ();
+            List<BuildingPartPrefab> allParts = new ();
             List<BoundsInt> rooms = new ();
             List<Vector2Int> doorFrames = new ();
             List<Vector2Int> walls = new ();
             List<Vector2Int> doors = new ();
+            List<Vector2Int> enemySpawnPoints = new();
 
             while (occupiedCells.Count > 0)
             {
@@ -30,6 +44,7 @@ namespace Moziborn.Buildings
                 GetBuildingParts(floor0Frame, adjustedCells, BuildingPartType.DoorFrame, doorFrames);
                 GetBuildingParts(floor0Frame, adjustedCells, BuildingPartType.Wall, walls);
                 GetBuildingParts(floor0Interactive, adjustedCells, BuildingPartType.Door, doors);
+                GetBuildingParts(floor0Interactive, adjustedCells, BuildingPartType.EnemySpawnPoint, enemySpawnPoints);
                 GetRoomBounds(adjustedCells, rooms);
 
                 allParts.Clear();
@@ -39,7 +54,7 @@ namespace Moziborn.Buildings
                     for (int x = room.min.x; x <= room.max.x; x++)
                     for (int y = room.min.y; y <= room.max.y; y++)
                     {
-                        if (TryGetPart(floor0Frame, x, y, out BuildingPartView partView))
+                        if (TryGetPart(floor0Frame, x, y, out BuildingPartPrefab partView))
                         {
                             allParts.Add(partView);
                         }
@@ -54,7 +69,7 @@ namespace Moziborn.Buildings
                 resultBuildings.Add(new BuildingData
                 {
                     rooms = rooms.ToArray(),
-                    allPartViews = allParts.ToArray(),
+                    allParts = allParts.ToArray(),
                     doorFrames = doorFrames.ToArray(),
                     walls = walls.ToArray(),
                     doors = doors.Select(pos => new DoorData
@@ -67,7 +82,7 @@ namespace Moziborn.Buildings
                 });
             }
 
-            bool TryGetPart(Tilemap tilemap, int x, int y, out BuildingPartView partView)
+            bool TryGetPart(Tilemap tilemap, int x, int y, out BuildingPartPrefab partView)
             {
                 partView = null;
                 
@@ -77,7 +92,7 @@ namespace Moziborn.Buildings
                     return false;
                 }
 
-                partView = gameObject.GetComponentInChildren<BuildingPartView>();
+                partView = gameObject.GetComponentInChildren<BuildingPartPrefab>();
 
                 return partView != null;
             }
@@ -98,7 +113,7 @@ namespace Moziborn.Buildings
                     continue;
                 }
                 
-                BuildingPartView partData = gameObject.GetComponentInChildren<BuildingPartView>();
+                BuildingPartPrefab partData = gameObject.GetComponentInChildren<BuildingPartPrefab>();
                 if (partData.partType == partType)
                 {
                     resultParts.Add(cell);
