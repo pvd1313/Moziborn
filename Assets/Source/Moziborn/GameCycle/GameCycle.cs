@@ -1,4 +1,5 @@
 using System.Collections;
+using Moziborn.AI;
 using Moziborn.Audio;
 using Moziborn.Buildings;
 using Moziborn.Characters;
@@ -40,6 +41,7 @@ namespace Moziborn.GameCycle
             yield return _container.TryResolve<AudioController>()?.Initialize();
             yield return _container.TryResolve<CharacterFactory>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
+            yield return _container.TryResolve<MobController>()?.Initialize();
             yield return _container.TryResolve<MainCameraController>()?.Initialize();
             yield return _container.TryResolve<PointLightManager>()?.Initialize();
             yield return _container.TryResolve<PointLightRender>()?.Initialize();

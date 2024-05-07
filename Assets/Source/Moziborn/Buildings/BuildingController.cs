@@ -5,6 +5,7 @@ using Moziborn.Audio;
 using Moziborn.Cinematics;
 using Moziborn.Debugging;
 using Moziborn.Rendering;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

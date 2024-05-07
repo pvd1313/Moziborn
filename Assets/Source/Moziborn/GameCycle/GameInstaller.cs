@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Moziborn.AI;
 using Moziborn.Audio;
 using Moziborn.Buildings;
 using Moziborn.Characters;
@@ -27,6 +28,7 @@ namespace Moziborn.GameCycle
             {
                 typeof(AudioController),
                 typeof(BulletManager),
+                typeof(MobController),
                 
                 typeof(GameCycle),
                 typeof(CoroutineController),
