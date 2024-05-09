@@ -17,5 +17,6 @@ namespace Moziborn.Audio
         public float maxPitch;
         public float volumeMin;
         public float volumeMax;
+        public float fadeOutDuration;
     }
 }

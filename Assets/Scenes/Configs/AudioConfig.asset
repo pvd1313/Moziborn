@@ -26,6 +26,7 @@ MonoBehaviour:
     maxPitch: 0.75
     volumeMin: 0.9
     volumeMax: 1
+    fadeOutDuration: 0
   - id: door_open
     audioClips:
     - {fileID: 8300000, guid: ba826bee560bdb1409641662b82c6097, type: 3}
@@ -37,6 +38,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: door_close
     audioClips:
     - {fileID: 8300000, guid: f5580245f0d290142bb6a47ad3890e41, type: 3}
@@ -48,6 +50,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_charge
     audioClips:
     - {fileID: 8300000, guid: 7cadb2d1a43f20e4792004df30a067e1, type: 3}
@@ -59,6 +62,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_shot
     audioClips:
     - {fileID: 8300000, guid: c149ec73ccbabf04d9cdd9cb93746299, type: 3}
@@ -70,6 +74,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_aim
     audioClips:
     - {fileID: 8300000, guid: c411c3e3132619445aa245ad2cbe63e2, type: 3}
@@ -81,6 +86,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_charged_loop
     audioClips:
     - {fileID: 8300000, guid: 97643672b5510e94fbb868fac59efd74, type: 3}
@@ -92,6 +98,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_charge_cancel
     audioClips:
     - {fileID: 8300000, guid: 61e62a17bb7b5cf40a4ed192aa1562aa, type: 3}
@@ -103,6 +110,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: gun_reload_loop
     audioClips:
     - {fileID: 8300000, guid: 1e9d0a92e10f0a443839face6531970f, type: 3}
@@ -114,6 +122,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: flashlight_on
     audioClips:
     - {fileID: 8300000, guid: 16e1fe5f390b5cb4b9e7f820157e1f58, type: 3}
@@ -125,6 +134,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: flashlight_off
     audioClips:
     - {fileID: 8300000, guid: 8044715c8df86d34b92829e2460fbea8, type: 3}
@@ -136,6 +146,7 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0
   - id: monster_growl
     audioClips:
     - {fileID: 8300000, guid: ef27fe996433992458f2ae7cc0714d6b, type: 3}
@@ -147,6 +158,7 @@ MonoBehaviour:
     maxPitch: 1.05
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 1
   - id: monster_begin_agro
     audioClips:
     - {fileID: 8300000, guid: faaa5701238390c419a281a7ba98311e, type: 3}
@@ -158,3 +170,4 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+    fadeOutDuration: 0

@@ -10,12 +10,16 @@ namespace Moziborn.Audio
 {
     public class AudioController
     {
-        private struct AudioPlayerData
+        private class AudioPlayerData
         {
             public int eventId;
-            public AudioSourcePrefab audioSource;
+            public AudioSource audioSource;
             public bool isPlaying;
             public IPositionTransform transform;
+            public bool isFadingOut;
+            public float initialVolume;
+            public float fadeOut01;
+            public AudioEventConfig config;
         }
         
         private readonly AudioConfig _config;
@@ -23,7 +27,7 @@ namespace Moziborn.Audio
         private Dictionary<string, AudioEventConfig> _events;
         private List<int> _freeAudioPlayers;
         private List<AudioPlayerData> _audioPlayers;
-        private Dictionary<int, int> _activePlayersIndexMap;
+        private Dictionary<int, int> _playerEventMap;
         private int _nextEventId;
         private AudioListenerPrefab _audioListener;
         private IPositionTransform _audioListenerTarget;
@@ -39,7 +43,7 @@ namespace Moziborn.Audio
             _events = _config.events.ToDictionary(e => e.id);
             _freeAudioPlayers = new List<int>();
             _audioPlayers = new List<AudioPlayerData>();
-            _activePlayersIndexMap = new Dictionary<int, int>();
+            _playerEventMap = new Dictionary<int, int>();
             _root = new GameObject("AudioController").transform;
             _audioListener = GameObject.Instantiate(_config.audioListenerPrefab, _root);
 
@@ -53,13 +57,24 @@ namespace Moziborn.Audio
 
         public int StartEvent(string eventName, IPositionTransform transform, float duration)
         {
-            int eventId = StartEvent(eventName, transform.position, duration);
-            int eventListIndex = _activePlayersIndexMap[eventId];
-            AudioPlayerData player = _audioPlayers[eventListIndex];
-            player.transform = transform;
-            _audioPlayers[eventListIndex] = player;
+            if (!_events.TryGetValue(eventName, out AudioEventConfig eventConfig))
+            {
+                throw new InvalidOperationException($"Unknown audio event '{eventName}'");
+            }
+            
+            int playerListIndex = GetOrCreateAudioPlayer();
+            
+            AudioPlayerData player = _audioPlayers[playerListIndex];
 
-            return eventId;
+            SetupPlayer(player, eventConfig);
+            
+            player.audioSource.transform.position = transform.position;
+            player.transform = transform;
+            player.audioSource.pitch = player.audioSource.clip.length / duration;
+            
+            _playerEventMap[_nextEventId] = playerListIndex;
+
+            return _nextEventId++;
         }
 
         public int StartEvent(string eventName, Vector3 position, float duration)
@@ -72,36 +87,36 @@ namespace Moziborn.Audio
             int playerListIndex = GetOrCreateAudioPlayer();
             
             AudioPlayerData player = _audioPlayers[playerListIndex];
+
+            SetupPlayer(player, eventConfig);
+            
             player.audioSource.transform.position = position;
-            player.audioSource.audioSource.minDistance = eventConfig.minDistance;
-            player.audioSource.audioSource.maxDistance = eventConfig.maxDistance;
-            player.audioSource.audioSource.loop = false;
-            player.audioSource.audioSource.volume = Random.Range(eventConfig.volumeMin, eventConfig.volumeMax);
-            int randomClipIndex = Random.Range(0, eventConfig.audioClips.Length);
-            player.audioSource.audioSource.clip = eventConfig.audioClips[randomClipIndex];
-            player.audioSource.audioSource.outputAudioMixerGroup = eventConfig.audioMixerGroup;
-            player.audioSource.audioSource.pitch = eventConfig.audioClips[randomClipIndex].length / duration;
-            player.audioSource.audioSource.Play();
+            player.audioSource.pitch = player.audioSource.clip.length / duration;
             
-            player.eventId = _nextEventId;
-            player.transform = null;
-            player.isPlaying = true;
-            _audioPlayers[playerListIndex] = player;
-            
-            _activePlayersIndexMap[_nextEventId] = playerListIndex;
+            _playerEventMap[_nextEventId] = playerListIndex;
 
             return _nextEventId++;
         }
         
         public int StartEvent(string eventName, IPositionTransform transform)
         {
-            int eventId = StartEvent(eventName, transform.position);
-            int eventListIndex = _activePlayersIndexMap[eventId];
-            AudioPlayerData player = _audioPlayers[eventListIndex];
-            player.transform = transform;
-            _audioPlayers[eventListIndex] = player;
+            if (!_events.TryGetValue(eventName, out AudioEventConfig eventConfig))
+            {
+                throw new InvalidOperationException($"Unknown audio event '{eventName}'");
+            }
 
-            return eventId;
+            int playerListIndex = GetOrCreateAudioPlayer();
+
+            AudioPlayerData player = _audioPlayers[playerListIndex];
+            
+            SetupPlayer(player, eventConfig);
+
+            player.audioSource.transform.position = transform.position;
+            player.transform = transform;
+            
+            _playerEventMap[_nextEventId] = playerListIndex;
+
+            return _nextEventId++;
         }
 
         public int StartEvent(string eventName, Vector3 position)
@@ -114,25 +129,35 @@ namespace Moziborn.Audio
             int playerListIndex = GetOrCreateAudioPlayer();
 
             AudioPlayerData player = _audioPlayers[playerListIndex];
-            player.audioSource.transform.position = position;
-            player.audioSource.audioSource.minDistance = eventConfig.minDistance;
-            player.audioSource.audioSource.maxDistance = eventConfig.maxDistance;
-            player.audioSource.audioSource.loop = eventConfig.loop;
-            player.audioSource.audioSource.pitch = Random.Range(eventConfig.minPith, eventConfig.maxPitch);
-            player.audioSource.audioSource.volume = Random.Range(eventConfig.volumeMin, eventConfig.volumeMax);
-            int randomClipIndex = Random.Range(0, eventConfig.audioClips.Length);
-            player.audioSource.audioSource.clip = eventConfig.audioClips[randomClipIndex];
-            player.audioSource.audioSource.outputAudioMixerGroup = eventConfig.audioMixerGroup;
-            player.audioSource.audioSource.Play();
-
-            player.eventId = _nextEventId;
-            player.transform = null;
-            player.isPlaying = true;
-            _audioPlayers[playerListIndex] = player;
             
-            _activePlayersIndexMap[_nextEventId] = playerListIndex;
+            SetupPlayer(player, eventConfig);
+
+            player.audioSource.transform.position = position;
+            
+            _playerEventMap[_nextEventId] = playerListIndex;
 
             return _nextEventId++;
+        }
+
+        private void SetupPlayer(AudioPlayerData player, AudioEventConfig eventConfig)
+        {
+            player.audioSource.minDistance = eventConfig.minDistance;
+            player.audioSource.maxDistance = eventConfig.maxDistance;
+            player.audioSource.loop = eventConfig.loop;
+            player.audioSource.pitch = Random.Range(eventConfig.minPith, eventConfig.maxPitch);
+            player.audioSource.volume = Random.Range(eventConfig.volumeMin, eventConfig.volumeMax);
+            int randomClipIndex = Random.Range(0, eventConfig.audioClips.Length);
+            player.audioSource.clip = eventConfig.audioClips[randomClipIndex];
+            player.audioSource.outputAudioMixerGroup = eventConfig.audioMixerGroup;
+            player.audioSource.Play();
+
+            player.config = eventConfig;
+            player.initialVolume = player.audioSource.volume;
+            player.eventId = _nextEventId;
+            player.transform = null;
+            player.isFadingOut = false;
+            player.fadeOut01 = 0;
+            player.isPlaying = true;
         }
 
         private int GetOrCreateAudioPlayer()
@@ -144,7 +169,7 @@ namespace Moziborn.Audio
                 _audioPlayers.Add(new AudioPlayerData
                 {
                     eventId = -1,
-                    audioSource = audioInstance
+                    audioSource = audioInstance.audioSource
                 });
 
                 return _audioPlayers.Count - 1;
@@ -158,24 +183,39 @@ namespace Moziborn.Audio
 
         public void StopEvent(int eventId)
         {
-            if (!_activePlayersIndexMap.TryGetValue(eventId, out int listIndex))
+            if (!_playerEventMap.TryGetValue(eventId, out int listIndex))
             {
                 return;
             }
 
             AudioPlayerData player = _audioPlayers[listIndex];
-            player.audioSource.audioSource.Stop();
+
+            if (player.isFadingOut && 
+                player.fadeOut01 < 1 && 
+                player.audioSource.isPlaying)
+            {
+                return;
+            }
+
+            if (!player.isFadingOut && 
+                player.config.fadeOutDuration > 0 && 
+                player.audioSource.isPlaying)
+            {
+                player.isFadingOut = true;
+                return;
+            }
+            
+            player.audioSource.Stop();
             player.isPlaying = false;
             player.eventId = -1;
-            _audioPlayers[listIndex] = player;
             _freeAudioPlayers.Add(listIndex);
 
-            _activePlayersIndexMap.Remove(eventId);
+            _playerEventMap.Remove(eventId);
         }
 
         public bool IsPlaying(int eventId)
         {
-            return _activePlayersIndexMap.ContainsKey(eventId);
+            return _playerEventMap.ContainsKey(eventId);
         }
 
         public void Update()
@@ -188,11 +228,34 @@ namespace Moziborn.Audio
                     continue;
                 }
 
-                if (player.audioSource.audioSource.isPlaying)
+                if (player.audioSource.isPlaying)
                 {
                     if (player.transform != null)
                     {
                         player.audioSource.transform.position = player.transform.position;
+                    }
+                    
+                    if (player.config.fadeOutDuration > 0)
+                    {
+                        float timeLeft = player.audioSource.clip.length -
+                                         player.audioSource.time;
+
+                        if (timeLeft < player.config.fadeOutDuration)
+                        {
+                            player.isFadingOut = true;
+                        }
+                    }
+
+                    if (player.isFadingOut)
+                    {
+                        float fadeDelta = Time.deltaTime / player.config.fadeOutDuration;
+                        player.fadeOut01 = Mathf.Clamp01(player.fadeOut01 + fadeDelta);
+                        player.audioSource.volume = player.initialVolume * (1 - player.fadeOut01);
+
+                        if (player.fadeOut01 == 1)
+                        {
+                            StopEvent(player.eventId);
+                        }
                     }
                 }
                 else
