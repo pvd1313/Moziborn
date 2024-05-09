@@ -25,7 +25,8 @@ namespace Moziborn.Player
         private readonly PointLightManager _pointLightManager;
         private readonly CharacterFactory _characterFactory;
         private readonly AudioController _audioController;
-        private readonly BulletManager _bulletManager;
+        private readonly BulletController _bulletController;
+        private readonly DamageController _damageController;
 
         private CharacterView _characterView;
         private AimLineView _gunAimLineView;
@@ -51,7 +52,8 @@ namespace Moziborn.Player
                                  PointLightManager pointLightManager,
                                  CharacterFactory characterFactory,
                                  AudioController audioController,
-                                 BulletManager bulletManager)
+                                 BulletController bulletController,
+                                 DamageController damageController)
         {
             _config = config;
             _input = input;
@@ -60,12 +62,15 @@ namespace Moziborn.Player
             _pointLightManager = pointLightManager;
             _characterFactory = characterFactory;
             _audioController = audioController;
-            _bulletManager = bulletManager;
+            _bulletController = bulletController;
+            _damageController = damageController;
         }
 
         public IEnumerator Initialize()
         {
             _characterView = _characterFactory.CreateView(CharacterMeshId.robot);
+            _characterView.RegisterDamageHandler(_damageController);
+            _characterView.SetFaction(DamageFactionId.Player);
             _characterView.animatorEvent += OnAnimatorEvent;
 
             _tempLights = new List<int>();
@@ -222,9 +227,9 @@ namespace Moziborn.Player
                 (_input.state.fireButton.HasFlag(InputButtonState.ReleasedThisFrame) ||
                 _input.state.mode != PlayerInputMode.Fire))
             {
-                
-                _bulletManager.SpawnBullet(
+                _bulletController.SpawnBullet(
                     BulletId.playerBullet, 
+                    DamageFactionId.Player,
                     _characterView.meshPosition + Vector3.up, 
                     _characterView.meshRotation * Vector3.forward);
                 

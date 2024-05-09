@@ -37,7 +37,8 @@ namespace Moziborn.GameCycle
 
         private IEnumerator InitializationRoutine()
         {
-            yield return _container.TryResolve<BulletManager>()?.Initialize();
+            yield return _container.TryResolve<DamageController>()?.Initialize();
+            yield return _container.TryResolve<BulletController>()?.Initialize();
             yield return _container.TryResolve<AudioController>()?.Initialize();
             yield return _container.TryResolve<CharacterFactory>()?.Initialize();
             yield return _container.TryResolve<BuildingController>()?.Initialize();
@@ -71,7 +72,7 @@ namespace Moziborn.GameCycle
             _container.TryResolve<WarFogRender>()?.Update();
             _container.TryResolve<BuildingController>()?.Update(false);
             _container.TryResolve<AudioController>()?.Update();
-            _container.TryResolve<BulletManager>()?.Update();
+            _container.TryResolve<BulletController>()?.Update();
         }
     }
 }

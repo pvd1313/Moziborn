@@ -7,26 +7,30 @@ using UnityEngine;
 
 namespace Moziborn.Damage
 {
-    public class BulletManager
+    public class BulletController
     {
         private struct BulletData
         {
             public BulletPrefab instance;
+            public DamageFactionId factionId;
             public float speed;
             public float damageLeft;
             public float distanceLeft;
         }
         
-        private readonly BulletManagerConfig _config;
-        
+        private readonly BulletControllerConfig _config;
+        private readonly DamageController _damageController;
+
         private Dictionary<string, BulletConfig> _bulletConfigs;
-        private List<BulletData> _activeBullets = new List<BulletData>();
+        private List<BulletData> _activeBullets;
         private List<BulletPrefab> _bulletPool;
         private Transform _root;
         
-        public BulletManager(BulletManagerConfig config)
+        public BulletController(BulletControllerConfig config,
+                                DamageController damageController)
         {
             _config = config;
+            _damageController = damageController;
         }
         
         public IEnumerator Initialize()
@@ -35,11 +39,12 @@ namespace Moziborn.Damage
             
             _bulletConfigs = _config.bullets.ToDictionary(config => config.id);
             _bulletPool = new List<BulletPrefab>();
+            _activeBullets = new List<BulletData>();
             
             yield break;
         }
         
-        public void SpawnBullet(string bulletId, Vector3 position, Vector3 direction)
+        public void SpawnBullet(string bulletId, DamageFactionId factionId, Vector3 position, Vector3 direction)
         {
             if (!_bulletConfigs.TryGetValue(bulletId, out BulletConfig bulletConfig))
             {
@@ -56,7 +61,8 @@ namespace Moziborn.Damage
                 instance = bullet, 
                 speed = bulletConfig.speed, 
                 damageLeft = bulletConfig.damage,
-                distanceLeft = bulletConfig.maxDistance
+                distanceLeft = bulletConfig.maxDistance,
+                factionId = factionId
             };
             
             _activeBullets.Add(bulletData);
@@ -94,14 +100,15 @@ namespace Moziborn.Damage
 
                 bool isHit = false;
 
-                if (Physics.Raycast(ray, travelDistance, 1 << LayerIndex.Default))
+                if (Physics.Raycast(ray, out RaycastHit hit, travelDistance, 1 << LayerIndex.Default))
                 {
-                    isHit = true;
+                    if (_damageController.ApplyDamage(hit.collider, bullet.factionId, bullet.damageLeft) > 0)
+                    {
+                        isHit = true;
+                    }
                 }
-                else
-                {
-                    bullet.instance.transform.position += ray.direction * travelDistance;
-                }
+                
+                bullet.instance.transform.position += ray.direction * travelDistance;
 
                 if (bullet.distanceLeft <= 0 || isHit)
                 {

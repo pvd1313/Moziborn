@@ -27,8 +27,9 @@ namespace Moziborn.GameCycle
             Type[] controllers = 
             {
                 typeof(AudioController),
-                typeof(BulletManager),
+                typeof(BulletController),
                 typeof(MobController),
+                typeof(DamageController),
                 
                 typeof(GameCycle),
                 typeof(CoroutineController),

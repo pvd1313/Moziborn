@@ -1,21 +1,27 @@
 using System;
 using Moziborn.Common;
+using Moziborn.Damage;
+using Moziborn.Layers;
 using Moziborn.Rendering;
 using UnityEngine;
 
 namespace Moziborn.Characters
 {
-    public class CharacterView : IPositionTransform
+    public class CharacterView : IPositionTransform, IDamageHandler
     {
         Vector3 IPositionTransform.position => _character.rigidbody.position;
 
         public event Action<CharacterView, string> animatorEvent;
+        
+        public DamageFactionId factionId { get; private set; }
 
         public Vector3 rigidbodyVelocity
         {
             get => _character.rigidbody.velocity;
             set => _character.rigidbody.velocity = value;
         }
+        
+        public float health { get; set; }
 
         public Vector3 rigidbodyPosition => _character.rigidbody.position;
         public Vector3 meshPosition => _character.meshRoot.position;
@@ -24,6 +30,7 @@ namespace Moziborn.Characters
         
         private readonly CharacterPrefab _character;
         private readonly CharacterMeshPrefab _mesh;
+        private readonly DamageController _damageController;
         private readonly MaterialPropertyBlock _materialProperty;
 
         private Vector3 _meshPosition;
@@ -43,6 +50,24 @@ namespace Moziborn.Characters
             _character.physicsCollider.center = new Vector3(0, _mesh.height * 0.5f, 0);
             
             _character.animatorEventHandler.animatorEvent += OnAnimatorEvent;
+        }
+
+        public float TakeDamage(float damageAmount)
+        {
+            float damageDelta = Mathf.Max(0, health - damageAmount);
+            health -= damageDelta;
+
+            return damageDelta;
+        }
+
+        public void RegisterDamageHandler(DamageController damageController)
+        {
+            damageController.RegisterCollider(_character.physicsCollider, this);
+        }
+
+        public void SetFaction(DamageFactionId faction)
+        {
+            factionId = faction;
         }
 
         private void OnAnimatorEvent(string eventId)
