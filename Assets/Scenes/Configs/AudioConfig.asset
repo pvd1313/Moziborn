@@ -136,3 +136,25 @@ MonoBehaviour:
     maxPitch: 1
     volumeMin: 1
     volumeMax: 1
+  - id: monster_growl
+    audioClips:
+    - {fileID: 8300000, guid: ef27fe996433992458f2ae7cc0714d6b, type: 3}
+    audioMixerGroup: {fileID: -7561580338849006493, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 10
+    minPith: 0.95
+    maxPitch: 1.05
+    volumeMin: 1
+    volumeMax: 1
+  - id: monster_begin_agro
+    audioClips:
+    - {fileID: 8300000, guid: faaa5701238390c419a281a7ba98311e, type: 3}
+    audioMixerGroup: {fileID: 8731270584115262716, guid: c559971d642874447bdd2aabedaaf83e, type: 2}
+    loop: 0
+    minDistance: 1
+    maxDistance: 30
+    minPith: 1
+    maxPitch: 1
+    volumeMin: 1
+    volumeMax: 1

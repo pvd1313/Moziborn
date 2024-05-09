@@ -203,8 +203,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: sharptooth
-  radius: 0.4
-  height: 0.9
+  radius: 0.35
+  height: 1.5
+  mass: 40
   renderers:
   - {fileID: 4969582712804426412}
 --- !u!137 &4969582712804426412 stripped

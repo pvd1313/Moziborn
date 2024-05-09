@@ -18,6 +18,7 @@ namespace Moziborn.Cinematics
         private Vector3 _desiredPosition;
         private Vector3 _velocity;
         private Vector3 _cameraPosition;
+        private Plane[] _frustumPlanes;
 
         public MainCameraController (CameraConfig config)
         {
@@ -30,6 +31,7 @@ namespace Moziborn.Cinematics
             _cameraView.transform.rotation = Quaternion.Euler(_config.rotationAngleDegrees);
             _cameraView.unityCamera.orthographicSize = _config.orthographicSize;
             _cameraView.unityCamera.depth = CameraDepth.Main;
+            _frustumPlanes = new Plane[6];
             
             yield break;
         }
@@ -55,6 +57,13 @@ namespace Moziborn.Cinematics
                 Time.deltaTime);
 
             _cameraView.transform.position = SnapToGrid(_cameraPosition);
+        }
+
+        public bool CheckBoundsIntersectsFrustum(Bounds bounds)
+        {
+            GeometryUtility.CalculateFrustumPlanes(_cameraView.unityCamera, _frustumPlanes);
+
+            return GeometryUtility.TestPlanesAABB(_frustumPlanes, bounds);
         }
 
         private Vector3 SnapToGrid(Vector3 position)

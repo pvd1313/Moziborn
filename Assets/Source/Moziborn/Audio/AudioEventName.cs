@@ -16,5 +16,8 @@ namespace Moziborn.Audio
 
         public static string flashlightOn = "flashlight_on";
         public static string flashlightOff = "flashlight_off";
+
+        public static string monsterGrowl = "monster_growl";
+        public static string monsterBeginAgro = "monster_begin_agro";
     }
 }

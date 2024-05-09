@@ -25,7 +25,7 @@ namespace Moziborn.Buildings
 
         public IReadOnlyList<BuildingData> buildings => _buildings;
 
-        private IReadOnlyList<Vector2Int> enemySpawnPoints => _enemySpawnPoints;
+        public IReadOnlyList<Vector2Int> enemySpawnPoints => _enemySpawnPoints;
         
         public BoundsInt bounds { get; private set; }
         

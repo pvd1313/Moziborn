@@ -66,6 +66,7 @@ namespace Moziborn.GameCycle
         {
             _container.TryResolve<PlayerInputController>()?.Update();
             _container.TryResolve<PlayerController>()?.Update();
+            _container.TryResolve<MobController>()?.Update();
             _container.TryResolve<MainCameraController>()?.Update();
             _container.TryResolve<PointLightManager>()?.Update();
             _container.TryResolve<AmbientLightRender>()?.Update();

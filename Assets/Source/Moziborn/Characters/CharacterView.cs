@@ -27,6 +27,7 @@ namespace Moziborn.Characters
         public Vector3 meshPosition => _character.meshRoot.position;
         public Quaternion meshRotation => _character.meshRoot.rotation;
         public Bounds viewBlockColliderBounds => _character.viewBlockCollider.bounds;
+        public Bounds rigidbodyColliderBounds => _character.physicsCollider.bounds;
         
         private readonly CharacterPrefab _character;
         private readonly CharacterMeshPrefab _mesh;
@@ -42,12 +43,13 @@ namespace Moziborn.Characters
             
             _character = character;
             _mesh = mesh;
-            
+
             _mesh.transform.SetParent(_character.animator.transform);
             
             _character.physicsCollider.radius = _mesh.radius;
             _character.physicsCollider.height = _mesh.height;
             _character.physicsCollider.center = new Vector3(0, _mesh.height * 0.5f, 0);
+            _character.rigidbody.mass = mesh.mass;
             
             _character.animatorEventHandler.animatorEvent += OnAnimatorEvent;
         }
@@ -86,7 +88,7 @@ namespace Moziborn.Characters
             _character.meshRoot.position = _meshPosition;
         }
 
-        public void RotateMeshTowards(Vector3 viewDirection, float rotationSpeed, float smoothTime)
+        public void AlignMeshTowards(Vector3 viewDirection, float rotationSpeed, float smoothTime)
         {
             Quaternion aimRotation = Quaternion.LookRotation(viewDirection);
             float aimDeltaAngle = Quaternion.Angle(aimRotation, _character.meshRoot.rotation);
@@ -98,7 +100,7 @@ namespace Moziborn.Characters
                 aimRotation,
                 Time.deltaTime * rotationSpeed * speedMultiplier);
         }
-
+        
         public void SetEmissionColor(Color color)
         {
             _materialProperty.SetColor(ShaderProperty.Standard.EmissionColor, color);
@@ -111,6 +113,26 @@ namespace Moziborn.Characters
             }
         }
 
+        public bool IsVisibleFromPoint(Vector3 point, float distance)
+        {
+            Vector3 rigidbodyPosition = _character.rigidbody.position + Vector3.up;
+            
+            Vector3 directionToRigidbody = (rigidbodyPosition - point);
+            float distanceToRigidBody = directionToRigidbody.magnitude;
+            if (distanceToRigidBody > distance)
+            {
+                return false;
+            }
+            
+            Ray ray = new (point, directionToRigidbody.normalized);
+            if (Physics.Raycast(ray, distanceToRigidBody, 1 << LayerIndex.LightObstacle))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public void AttachTransformToMeshRoot(Transform transform)
         {
             transform.SetParent(_character.meshRoot);
@@ -119,6 +141,11 @@ namespace Moziborn.Characters
         public void AnimatorSetFloat(int propertyId, float value)
         {
             _character.animator.SetFloat(propertyId, value);
+        }
+
+        public void Teleport(Vector3 position)
+        {
+            _character.rigidbody.position = position;
         }
     }
 }

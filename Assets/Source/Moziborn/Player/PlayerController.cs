@@ -101,6 +101,16 @@ namespace Moziborn.Player
             yield break;
         }
 
+        public PlayerAimStatus GetAimStatus()
+        {
+            return new PlayerAimStatus
+            {
+                aimDirection = _characterView.meshRotation * Vector3.forward,
+                isFireAim = _input.state.mode == PlayerInputMode.Fire,
+                isChargingGun = _gunCharge01 > 0
+            };
+        }
+
         public void FixedUpdate()
         {
             PlayerInputState input = _input.state;
@@ -124,7 +134,7 @@ namespace Moziborn.Player
         {
             _characterView.InterpolateMeshPosition(_config.positionSmoothTime);
             
-            _characterView.RotateMeshTowards(
+            _characterView.AlignMeshTowards(
                 _input.state.aimDirection,
                 _config.rotationSpeed, 
                 _config.rotationSmoothTime);
@@ -338,6 +348,11 @@ namespace Moziborn.Player
 
             _aimLineTransparency01 = Mathf.Clamp01(_aimLineTransparency01);
             _gunAimLineView.SetTransparency(_aimLineTransparency01);
+        }
+
+        public bool IsVisibleFromPoint(Vector3 point, float distance)
+        {
+            return _characterView.IsVisibleFromPoint(point, distance);
         }
     }
 }

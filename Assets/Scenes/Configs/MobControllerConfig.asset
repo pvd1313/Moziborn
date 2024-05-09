@@ -13,3 +13,7 @@ MonoBehaviour:
   m_Name: MobControllerConfig
   m_EditorClassIdentifier: 
   navigationSurfacePrefab: {fileID: 437491066478438617, guid: 5d6272a38d927584bb7ae4003fcd56ff, type: 3}
+  mobRotationSpeed: 270
+  agroDistance: 6
+  agroDelay: 2
+  aimAgroAngle: 30

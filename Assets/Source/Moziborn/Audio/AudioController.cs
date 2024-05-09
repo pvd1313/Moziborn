@@ -173,6 +173,11 @@ namespace Moziborn.Audio
             _activePlayersIndexMap.Remove(eventId);
         }
 
+        public bool IsPlaying(int eventId)
+        {
+            return _activePlayersIndexMap.ContainsKey(eventId);
+        }
+
         public void Update()
         {
             for (int i = 0; i < _audioPlayers.Count; i++)

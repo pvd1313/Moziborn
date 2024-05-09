@@ -4249,6 +4249,7 @@ MonoBehaviour:
   id: robot
   radius: 0.35
   height: 1.6
+  mass: 80
   renderers:
   - {fileID: 1922212265592731167}
   - {fileID: 2280759552197731124}
